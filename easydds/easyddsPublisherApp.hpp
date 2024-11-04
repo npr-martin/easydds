@@ -37,7 +37,8 @@ class easyddsPublisherApp : public easyddsApplication,
 public:
 
     easyddsPublisherApp(
-            const int& domain_id);
+            const int& domain_id,
+            const std::string& topic_name);
 
     ~easyddsPublisherApp();
 
@@ -72,6 +73,7 @@ private:
     const uint32_t period_ms_ = 100; // in ms
     uint16_t samples_sent_;
     std::atomic<bool> stop_;
+    std::string m_topicName;
 };
 
 #endif // FAST_DDS_GENERATED__EASYDDSPUBLISHERAPP_HPP

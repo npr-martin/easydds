@@ -38,7 +38,7 @@
 using namespace eprosima::fastdds::dds;
 
 easyddsPublisherApp::easyddsPublisherApp(
-        const int& domain_id)
+        const int& domain_id, const std::string& topic_name)
     : factory_(nullptr)
     , participant_(nullptr)
     , publisher_(nullptr)
@@ -48,6 +48,7 @@ easyddsPublisherApp::easyddsPublisherApp(
     , matched_(0)
     , samples_sent_(0)
     , stop_(false)
+    , m_topicName(topic_name)
 {
     //
 
@@ -76,7 +77,7 @@ easyddsPublisherApp::easyddsPublisherApp(
     // Create the topic
     TopicQos topic_qos = TOPIC_QOS_DEFAULT;
     participant_->get_default_topic_qos(topic_qos);
-    topic_ = participant_->create_topic("easyddsTopic", type_.get_type_name(), topic_qos);
+    topic_ = participant_->create_topic(topic_name, type_.get_type_name(), topic_qos);
     if (topic_ == nullptr)
     {
         throw std::runtime_error("Employee Topic initialization failed");
@@ -141,7 +142,7 @@ void easyddsPublisherApp::run()
     {
         if (publish())
         {
-            std::cout << "Sample '" << std::to_string(++samples_sent_) << "' SENT" << std::endl;
+            std::cout << "Sample '" << std::to_string(++samples_sent_) << "' SENT: topic_name: " <<m_topicName<< std::endl;
         }
         // Wait for period or stop event
         std::unique_lock<std::mutex> period_lock(mutex_);

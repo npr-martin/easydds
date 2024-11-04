@@ -38,7 +38,8 @@ class easyddsSubscriberApp : public easyddsApplication,
 public:
 
     easyddsSubscriberApp(
-            const int& domain_id);
+            const int& domain_id,
+            const std::string& topic_name);
 
     virtual ~easyddsSubscriberApp();
 
@@ -72,6 +73,7 @@ private:
     std::atomic<bool> stop_;
     mutable std::mutex terminate_cv_mtx_;
     std::condition_variable terminate_cv_;
+    std::string m_topicName;
 };
 
 #endif // FAST_DDS_GENERATED__EASYDDSSUBSCRIBERAPP_HPP

@@ -37,7 +37,7 @@
 using namespace eprosima::fastdds::dds;
 
 easyddsSubscriberApp::easyddsSubscriberApp(
-        const int& domain_id)
+        const int& domain_id, const std::string& topic_name)
     : factory_(nullptr)
     , participant_(nullptr)
     , subscriber_(nullptr)
@@ -46,6 +46,7 @@ easyddsSubscriberApp::easyddsSubscriberApp(
     , type_(new EmployeePubSubType())
     , samples_received_(0)
     , stop_(false)
+    , m_topicName(topic_name)
 {
     // Create the participant
     DomainParticipantQos pqos = PARTICIPANT_QOS_DEFAULT;
@@ -72,7 +73,7 @@ easyddsSubscriberApp::easyddsSubscriberApp(
     // Create the topic
     TopicQos topic_qos = TOPIC_QOS_DEFAULT;
     participant_->get_default_topic_qos(topic_qos);
-    topic_ = participant_->create_topic("easyddsTopic", type_.get_type_name(), topic_qos);
+    topic_ = participant_->create_topic(topic_name, type_.get_type_name(), topic_qos);
     if (topic_ == nullptr)
     {
         throw std::runtime_error("Employee Topic initialization failed");
@@ -131,7 +132,7 @@ void easyddsSubscriberApp::on_data_available(
     {
         if ((info.instance_state == ALIVE_INSTANCE_STATE) && info.valid_data)
         {
-            std::cout << "Sample '" << std::to_string(++samples_received_) << "' RECEIVED" << std::endl;
+            std::cout << "Sample '" << std::to_string(++samples_received_) << "' RECEIVED : topic_name: " <<m_topicName<<std::endl;
         }
     }
 }

@@ -67,7 +67,7 @@ int main(
     int domain_id = 0;
     std::shared_ptr<easyddsApplication> app;
 
-    if (argc != 2 || (strcmp(argv[1], "publisher") != 0 && strcmp(argv[1], "subscriber") != 0))
+    if(argc !=3 || (strcmp(argv[2], "publisher") != 0 && strcmp(argv[2], "subscriber") != 0))
     {
         std::cout << "Error: Incorrect arguments." << std::endl;
         std::cout << "Usage: " << std::endl << std::endl;
@@ -78,13 +78,34 @@ int main(
     {
         try
         {
-            app = easyddsApplication::make_app(domain_id, argv[1]);
+            app = easyddsApplication::make_app(domain_id, argv[1], argv[2]);
         }
         catch (const std::runtime_error& e)
         {
             EPROSIMA_LOG_ERROR(app_name, e.what());
             ret = EXIT_FAILURE;
         }
+
+    
+
+    // if (argc != 2 || (strcmp(argv[1], "publisher") != 0 && strcmp(argv[1], "subscriber") != 0))
+    // {
+    //     std::cout << "Error: Incorrect arguments." << std::endl;
+    //     std::cout << "Usage: " << std::endl << std::endl;
+    //     std::cout << argv[0] << " publisher|subscriber" << std::endl << std::endl;
+    //     ret = EXIT_FAILURE;
+    // }
+    // else
+    // {
+    //     try
+    //     {
+    //         app = easyddsApplication::make_app(domain_id, argv[1]);
+    //     }
+    //     catch (const std::runtime_error& e)
+    //     {
+    //         EPROSIMA_LOG_ERROR(app_name, e.what());
+    //         ret = EXIT_FAILURE;
+    //     }
 
         std::thread thread(&easyddsApplication::run, app);
 

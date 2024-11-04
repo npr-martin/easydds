@@ -42,6 +42,7 @@ public:
     //! Factory method to create applications based on configuration
     static std::shared_ptr<easyddsApplication> make_app(
             const int& domain_id,
+            const std::string& topic_name,
             const std::string& entity_kind);
 };
 
