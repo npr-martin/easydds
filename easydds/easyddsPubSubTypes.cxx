@@ -31,6 +31,8 @@ using SerializedPayload_t = eprosima::fastdds::rtps::SerializedPayload_t;
 using InstanceHandle_t = eprosima::fastdds::rtps::InstanceHandle_t;
 using DataRepresentationId_t = eprosima::fastdds::dds::DataRepresentationId_t;
 
+#define ORIGIN_CODE 0
+
 EmployeePubSubType::EmployeePubSubType()
 {
     set_name("Employee");
@@ -56,8 +58,12 @@ bool EmployeePubSubType::serialize(
         SerializedPayload_t& payload,
         DataRepresentationId_t data_representation)
 {
+    std::cout << __func__ << std::endl;
+    const clock_t begin_time = clock();
+
     const Employee* p_type = static_cast<const Employee*>(data);
 
+#if ORIGIN_CODE
     // Object that manages the raw buffer.
     eprosima::fastcdr::FastBuffer fastbuffer(reinterpret_cast<char*>(payload.data), payload.max_size);
     // Object that serializes the data.
@@ -84,6 +90,13 @@ bool EmployeePubSubType::serialize(
 
     // Get the serialized length
     payload.length = static_cast<uint32_t>(ser.get_serialized_data_length());
+#else
+    memcpy(payload.data, p_type->text().data(), p_type->text().size());
+    payload.length = p_type->text().size();
+#endif
+
+    float mseconds = float(clock() - begin_time);
+    std::cout << "spendtime = " << mseconds << std::endl;
     return true;
 }
 
@@ -93,9 +106,12 @@ bool EmployeePubSubType::deserialize(
 {
     try
     {
-        // Convert DATA to pointer of your type
-        Employee* p_type = static_cast<Employee*>(data);
+        std::cout << __func__ << std::endl;
+        const clock_t begin_time = clock();
 
+        // Convert DATA to pointer of your type
+        Employee *p_type = static_cast<Employee *>(data);
+#if ORIGIN_CODE
         // Object that manages the raw buffer.
         eprosima::fastcdr::FastBuffer fastbuffer(reinterpret_cast<char*>(payload.data), payload.length);
 
@@ -108,6 +124,12 @@ bool EmployeePubSubType::deserialize(
 
         // Deserialize the object.
         deser >> *p_type;
+#else
+        p_type->text() = std::string(reinterpret_cast<char*>(payload.data), payload.length);
+#endif
+
+        float mseconds = float(clock() - begin_time);
+        std::cout << "spendtime = " << mseconds << std::endl;
     }
     catch (eprosima::fastcdr::exception::Exception& /*exception*/)
     {
@@ -123,13 +145,26 @@ uint32_t EmployeePubSubType::calculate_serialized_size(
 {
     try
     {
+        std::cout << __func__ << std::endl;
+        const clock_t begin_time = clock();
+
+#if ORIGIN_CODE
         eprosima::fastcdr::CdrSizeCalculator calculator(
             data_representation == DataRepresentationId_t::XCDR_DATA_REPRESENTATION ?
             eprosima::fastcdr::CdrVersion::XCDRv1 :eprosima::fastcdr::CdrVersion::XCDRv2);
         size_t current_alignment {0};
+
+        float mseconds = float(clock() - begin_time);
+        std::cout << "spendtime = " << mseconds << std::endl;
         return static_cast<uint32_t>(calculator.calculate_serialized_size(
                     *static_cast<const Employee*>(data), current_alignment)) +
                 4u /*encapsulation*/;
+#else
+        float mseconds = float(clock() - begin_time);
+        std::cout << "spendtime = " << mseconds << std::endl;
+        return static_cast<const Employee*>(data)->text().size() + 4u;
+#endif
+
     }
     catch (eprosima::fastcdr::exception::Exception& /*exception*/)
     {

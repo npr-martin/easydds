@@ -71,7 +71,7 @@ int main(
     {
         std::cout << "Error: Incorrect arguments." << std::endl;
         std::cout << "Usage: " << std::endl << std::endl;
-        std::cout << argv[0] << " publisher|subscriber" << std::endl << std::endl;
+        std::cout << argv[0] << " \"topic_name\" publisher|subscriber" << std::endl << std::endl;
         ret = EXIT_FAILURE;
     }
     else
@@ -109,7 +109,8 @@ int main(
 
         std::thread thread(&easyddsApplication::run, app);
 
-        std::cout << argv[1] << " running. Please press Ctrl+C to stop the " << argv[1] << " at any time." << std::endl;
+        std::cout << argv[1] << "'s " << argv[2] << " running. Please press Ctrl+C to stop the " 
+                  << argv[2] << " at any time." << std::endl;
 
         stop_handler = [&](int signum)
                 {

@@ -130,6 +130,8 @@ void easyddsSubscriberApp::on_data_available(
     SampleInfo info;
     while ((!is_stopped()) && (RETCODE_OK == reader->take_next_sample(&sample_, &info)))
     {
+        std::cout << "info valid_data = " << info.valid_data << std::endl;
+        std::cout << "info state = " << info.sample_state << std::endl;
         if ((info.instance_state == ALIVE_INSTANCE_STATE) && info.valid_data)
         {
             std::cout << "Sample '" << std::to_string(++samples_received_) << "' RECEIVED : topic_name: " <<m_topicName<<std::endl;
