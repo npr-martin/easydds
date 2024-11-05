@@ -169,6 +169,7 @@ bool easyddsPublisherApp::publish()
     {
         /* Initialize your structure here */
         Employee sample_;
+        // sample_.text() = "0123456789012345678";
         ret = (RETCODE_OK == writer_->write(&sample_));
     }
     return ret;

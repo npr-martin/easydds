@@ -90,10 +90,14 @@ bool EmployeePubSubType::serialize(
 
     // Get the serialized length
     payload.length = static_cast<uint32_t>(ser.get_serialized_data_length());
+
 #else
-    memcpy(payload.data, p_type->text().data(), p_type->text().size());
-    payload.length = p_type->text().size();
+    std::size_t size = p_type->text().size() + 1;
+
+    memcpy(payload.data, p_type->text().data(), size);
+    payload.length = size;
 #endif
+    std::cout << "length = " << payload.length << std::endl;
 
     float mseconds = float(clock() - begin_time);
     std::cout << "spendtime = " << mseconds << std::endl;
@@ -124,9 +128,11 @@ bool EmployeePubSubType::deserialize(
 
         // Deserialize the object.
         deser >> *p_type;
+
 #else
-        p_type->text() = std::string(reinterpret_cast<char*>(payload.data), payload.length);
+        p_type->text() = std::string(reinterpret_cast<char*>(payload.data), payload.length - 1);
 #endif
+        std::cout << "length = " << payload.length << std::endl;
 
         float mseconds = float(clock() - begin_time);
         std::cout << "spendtime = " << mseconds << std::endl;
@@ -156,13 +162,20 @@ uint32_t EmployeePubSubType::calculate_serialized_size(
 
         float mseconds = float(clock() - begin_time);
         std::cout << "spendtime = " << mseconds << std::endl;
-        return static_cast<uint32_t>(calculator.calculate_serialized_size(
+
+        uint32_t result = static_cast<uint32_t>(calculator.calculate_serialized_size(
                     *static_cast<const Employee*>(data), current_alignment)) +
                 4u /*encapsulation*/;
+
+        std::cout << "cal_size = " << result << std::endl;
+        return result;
 #else
         float mseconds = float(clock() - begin_time);
         std::cout << "spendtime = " << mseconds << std::endl;
-        return static_cast<const Employee*>(data)->text().size() + 4u;
+
+        uint32_t result = static_cast<const Employee*>(data)->text().size() + 1;
+        std::cout << "cal_size = " << result << std::endl;
+        return result;
 #endif
 
     }
