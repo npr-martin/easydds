@@ -37,7 +37,9 @@
 using namespace eprosima::fastdds::dds;
 
 easyddsSubscriberApp::easyddsSubscriberApp(
-        const int& domain_id, const std::string& topic_name)
+        const int& domain_id, const std::string& topic_name,
+        int frequency,
+        std::string source)
     : factory_(nullptr)
     , participant_(nullptr)
     , subscriber_(nullptr)

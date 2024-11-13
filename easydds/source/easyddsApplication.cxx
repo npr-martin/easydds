@@ -26,18 +26,20 @@
 
 //! Factory method to create a publisher or subscriber
 std::shared_ptr<easyddsApplication> easyddsApplication::make_app(
-        const int& domain_id,
-        const std::string& topic_name,
-        const std::string& entity_kind)
+    const int &domain_id,
+    const std::string &topic_name,
+    const std::string &entity_kind,
+    int frequency,
+    std::string source)
 {
     std::shared_ptr<easyddsApplication> entity;
     if (strcmp(entity_kind.c_str(), "publisher") == 0)
     {
-        entity = std::make_shared<easyddsPublisherApp>(domain_id, topic_name);
+        entity = std::make_shared<easyddsPublisherApp>(domain_id, topic_name, frequency, source);
     }
     else if (strcmp(entity_kind.c_str(), "subscriber") == 0)
     {
-        entity = std::make_shared<easyddsSubscriberApp>(domain_id, topic_name);
+        entity = std::make_shared<easyddsSubscriberApp>(domain_id, topic_name, frequency, source);
     }
     else
     {

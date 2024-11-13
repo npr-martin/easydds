@@ -43,7 +43,9 @@ public:
     static std::shared_ptr<easyddsApplication> make_app(
             const int& domain_id,
             const std::string& topic_name,
-            const std::string& entity_kind);
+            const std::string& entity_kind,
+            int frequency = 500,
+            std::string source = std::string());
 };
 
 #endif // FAST_DDS_GENERATED__EASYDDSAPPLICATION_HPP

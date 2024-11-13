@@ -39,7 +39,9 @@ public:
 
     easyddsSubscriberApp(
             const int& domain_id,
-            const std::string& topic_name);
+            const std::string& topic_name,
+            int frequency = 500,
+            std::string source = std::string());
 
     virtual ~easyddsSubscriberApp();
 

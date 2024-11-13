@@ -31,7 +31,7 @@ using SerializedPayload_t = eprosima::fastdds::rtps::SerializedPayload_t;
 using InstanceHandle_t = eprosima::fastdds::rtps::InstanceHandle_t;
 using DataRepresentationId_t = eprosima::fastdds::dds::DataRepresentationId_t;
 
-#define ORIGIN_CODE 0
+#define ORIGIN_CODE 1
 
 EmployeePubSubType::EmployeePubSubType()
 {

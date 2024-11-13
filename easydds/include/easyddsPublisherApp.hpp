@@ -38,7 +38,9 @@ public:
 
     easyddsPublisherApp(
             const int& domain_id,
-            const std::string& topic_name);
+            const std::string& topic_name,
+            int frequency = 500,
+            std::string source = std::string());
 
     ~easyddsPublisherApp();
 
@@ -74,6 +76,7 @@ private:
     uint16_t samples_sent_;
     std::atomic<bool> stop_;
     std::string m_topicName;
+    std::string m_source;
 };
 
 #endif // FAST_DDS_GENERATED__EASYDDSPUBLISHERAPP_HPP
