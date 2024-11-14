@@ -40,25 +40,33 @@ using namespace eprosima::fastdds::dds;
 easyddsPublisherApp::easyddsPublisherApp(
         const int& domain_id, const std::string& topic_name,
         int frequency,
-        std::string source)
+        std::string source,
+        std::string monitorTopic,
+        bool useCDR)
     : factory_(nullptr)
     , participant_(nullptr)
     , publisher_(nullptr)
     , topic_(nullptr)
     , writer_(nullptr)
-    , type_(new EmployeePubSubType())
+    , type_(new EmployeePubSubType(useCDR))
     , matched_(0)
     , samples_sent_(0)
     , stop_(false)
     , m_topicName(topic_name)
     , period_ms_(frequency)
     , m_source(source)
+    , m_monitorTopic(monitorTopic)
 {
     //
 
     // Create the participant
     DomainParticipantQos pqos = PARTICIPANT_QOS_DEFAULT;
     pqos.name("Employee_pub_participant");
+    if(!m_monitorTopic.empty())
+    {
+         pqos.properties().properties().emplace_back("fastdds.statistics",m_monitorTopic);
+    }
+   //std::cout << "the pub monitor topic is: "<< m_monitorTopic << std::endl;
     factory_ = DomainParticipantFactory::get_shared_instance();
     participant_ = factory_->create_participant(domain_id, pqos, nullptr, StatusMask::none());
     if (participant_ == nullptr)
@@ -147,7 +155,8 @@ void easyddsPublisherApp::run()
     {
         if (publish())
         {
-            std::cout << "Sample '" << std::to_string(++samples_sent_) << "' SENT: topic_name: " <<m_topicName<< std::endl;
+            //std::cout << "Sample '" << std::to_string(++samples_sent_) << "' SENT: topic_name: " <<m_topicName<< std::endl;
+            std::cout <<"Sent [topic: " << m_topicName << "] Sample " << std::to_string(++samples_sent_) <<std::endl;
         }
         // Wait for period or stop event
         std::unique_lock<std::mutex> period_lock(mutex_);
@@ -180,7 +189,7 @@ bool easyddsPublisherApp::publish()
         ret = (RETCODE_OK == writer_->write(&sample_));
 
         float mseconds = float(clock() - begin_time);
-        std::cout << "write cost = " << mseconds << " ms" << std::endl;
+        //std::cout << "write cost = " << mseconds << " ms" << std::endl;
     }
     return ret;
 }

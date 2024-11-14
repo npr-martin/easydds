@@ -40,7 +40,9 @@ public:
             const int& domain_id,
             const std::string& topic_name,
             int frequency = 500,
-            std::string source = std::string());
+            std::string source = std::string(),
+            std::string monitorTopic = std::string(),
+            bool useCDR = false);
 
     ~easyddsPublisherApp();
 
@@ -77,6 +79,7 @@ private:
     std::atomic<bool> stop_;
     std::string m_topicName;
     std::string m_source;
+    std::string m_monitorTopic;
 };
 
 #endif // FAST_DDS_GENERATED__EASYDDSPUBLISHERAPP_HPP

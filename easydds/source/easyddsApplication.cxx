@@ -30,16 +30,18 @@ std::shared_ptr<easyddsApplication> easyddsApplication::make_app(
     const std::string &topic_name,
     const std::string &entity_kind,
     int frequency,
-    std::string source)
+    std::string source,
+    std::string monitorTopic,
+    bool useCDR)
 {
     std::shared_ptr<easyddsApplication> entity;
     if (strcmp(entity_kind.c_str(), "publisher") == 0)
     {
-        entity = std::make_shared<easyddsPublisherApp>(domain_id, topic_name, frequency, source);
+        entity = std::make_shared<easyddsPublisherApp>(domain_id, topic_name, frequency, source, monitorTopic, useCDR);
     }
     else if (strcmp(entity_kind.c_str(), "subscriber") == 0)
     {
-        entity = std::make_shared<easyddsSubscriberApp>(domain_id, topic_name, frequency, source);
+        entity = std::make_shared<easyddsSubscriberApp>(domain_id, topic_name, frequency, source, monitorTopic, useCDR);
     }
     else
     {

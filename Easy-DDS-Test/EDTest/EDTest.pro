@@ -53,3 +53,6 @@ else:unix: LIBS += -L$$PWD/../../install/lib/ -lfastdds
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../install/lib/release/ -lfoonathan_memory-0.7.3
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../install/lib/debug/ -lfoonathan_memory-0.7.3
 else:unix: LIBS += -L$$PPWD/../../install/lib/ -lfoonathan_memory-0.7.3
+
+RESOURCES += \
+    icon.qrc

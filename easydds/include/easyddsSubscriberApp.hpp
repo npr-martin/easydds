@@ -41,7 +41,9 @@ public:
             const int& domain_id,
             const std::string& topic_name,
             int frequency = 500,
-            std::string source = std::string());
+            std::string source = std::string(),
+            std::string monitorTopic = std::string(),
+            bool useCDR = false);
 
     virtual ~easyddsSubscriberApp();
 
@@ -76,6 +78,7 @@ private:
     mutable std::mutex terminate_cv_mtx_;
     std::condition_variable terminate_cv_;
     std::string m_topicName;
+    std::string m_monitorTopic;
 };
 
 #endif // FAST_DDS_GENERATED__EASYDDSSUBSCRIBERAPP_HPP

@@ -1,2 +1,6 @@
-<!DOCTYPE RCC>
-<RCC version="1.0"/>
+<RCC>
+    <qresource prefix="/">
+        <file>duicuo.svg</file>
+        <file>duicuo-.svg</file>
+    </qresource>
+</RCC>

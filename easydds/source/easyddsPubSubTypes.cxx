@@ -31,17 +31,17 @@ using SerializedPayload_t = eprosima::fastdds::rtps::SerializedPayload_t;
 using InstanceHandle_t = eprosima::fastdds::rtps::InstanceHandle_t;
 using DataRepresentationId_t = eprosima::fastdds::dds::DataRepresentationId_t;
 
-#define ORIGIN_CODE 1
+#define ORIGIN_CODE 0
 
-EmployeePubSubType::EmployeePubSubType()
+EmployeePubSubType::EmployeePubSubType(bool useCDR) : m_useCDR(useCDR)
 {
     set_name("Employee");
     uint32_t type_size = Employee_max_cdr_typesize;
     type_size += static_cast<uint32_t>(eprosima::fastcdr::Cdr::alignment(type_size, 4)); /* possible submessage alignment */
-    max_serialized_type_size = type_size + 4; /*encapsulation*/
+    max_serialized_type_size = type_size + 4;                                            /*encapsulation*/
     is_compute_key_provided = false;
     uint32_t key_length = Employee_max_key_cdr_typesize > 16 ? Employee_max_key_cdr_typesize : 16;
-    key_buffer_ = reinterpret_cast<unsigned char*>(malloc(key_length));
+    key_buffer_ = reinterpret_cast<unsigned char *>(malloc(key_length));
     memset(key_buffer_, 0, key_length);
 }
 
@@ -54,90 +54,96 @@ EmployeePubSubType::~EmployeePubSubType()
 }
 
 bool EmployeePubSubType::serialize(
-        const void* const data,
-        SerializedPayload_t& payload,
-        DataRepresentationId_t data_representation)
+    const void *const data,
+    SerializedPayload_t &payload,
+    DataRepresentationId_t data_representation)
 {
-    std::cout << __func__ << std::endl;
+    // std::cout << __func__ << std::endl;
     const clock_t begin_time = clock();
 
-    const Employee* p_type = static_cast<const Employee*>(data);
+    const Employee *p_type = static_cast<const Employee *>(data);
 
-#if ORIGIN_CODE
-    // Object that manages the raw buffer.
-    eprosima::fastcdr::FastBuffer fastbuffer(reinterpret_cast<char*>(payload.data), payload.max_size);
-    // Object that serializes the data.
-    eprosima::fastcdr::Cdr ser(fastbuffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
-            data_representation == DataRepresentationId_t::XCDR_DATA_REPRESENTATION ?
-            eprosima::fastcdr::CdrVersion::XCDRv1 : eprosima::fastcdr::CdrVersion::XCDRv2);
-    payload.encapsulation = ser.endianness() == eprosima::fastcdr::Cdr::BIG_ENDIANNESS ? CDR_BE : CDR_LE;
-    ser.set_encoding_flag(
-        data_representation == DataRepresentationId_t::XCDR_DATA_REPRESENTATION ?
-        eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR  :
-        eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2);
-
-    try
+    if (m_useCDR)
     {
-        // Serialize encapsulation
-        ser.serialize_encapsulation();
-        // Serialize the object.
-        ser << *p_type;
+        // Object that manages the raw buffer.
+        eprosima::fastcdr::FastBuffer fastbuffer(reinterpret_cast<char *>(payload.data), payload.max_size);
+        // Object that serializes the data.
+        eprosima::fastcdr::Cdr ser(fastbuffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
+                                   data_representation == DataRepresentationId_t::XCDR_DATA_REPRESENTATION ? eprosima::fastcdr::CdrVersion::XCDRv1 : eprosima::fastcdr::CdrVersion::XCDRv2);
+        payload.encapsulation = ser.endianness() == eprosima::fastcdr::Cdr::BIG_ENDIANNESS ? CDR_BE : CDR_LE;
+        ser.set_encoding_flag(
+            data_representation == DataRepresentationId_t::XCDR_DATA_REPRESENTATION ? eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR : eprosima::fastcdr::EncodingAlgorithmFlag::DELIMIT_CDR2);
+
+        try
+        {
+            // Serialize encapsulation
+            ser.serialize_encapsulation();
+            // Serialize the object.
+            ser << *p_type;
+        }
+        catch (eprosima::fastcdr::exception::Exception & /*exception*/)
+        {
+            // Get the serialized length
+            payload.length = static_cast<uint32_t>(ser.get_serialized_data_length());
+
+            return false;
+        }
+
+        // Get the serialized length
+        payload.length = static_cast<uint32_t>(ser.get_serialized_data_length());
     }
-    catch (eprosima::fastcdr::exception::Exception& /*exception*/)
+    else
     {
-        return false;
+        std::size_t size = p_type->text().size() + 1;
+
+        memcpy(payload.data, p_type->text().data(), size);
+        payload.length = size;
     }
-
-    // Get the serialized length
-    payload.length = static_cast<uint32_t>(ser.get_serialized_data_length());
-
-#else
-    std::size_t size = p_type->text().size() + 1;
-
-    memcpy(payload.data, p_type->text().data(), size);
-    payload.length = size;
-#endif
-    std::cout << "length = " << payload.length << std::endl;
+    // std::cout << "length = " << payload.length << std::endl;
 
     float mseconds = float(clock() - begin_time);
-    std::cout << "spendtime = " << mseconds << std::endl;
+    std::cout << "length = " << payload.length << ", spendtime = " << mseconds << "(ms)" << std::endl;
     return true;
 }
 
 bool EmployeePubSubType::deserialize(
-        SerializedPayload_t& payload,
-        void* data)
+    SerializedPayload_t &payload,
+    void *data)
 {
     try
     {
-        std::cout << __func__ << std::endl;
+        // std::cout << __func__ << std::endl;
         const clock_t begin_time = clock();
 
         // Convert DATA to pointer of your type
         Employee *p_type = static_cast<Employee *>(data);
-#if ORIGIN_CODE
-        // Object that manages the raw buffer.
-        eprosima::fastcdr::FastBuffer fastbuffer(reinterpret_cast<char*>(payload.data), payload.length);
 
-        // Object that deserializes the data.
-        eprosima::fastcdr::Cdr deser(fastbuffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN);
+        if (m_useCDR)
+        {
+            // Object that manages the raw buffer.
+            eprosima::fastcdr::FastBuffer fastbuffer(reinterpret_cast<char *>(payload.data), payload.length);
 
-        // Deserialize encapsulation.
-        deser.read_encapsulation();
-        payload.encapsulation = deser.endianness() == eprosima::fastcdr::Cdr::BIG_ENDIANNESS ? CDR_BE : CDR_LE;
+            // Object that deserializes the data.
+            eprosima::fastcdr::Cdr deser(fastbuffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN);
 
-        // Deserialize the object.
-        deser >> *p_type;
+            // Deserialize encapsulation.
+            deser.read_encapsulation();
+            payload.encapsulation = deser.endianness() == eprosima::fastcdr::Cdr::BIG_ENDIANNESS ? CDR_BE : CDR_LE;
 
-#else
-        p_type->text() = std::string(reinterpret_cast<char*>(payload.data), payload.length - 1);
-#endif
-        std::cout << "length = " << payload.length << std::endl;
+            // Deserialize the object.
+            deser >> *p_type;
+        }
+        else
+        {
+            p_type->text() = std::string(reinterpret_cast<char *>(payload.data), payload.length - 1);
+        }
+
+        // std::cout << "length = " << payload.length << std::endl;
 
         float mseconds = float(clock() - begin_time);
-        std::cout << "spendtime = " << mseconds << std::endl;
+        // std::cout << "length = " << payload.length << " spendtime = " << mseconds << std::endl;
     }
-    catch (eprosima::fastcdr::exception::Exception& /*exception*/)
+    catch (eprosima::fastcdr::exception::Exception & /*exception*/)
     {
         return false;
     }
@@ -146,60 +152,61 @@ bool EmployeePubSubType::deserialize(
 }
 
 uint32_t EmployeePubSubType::calculate_serialized_size(
-        const void* const data,
-        DataRepresentationId_t data_representation)
+    const void *const data,
+    DataRepresentationId_t data_representation)
 {
     try
     {
-        std::cout << __func__ << std::endl;
+        //  std::cout << __func__ << std::endl;
         const clock_t begin_time = clock();
 
-#if ORIGIN_CODE
-        eprosima::fastcdr::CdrSizeCalculator calculator(
-            data_representation == DataRepresentationId_t::XCDR_DATA_REPRESENTATION ?
-            eprosima::fastcdr::CdrVersion::XCDRv1 :eprosima::fastcdr::CdrVersion::XCDRv2);
-        size_t current_alignment {0};
+        if (m_useCDR)
+        {
+            eprosima::fastcdr::CdrSizeCalculator calculator(
+                data_representation == DataRepresentationId_t::XCDR_DATA_REPRESENTATION ? eprosima::fastcdr::CdrVersion::XCDRv1 : eprosima::fastcdr::CdrVersion::XCDRv2);
+            size_t current_alignment{0};
 
-        float mseconds = float(clock() - begin_time);
-        std::cout << "spendtime = " << mseconds << std::endl;
+            float mseconds = float(clock() - begin_time);
+            std::cout << "spendtime = " << mseconds << std::endl;
 
-        uint32_t result = static_cast<uint32_t>(calculator.calculate_serialized_size(
-                    *static_cast<const Employee*>(data), current_alignment)) +
-                4u /*encapsulation*/;
+            uint32_t result = static_cast<uint32_t>(calculator.calculate_serialized_size(
+                                  *static_cast<const Employee *>(data), current_alignment)) +
+                              4u /*encapsulation*/;
 
-        std::cout << "cal_size = " << result << std::endl;
-        return result;
-#else
-        float mseconds = float(clock() - begin_time);
-        std::cout << "spendtime = " << mseconds << std::endl;
+            //  std::cout << "cal_size = " << result << std::endl;
+            return result;
+        }
+        else
+        {
+            float mseconds = float(clock() - begin_time);
+            // std::cout << "spendtime = " << mseconds << std::endl;
 
-        uint32_t result = static_cast<const Employee*>(data)->text().size() + 1;
-        std::cout << "cal_size = " << result << std::endl;
-        return result;
-#endif
-
+            uint32_t result = static_cast<const Employee *>(data)->text().size() + 1;
+            // std::cout << "cal_size = " << result << std::endl;
+            return result;
+        }
     }
-    catch (eprosima::fastcdr::exception::Exception& /*exception*/)
+    catch (eprosima::fastcdr::exception::Exception & /*exception*/)
     {
         return 0;
     }
 }
 
-void* EmployeePubSubType::create_data()
+void *EmployeePubSubType::create_data()
 {
-    return reinterpret_cast<void*>(new Employee());
+    return reinterpret_cast<void *>(new Employee());
 }
 
 void EmployeePubSubType::delete_data(
-        void* data)
+    void *data)
 {
-    delete(reinterpret_cast<Employee*>(data));
+    delete (reinterpret_cast<Employee *>(data));
 }
 
 bool EmployeePubSubType::compute_key(
-        SerializedPayload_t& payload,
-        InstanceHandle_t& handle,
-        bool force_md5)
+    SerializedPayload_t &payload,
+    InstanceHandle_t &handle,
+    bool force_md5)
 {
     if (!is_compute_key_provided)
     {
@@ -207,29 +214,29 @@ bool EmployeePubSubType::compute_key(
     }
 
     Employee data;
-    if (deserialize(payload, static_cast<void*>(&data)))
+    if (deserialize(payload, static_cast<void *>(&data)))
     {
-        return compute_key(static_cast<void*>(&data), handle, force_md5);
+        return compute_key(static_cast<void *>(&data), handle, force_md5);
     }
 
     return false;
 }
 
 bool EmployeePubSubType::compute_key(
-        const void* const data,
-        InstanceHandle_t& handle,
-        bool force_md5)
+    const void *const data,
+    InstanceHandle_t &handle,
+    bool force_md5)
 {
     if (!is_compute_key_provided)
     {
         return false;
     }
 
-    const Employee* p_type = static_cast<const Employee*>(data);
+    const Employee *p_type = static_cast<const Employee *>(data);
 
     // Object that manages the raw buffer.
-    eprosima::fastcdr::FastBuffer fastbuffer(reinterpret_cast<char*>(key_buffer_),
-            Employee_max_key_cdr_typesize);
+    eprosima::fastcdr::FastBuffer fastbuffer(reinterpret_cast<char *>(key_buffer_),
+                                             Employee_max_key_cdr_typesize);
 
     // Object that serializes the data.
     eprosima::fastcdr::Cdr ser(fastbuffer, eprosima::fastcdr::Cdr::BIG_ENDIANNESS, eprosima::fastcdr::CdrVersion::XCDRv2);
@@ -259,7 +266,6 @@ void EmployeePubSubType::register_type_object_representation()
 {
     register_Employee_type_identifier(type_identifiers_);
 }
-
 
 // Include auxiliary functions like for serializing/deserializing.
 #include "easyddsCdrAux.ipp"

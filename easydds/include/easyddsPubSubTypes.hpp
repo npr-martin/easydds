@@ -48,7 +48,7 @@ public:
 
     typedef Employee type;
 
-    eProsima_user_DllExport EmployeePubSubType();
+    eProsima_user_DllExport EmployeePubSubType(bool useCDR);
 
     eProsima_user_DllExport ~EmployeePubSubType() override;
 
@@ -116,6 +116,7 @@ private:
 
     eprosima::fastdds::MD5 md5_;
     unsigned char* key_buffer_;
+    bool m_useCDR = false;
 
 };
 

@@ -32,6 +32,14 @@ private slots:
 
     void on_pushButton_4_clicked();
 
+    void on_ckb_all_toggled(bool checked);
+
+    void on_comboBox_currentIndexChanged(int index);
+
+    void on_pushButton_5_clicked();
+
+    void on_pushButton_6_clicked();
+
 private:
     void addInfoTab(const QString& topicName, int frequency = 500, std::string source = "");
 
@@ -45,6 +53,7 @@ private:
     int getWidgetRow(QWidget* widget, int column);
 
     void multiOp(const QString& op);
+    void insertMonitorQos();
 
 private:
     Ui::EasyDDSTest *ui;
@@ -55,6 +64,10 @@ private:
     std::shared_ptr<qtStreamBuf> buffer;
 
     std::string m_source;
+
+    std::string m_monitorTopic;
+
+    bool m_useCDR;
 
 //    TextEditStreamBuf streamBuffer;
 };

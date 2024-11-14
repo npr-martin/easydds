@@ -39,20 +39,29 @@ using namespace eprosima::fastdds::dds;
 easyddsSubscriberApp::easyddsSubscriberApp(
         const int& domain_id, const std::string& topic_name,
         int frequency,
-        std::string source)
+        std::string source,
+        std::string monitorTopic,
+        bool useCDR)
     : factory_(nullptr)
     , participant_(nullptr)
     , subscriber_(nullptr)
     , topic_(nullptr)
     , reader_(nullptr)
-    , type_(new EmployeePubSubType())
+    , type_(new EmployeePubSubType(useCDR))
     , samples_received_(0)
     , stop_(false)
     , m_topicName(topic_name)
+    , m_monitorTopic(monitorTopic)
 {
     // Create the participant
     DomainParticipantQos pqos = PARTICIPANT_QOS_DEFAULT;
     pqos.name("Employee_sub_participant");
+
+     if(!m_monitorTopic.empty())
+    {
+         pqos.properties().properties().emplace_back("fastdds.statistics",m_monitorTopic);
+    }
+    //std::cout << "the sub monitor topic is: "<< m_monitorTopic << std::endl;
     factory_ = DomainParticipantFactory::get_shared_instance();
     participant_ = factory_->create_participant(domain_id, pqos, nullptr, StatusMask::none());
     if (participant_ == nullptr)
@@ -134,8 +143,9 @@ void easyddsSubscriberApp::on_data_available(
     {
         if ((info.instance_state == ALIVE_INSTANCE_STATE) && info.valid_data)
         {
-            // std::cout << "Sample '" << std::to_string(++samples_received_) << "' RECEIVED : topic_name: " <<m_topicName<<std::endl;
-            std::cout << "Sample '" << sample_.text() << "' RECEIVED : topic_name: " <<m_topicName<<std::endl;
+             //std::cout << "Sample '" << std::to_string(++samples_received_) << "' RECEIVED : topic_name: " <<m_topicName<<std::endl;
+            //std::cout << "Sample '" << sample_.text() << "' RECEIVED : topic_name: " <<m_topicName<<std::endl;
+            std::cout <<"Recv [topic: " << m_topicName << "] Sample " << std::to_string(++samples_received_) <<std::endl;
         }
     }
 }

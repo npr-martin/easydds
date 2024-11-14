@@ -45,7 +45,9 @@ public:
             const std::string& topic_name,
             const std::string& entity_kind,
             int frequency = 500,
-            std::string source = std::string());
+            std::string source = std::string(),
+            std::string monitorTopic = std::string(),
+            bool useCDR = false);
 };
 
 #endif // FAST_DDS_GENERATED__EASYDDSAPPLICATION_HPP
