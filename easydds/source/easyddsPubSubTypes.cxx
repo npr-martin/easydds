@@ -65,6 +65,7 @@ bool EmployeePubSubType::serialize(
 
     if (m_useCDR)
     {
+        //std::cout<<"its useCDR"<<std::endl;
         // Object that manages the raw buffer.
         eprosima::fastcdr::FastBuffer fastbuffer(reinterpret_cast<char *>(payload.data), payload.max_size);
         // Object that serializes the data.
@@ -94,6 +95,7 @@ bool EmployeePubSubType::serialize(
     }
     else
     {
+       // std::cout<<"its not useCDR"<<std::endl;
         std::size_t size = p_type->text().size() + 1;
 
         memcpy(payload.data, p_type->text().data(), size);

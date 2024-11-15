@@ -5,6 +5,7 @@
 /foonathan_memory_vendor/build
 /install
 /Easy-DDS-Test/build-EDTest-Desktop_Qt_5_12_9_GCC_64bit-Debug
+/Easy-DDS-Test/build-EDTest-Desktop_Qt_5_12_9_GCC_64bit-Release
 
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
@@ -79,3 +80,4 @@ Thumbs.db
 *.dll
 *.exe
 
+Easy-DDS-Test/build-EDTest-Desktop_Qt_5_12_9_GCC_64bit-Release/EDTest
