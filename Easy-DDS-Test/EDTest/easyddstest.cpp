@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QFileDialog>
 #include <QTextStream>
+#include <QEventLoop>
 #include <thread>
 #include <iostream>
 
@@ -26,15 +27,10 @@ EasyDDSTest::EasyDDSTest(QWidget *parent)
     QStringList labels({"topic", "status", "frequency", "source size"});
     ui->tableWidget->setColumnCount(labels.size());
     ui->tableWidget->setHorizontalHeaderLabels(labels);
-    //    ui->tableWidget->horizontalHeader()->setVisible(false);
+
     ui->tableWidget->verticalHeader()->setVisible(false);
 
-    connect(this, &EasyDDSTest::setCoutText, this, [=](const QString& text){
-        //        ui->textEdit->setText(text);
-        //        ui->textEdit->moveCursor(QTextCursor::End);
-        ui->textEdit->insertPlainText(text);
-        ui->textEdit->moveCursor(QTextCursor::End);
-    });
+    connect(this, &EasyDDSTest::setCoutText, this, &EasyDDSTest::addText);
 }
 
 EasyDDSTest::~EasyDDSTest()
@@ -211,41 +207,77 @@ void EasyDDSTest::multiOp(const QString &op)
 
 void EasyDDSTest::insertMonitorQos()
 {
+    m_monitorTopic = std::string();
     if(ui->ckb_all->isChecked())
     {
-        m_monitorTopic = std::string();
-        m_monitorTopic += ui->ckb_history_latency->isChecked() ? "HISTORY_LATENCY_TOPIC;":"";
-        m_monitorTopic += ui->ckb_discovery->isChecked() ? "DISCOVERY_TOPIC;":"";
-        m_monitorTopic += ui->ckb_gap_count->isChecked() ? "GAP_COUNT_TOPIC;":"";
-        m_monitorTopic += ui->ckb_rtps_lost->isChecked() ? "RTPS_LOST_TOPIC;":"";
-        m_monitorTopic += ui->ckb_rtps_sent->isChecked() ? "RTPS_SENT_TOPIC;":"";
-        m_monitorTopic += ui->ckb_data_count->isChecked() ? "DATA_COUNT_TOPIC;":"";
-        m_monitorTopic += ui->ckb_edp_packets->isChecked() ? "EDP_PACKETS_TOPIC;":"";
-        m_monitorTopic += ui->ckb_pdp_packets->isChecked() ? "PDP_PACKETS_TOPIC;":"";
-        m_monitorTopic += ui->ckb_sample_data->isChecked() ? "SAMPLE_DATAS_TOPIC;":"";
-        m_monitorTopic += ui->ckb_resent_data->isChecked() ? "RESENT_DATAS_TOPIC;":"";
-        m_monitorTopic += ui->ckb_acknack_count->isChecked() ? "ACKNACK_COUNT_TOPIC;":"";
-        m_monitorTopic += ui->ckb_physical_data->isChecked() ? "PHYSICAL_DATA_TOPIC;":"";
-        m_monitorTopic += ui->ckb_nackfrag_count->isChecked() ? "NACKFRAG_COUNT_TOPIC;":"";
-        m_monitorTopic += ui->ckb_heartbeat_count->isChecked() ? "HEARTBEAT_COUNT_TOPIC;":"";
-        m_monitorTopic += ui->ckb_monitor_service->isChecked() ? "MONITOR_SERVICE_TOPIC;":"";
-        m_monitorTopic += ui->ckb_network_latency->isChecked() ? "NETWORK_LATENCY_TOPIC;":"";
-        m_monitorTopic += ui->ckb_pub_throughtput->isChecked() ? "PUBLICATION_THROUGHPUT_TOPIC;":"";
-        m_monitorTopic += ui->ckb_sub_throughtput->isChecked() ? "SUBSCRIPTION_THROUGHPUT_TOPIC;":"";
+        auto children = ui->wgt_monitor->findChildren<QCheckBox*>();
+        for(auto ckb : children)
+        {
+            if(ckb->isChecked())
+            {
+                QString text = ckb->text();
+                if(text.startsWith("PUB_"))
+                {
+                    text = "PUBLICATION_THROUGHPUT";
+                }
+                else if(text.startsWith("SUB_"))
+                {
+                    text = "SUBSCRIPTION_THROUGHPUT";
+                }
+                m_monitorTopic += text.toStdString() + "_TOPIC;";
+            }
+        }
 
         if(!m_monitorTopic.empty())
         {
             m_monitorTopic.pop_back();
-            //m_monitorTopic.substr(0, m_monitorTopic.size() - 1);
         }
     }
-    else
-    {
-        m_monitorTopic = std::string();
-    }
+
     //CDR
     m_useCDR = ui->ckb_usecdr->isChecked();
     //  qDebug()<<"the monitor topic include: "<<QString::fromStdString(m_monitorTopic);
+}
+
+void EasyDDSTest::addText(const QString &text)
+{
+    QTextDocument* doc = ui->textEdit->document();
+    QTextCursor cursor = ui->textEdit->textCursor();
+    Qt::TextFormat format = Qt::AutoText;
+
+    QTextCursor tmp(doc);
+    tmp.beginEditBlock();
+    tmp.movePosition(QTextCursor::End);
+
+    if (!doc->isEmpty())
+        tmp.insertBlock(cursor.blockFormat(), cursor.charFormat());
+    else
+        tmp.setCharFormat(cursor.charFormat());
+
+    // 删除默认的换行
+    tmp.movePosition(QTextCursor::End);
+    tmp.deletePreviousChar();
+
+    // preserve the char format
+    QTextCharFormat oldCharFormat = cursor.charFormat();
+
+#ifndef QT_NO_TEXTHTMLPARSER
+    if (format == Qt::RichText || (format == Qt::AutoText && Qt::mightBeRichText(text))) {
+        tmp.insertHtml(text);
+    } else {
+        tmp.insertText(text);
+    }
+#else
+    Q_UNUSED(format);
+    tmp.insertText(text);
+#endif // QT_NO_TEXTHTMLPARSER
+    if (!cursor.hasSelection())
+        cursor.setCharFormat(oldCharFormat);
+
+    tmp.endEditBlock();
+
+    // 添加文本后移动光标至末尾
+    ui->textEdit->moveCursor(QTextCursor::End);
 }
 
 void EasyDDSTest::on_pushButton_2_clicked()
@@ -279,7 +311,6 @@ void EasyDDSTest::on_pushButton_4_clicked()
     }
 }
 
-
 void EasyDDSTest::on_ckb_all_toggled(bool checked)
 {
     ui->wgt_monitor->setEnabled(checked);
@@ -297,44 +328,18 @@ void EasyDDSTest::on_comboBox_currentIndexChanged(int index)
 
 void EasyDDSTest::on_pushButton_5_clicked()
 {
-    ui->ckb_history_latency->setChecked(true);
-    ui->ckb_discovery->setChecked(true);
-    ui->ckb_gap_count->setChecked(true);
-    ui->ckb_rtps_lost->setChecked(true);
-    ui->ckb_rtps_sent->setChecked(true);
-    ui->ckb_data_count->setChecked(true);
-    ui->ckb_edp_packets->setChecked(true);
-    ui->ckb_pdp_packets->setChecked(true);
-    ui->ckb_sample_data->setChecked(true);
-    ui->ckb_resent_data->setChecked(true);
-    ui->ckb_acknack_count->setChecked(true);
-    ui->ckb_physical_data->setChecked(true);
-    ui->ckb_nackfrag_count->setChecked(true);
-    ui->ckb_heartbeat_count->setChecked(true);
-    ui->ckb_monitor_service->setChecked(true);
-    ui->ckb_network_latency->setChecked(true);
-    ui->ckb_pub_throughtput->setChecked(true);
-    ui->ckb_sub_throughtput->setChecked(true);
+    auto children = ui->wgt_monitor->findChildren<QCheckBox*>();
+    for(auto ckb : children)
+    {
+        ckb->setChecked(true);
+    }
 }
 
 void EasyDDSTest::on_pushButton_6_clicked()
 {
-    ui->ckb_history_latency->setChecked(false);
-    ui->ckb_discovery->setChecked(false);
-    ui->ckb_gap_count->setChecked(false);
-    ui->ckb_rtps_lost->setChecked(false);
-    ui->ckb_rtps_sent->setChecked(false);
-    ui->ckb_data_count->setChecked(false);
-    ui->ckb_edp_packets->setChecked(false);
-    ui->ckb_pdp_packets->setChecked(false);
-    ui->ckb_sample_data->setChecked(false);
-    ui->ckb_resent_data->setChecked(false);
-    ui->ckb_acknack_count->setChecked(false);
-    ui->ckb_physical_data->setChecked(false);
-    ui->ckb_nackfrag_count->setChecked(false);
-    ui->ckb_heartbeat_count->setChecked(false);
-    ui->ckb_monitor_service->setChecked(false);
-    ui->ckb_network_latency->setChecked(false);
-    ui->ckb_pub_throughtput->setChecked(false);
-    ui->ckb_sub_throughtput->setChecked(false);
+    auto children = ui->wgt_monitor->findChildren<QCheckBox*>();
+    for(auto ckb : children)
+    {
+        ckb->setChecked(false);
+    }
 }

@@ -55,6 +55,8 @@ private:
     void multiOp(const QString& op);
     void insertMonitorQos();
 
+    void addText(const QString& text);
+
 private:
     Ui::EasyDDSTest *ui;
 
