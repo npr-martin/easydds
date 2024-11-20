@@ -81,10 +81,13 @@ public:
 
 protected:
     DomainParticipantQos getDomainParticipantQos(const bool &monitorEnabled, const MONITOR_TOPIC::monitorItems &items);
+    
     DomainParticipantQos getClientDomainParticipantQos(const bool &monitorEnabled, const MONITOR_TOPIC::monitorItems &items, const SERVER::client_config &config);
+   
     DomainParticipantQos getServerDomainParticipantQos(const bool &monitorEnabled, const MONITOR_TOPIC::monitorItems &items, const SERVER::server_config &config);
-    DataWriterQos getDataWriterQos(const qos_profile_s &qos_profile);
-    DataReaderQos getDataReaderQos(const qos_profile_s &qos_profile);
+   
+    template <typename T>
+    T getDataQos(const qos_profile_s &qos_profile);
 };
 
 #endif // EASYDDS_APPLICATION_HPP
