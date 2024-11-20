@@ -5,6 +5,8 @@
 #include <QMap>
 #include "easyddsApplication.hpp"
 #include "qtstreambuf.h"
+#include "easyddsPublisherApp.hpp"
+#include "easyddsSubscriberApp.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class EasyDDSTest; }
@@ -22,7 +24,7 @@ public:
 
 signals:
     void setCoutText(const QString& text);
-
+    void sendTextSignal(const std::shared_ptr<easyddsPublisherApp> &app , QString topicName, int frequency, std::string source);
 private slots:
     void on_pushButton_clicked();
 
@@ -43,34 +45,38 @@ private slots:
 private:
     void addInfoTab(const QString& topicName, int frequency = 500, std::string source = "");
 
-    std::shared_ptr<easyddsApplication> createApp(int domain_id, const QString& topicName,
-                                                  const QString& kindName,
-                                                  int frequency = 500, std::string source = "",
-                                                  int curRow = 0,
-                                                  bool addRow = true);
+    std::shared_ptr<easyddsPublisherApp> createPubliserApp(int domain_id, const QString& topicName,
+                                                           int frequency = 500, std::string source = "",
+                                                           int curRow = 0,
+                                                           bool addRow = true);
+    std::shared_ptr<easyddsSubscriberApp> createSubscriberApp(int domain_id, const QString& topicName,
+                                                              int curRow = 0,
+                                                              bool addRow = true);
     void stopApp(int curRow);
 
     int getWidgetRow(QWidget* widget, int column);
 
     void multiOp(const QString& op);
-    void insertMonitorQos();
+    uint64_t insertMonitorQos();
 
     void addText(const QString& text);
+public slots:
+    void sendText(const std::shared_ptr<easyddsPublisherApp> &app, QString topicName, int frequency = 500, std::string source = "");
 
+   static void printRecvMsg(std::string message);
 private:
     Ui::EasyDDSTest *ui;
 
     int m_index = 0;
-    QVector< std::shared_ptr<easyddsApplication> > m_infos;
-
+    QVector< std::shared_ptr<easyddsPublisherApp> > m_pubInfos;
+    QVector< std::shared_ptr<easyddsSubscriberApp> > m_subInfos;
     std::shared_ptr<qtStreamBuf> buffer;
 
     std::string m_source;
 
     std::string m_monitorTopic;
+    std::string m_kindName;
 
-    bool m_useCDR;
-
-//    TextEditStreamBuf streamBuffer;
+    //    TextEditStreamBuf streamBuffer;
 };
 #endif // EASYDDSTEST_H

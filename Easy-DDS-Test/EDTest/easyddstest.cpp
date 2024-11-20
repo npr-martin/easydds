@@ -30,7 +30,10 @@ EasyDDSTest::EasyDDSTest(QWidget *parent)
 
     ui->tableWidget->verticalHeader()->setVisible(false);
 
+    qRegisterMetaType<std::shared_ptr<easyddsPublisherApp>>("std::shared_ptr<easyddsPublisherApp>");
+    qRegisterMetaType<std::string>("std::string");
     connect(this, &EasyDDSTest::setCoutText, this, &EasyDDSTest::addText);
+    connect(this, &EasyDDSTest::sendTextSignal, this, & EasyDDSTest::sendText, Qt::QueuedConnection);
 }
 
 EasyDDSTest::~EasyDDSTest()
@@ -49,16 +52,36 @@ void EasyDDSTest::Append(const QString &text)
 void EasyDDSTest::on_pushButton_clicked()
 {
     int num = ui->spinBox->value();
-    if(num == 1)
+    m_kindName = ui->comboBox->currentText().toStdString();
+
+    if("publisher" == m_kindName)
     {
-        createApp(0, ui->lineEdit->text(), ui->comboBox->currentText(), ui->spinBox_2->value(), m_source);
-    }
-    else
-    {
-        for(int i = 0; i < num; ++i)
+        if(num == 1)
         {
-            QString topicName = QString("%1_%2").arg(ui->lineEdit->text()).arg(i);
-            createApp(0, topicName, ui->comboBox->currentText(), ui->spinBox_2->value(), m_source);
+            createPubliserApp(0, ui->lineEdit->text(), ui->spinBox_2->value(), m_source);
+        }
+        else
+        {
+            for(int i = 0; i < num; ++i)
+            {
+                QString topicName = QString("%1_%2").arg(ui->lineEdit->text()).arg(i);
+                createPubliserApp(0, topicName, ui->spinBox_2->value(), m_source);
+            }
+        }
+    }
+    else if("subscriber" == m_kindName)
+    {
+        if(num == 1)
+        {
+            createSubscriberApp(0, ui->lineEdit->text());
+        }
+        else
+        {
+            for(int i = 0; i < num; ++i)
+            {
+                QString topicName = QString("%1_%2").arg(ui->lineEdit->text()).arg(i);
+                createSubscriberApp(0, topicName);
+            }
         }
     }
 }
@@ -92,10 +115,15 @@ void EasyDDSTest::addInfoTab(const QString &topicName, int frequency, std::strin
             }
             else
             {
-                createApp(0, topicName, ui->comboBox->currentText(),
-                          frequency, source, curRow, false);
-                //                m_infos[curRow]->run();
                 btn->setText("stop");
+                if("publisher" == m_kindName)
+                {
+                    createPubliserApp(0, topicName, ui->spinBox_2->value(), m_source, curRow, false);
+                }
+                else
+                {
+                    createSubscriberApp(0, topicName, curRow, false);
+                }
             }
         }
     });
@@ -111,39 +139,85 @@ void EasyDDSTest::addInfoTab(const QString &topicName, int frequency, std::strin
     ui->tableWidget->setItem(rowNum, 3, new QTableWidgetItem());
 }
 
-std::shared_ptr<easyddsApplication> EasyDDSTest::createApp(int domain_id, const QString &topicName,
-                                                           const QString &kindName,
-                                                           int frequency, std::string source,
-                                                           int curRow, bool addRow)
+std::shared_ptr<easyddsPublisherApp> EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int frequency, std::string source, int curRow, bool addRow)
 {
-    insertMonitorQos();
-    std::shared_ptr<easyddsApplication> app = nullptr;
-
+    std::shared_ptr<easyddsPublisherApp> app = nullptr;
     if(!topicName.isEmpty())
     {
-        app = easyddsApplication::make_app(domain_id, topicName.toStdString(), kindName.toStdString(), frequency, source, m_monitorTopic, m_useCDR);
-        std::thread thread(&easyddsApplication::run, app);
 
+        app = easyddsApplication::createPublisher(topicName.toStdString()
+                                                  , domain_id
+                                                  , qos_profile_default
+                                                  , ui->ckb_all->isChecked()
+                                                  , static_cast<MONITOR_TOPIC::monitorItems>(insertMonitorQos()));
+
+        std::thread thread(&easyddsApplication::run, app);
         thread.detach();
 
-        std::cout << topicName.toStdString() << "'s " << kindName.toStdString() << " running. Please press stop Button to stop the "
-                  << kindName.toStdString() << " at any time." << std::endl;
+        std::cout << topicName.toStdString() << "'s publisher running. Please press stop Button to stop the publisher at any time." << std::endl;
 
         if(addRow)
         {
-            QString newName = QString("%1_%2").arg(kindName).arg(m_index++);
+            QString newName = QString("%1_%2").arg("publisher").arg(m_index++);
             addInfoTab(topicName, frequency, source);
-            m_infos.append(app);
+            m_pubInfos.append(app);
         }
         else
         {
-            if(curRow < m_infos.size())
+            if(curRow < m_pubInfos.size())
             {
-                m_infos[curRow] = app;
+                m_pubInfos[curRow] = app;
             }
             else
             {
-                qDebug() << "wrong curRow for info buffer.(curRow = " << curRow << ", bufferSize = " << m_infos.size();
+                qDebug() << "wrong curRow for info buffer.(curRow = " << curRow << ", bufferSize = " << m_pubInfos.size();
+            }
+        }
+
+        ui->comboBox->setEnabled(false);
+        emit sendTextSignal(app, topicName, frequency, source);
+    }
+    else
+    {
+        QMessageBox::warning(this, "Topic Error", "Publisher Topic can't be empty.");
+    }
+
+    //    sendText(app, frequency, source);
+    return app;
+}
+
+std::shared_ptr<easyddsSubscriberApp> EasyDDSTest::createSubscriberApp(int domain_id, const QString &topicName, int curRow, bool addRow)
+{
+
+    std::shared_ptr<easyddsSubscriberApp> app = nullptr;
+    if(!topicName.isEmpty())
+    {
+        app = easyddsApplication::createSubscriber(topicName.toStdString()
+                                                   , domain_id
+                                                   , qos_profile_default
+                                                   , ui->ckb_all->isChecked()
+                                                   , static_cast<MONITOR_TOPIC::monitorItems>(insertMonitorQos()));
+
+        std::thread thread(&easyddsApplication::run, app);
+        thread.detach();
+
+        std::cout << topicName.toStdString() << "'s subscriber running. Please press stop Button to stop the subscriber at any time." << std::endl;
+
+        if(addRow)
+        {
+            QString newName = QString("%1_%2").arg("subscriber").arg(m_index++);
+            addInfoTab(topicName);
+            m_subInfos.append(app);
+        }
+        else
+        {
+            if(curRow < m_subInfos.size())
+            {
+                m_subInfos[curRow] = app;
+            }
+            else
+            {
+                qDebug() << "wrong curRow for info buffer.(curRow = " << curRow << ", bufferSize = " << m_subInfos.size();
             }
         }
 
@@ -154,17 +228,31 @@ std::shared_ptr<easyddsApplication> EasyDDSTest::createApp(int domain_id, const 
         QMessageBox::warning(this, "Topic Error", "Publisher Topic can't be empty.");
     }
 
+    app->onMessageReceived(printRecvMsg);
     return app;
 }
 
 void EasyDDSTest::stopApp(int curRow)
 {
-    if(curRow < m_infos.size())
+    if("publisher" == m_kindName)
     {
-        m_infos[curRow]->stop();
-        m_infos[curRow] = nullptr;
-        //        m_infos.remove(curRow);
+        if(curRow < m_pubInfos.size())
+        {
+            m_pubInfos[curRow]->stop();
+            m_pubInfos[curRow] = nullptr;
+            //        m_infos.remove(curRow);
+        }
     }
+    else
+    {
+        if(curRow < m_subInfos.size())
+        {
+            m_subInfos[curRow]->stop();
+            m_subInfos[curRow] = nullptr;
+            //        m_infos.remove(curRow);
+        }
+    }
+
 }
 
 int EasyDDSTest::getWidgetRow(QWidget* widget, int column)
@@ -205,38 +293,82 @@ void EasyDDSTest::multiOp(const QString &op)
     }
 }
 
-void EasyDDSTest::insertMonitorQos()
+uint64_t EasyDDSTest::insertMonitorQos()
 {
-    m_monitorTopic = std::string();
-    if(ui->ckb_all->isChecked())
+    uint64_t monitorItems = 0;
+    auto children = ui->wgt_monitor->findChildren<QCheckBox*>();
+    for(auto ckb : children)
     {
-        auto children = ui->wgt_monitor->findChildren<QCheckBox*>();
-        for(auto ckb : children)
+        if(ckb->isChecked())
         {
-            if(ckb->isChecked())
+            QString text = ckb->text();
+            if("GAP_COUNT" == text)
             {
-                QString text = ckb->text();
-                if(text.startsWith("PUB_"))
-                {
-                    text = "PUBLICATION_THROUGHPUT";
-                }
-                else if(text.startsWith("SUB_"))
-                {
-                    text = "SUBSCRIPTION_THROUGHPUT";
-                }
-                m_monitorTopic += text.toStdString() + "_TOPIC;";
+                monitorItems |= MONITOR_TOPIC::GAP_COUNT_TOPIC;
+            }
+            else if("RTPS_LOST" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::RTPS_LOST_TOPIC;
+            }
+            else if("RTPS_SENT" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::RTPS_SENT_TOPIC;
+            }
+            else if("DATA_COUNT" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::DATA_COUNT_TOPIC;
+            }
+            else if("EDP_PACKETS" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::EDP_PACKETS_TOPIC;
+            }
+            else if("PDP_PACKETS" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::PDP_PACKETS_TOPIC;
+            }
+            else if("RESENT_DATAS" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::RESENT_DATAS_TOPIC;
+            }
+            else if("SAMPLE_DATAS" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::SAMPLE_DATAS_TOPIC;
+            }
+            else if("ACKNACK_COUNT" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::ACKNACK_COUNT_TOPIC;
+            }
+            else if("PHYSICAL_DATA" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::PHYSICAL_DATA_TOPIC;
+            }
+            else if("NACKFRAG_COUNT" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::NACKFRAG_COUNT_TOPIC;
+            }
+            else if("HEARTBEAT_COUNT" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::HEARTBEAT_COUNT_TOPIC;
+            }
+            else if("HISTORY_LATENCY" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::HISTORY_LATENCY_TOPIC;
+            }
+            else if("NETWORK_LATENCY" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::NETWORK_LATENCY_TOPIC;
+            }
+            else if("PUB_THROUGHPUT" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::PUBLICATION_THROUGHPUT_TOPIC;
+            }
+            else if("SUB_THROUGHPUT" == text)
+            {
+                monitorItems |= MONITOR_TOPIC::SUBSCRIPTION_THROUGHPUT_TOPIC;
             }
         }
-
-        if(!m_monitorTopic.empty())
-        {
-            m_monitorTopic.pop_back();
-        }
     }
-
-    //CDR
-    m_useCDR = ui->ckb_usecdr->isChecked();
-    //  qDebug()<<"the monitor topic include: "<<QString::fromStdString(m_monitorTopic);
+    return monitorItems;
 }
 
 void EasyDDSTest::addText(const QString &text)
@@ -278,6 +410,28 @@ void EasyDDSTest::addText(const QString &text)
 
     // 添加文本后移动光标至末尾
     ui->textEdit->moveCursor(QTextCursor::End);
+}
+
+void EasyDDSTest::sendText(const std::shared_ptr<easyddsPublisherApp> &app, QString topicName, int frequency, std::string source)
+{
+    std::thread t([=]() {
+        int sampleCount = 0;
+        while(!app->getIsStopped())
+        {
+            app->send(source);
+            std::string printInfo = "Send [topic: " + topicName.toStdString() + "] Sample: " + std::to_string(sampleCount++) + "  \n";
+            std::cout << printInfo;
+            QApplication::processEvents(QEventLoop::AllEvents, frequency);
+            std::this_thread::sleep_for(std::chrono::milliseconds(frequency));
+        }
+    });
+    t.detach();
+
+}
+
+void EasyDDSTest::printRecvMsg(std::string message)
+{
+    std::cout << message;
 }
 
 void EasyDDSTest::on_pushButton_2_clicked()

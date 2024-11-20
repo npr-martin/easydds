@@ -1,0 +1,164 @@
+#include "easyddsClientPublisherApp.hpp"
+
+#include <condition_variable>
+#include <stdexcept>
+
+#include <fastdds/dds/domain/DomainParticipantFactory.hpp>
+#include <fastdds/dds/publisher/DataWriter.hpp>
+#include <fastdds/dds/publisher/Publisher.hpp>
+#include <fastdds/dds/publisher/qos/DataWriterQos.hpp>
+#include <fastdds/dds/publisher/qos/PublisherQos.hpp>
+#include <fastdds/rtps/transport/shared_mem/SharedMemTransportDescriptor.hpp>
+#include <fastdds/rtps/transport/TCPv4TransportDescriptor.hpp>
+#include <fastdds/rtps/transport/TCPv6TransportDescriptor.hpp>
+#include <fastdds/rtps/transport/UDPv4TransportDescriptor.hpp>
+#include <fastdds/rtps/transport/UDPv6TransportDescriptor.hpp>
+
+#include "easyddsPubSubTypes.hpp"
+
+easyddsClientPublisherApp::easyddsClientPublisherApp(
+    const std::string &topic_name,
+    const int &domain_id,
+    const qos_profile_s &qos_profile,
+    const bool &open_monitor,
+    const MONITOR_TOPIC::monitorItems &items,
+    const SERVER::client_config &config)
+    : participant_(nullptr)
+    , publisher_(nullptr)
+    , topic_(nullptr)
+    , writer_(nullptr)
+    , type_(new EmployeePubSubType())
+    , matched_(0)
+    , stop_(false)
+{
+    // Configure Participant QoS
+    DomainParticipantQos pqos = getClientDomainParticipantQos(open_monitor, items, config);
+
+    // Create Domainparticipant
+    participant_ = DomainParticipantFactory::get_instance()->create_participant(0, pqos, nullptr);
+
+    if (participant_ == nullptr)
+    {
+        throw std::runtime_error("Participant initialization failed");
+    }
+
+    std::cout <<
+        "Publisher Participant " << pqos.name() <<
+        " created with GUID " << participant_->guid() <<
+        " connecting to server <" << server_locator  << "> " <<
+        std::endl;
+
+    // Regsiter type
+    type_.register_type(participant_);
+
+    // Create the publisher
+    publisher_ = participant_->create_publisher(PUBLISHER_QOS_DEFAULT, nullptr);
+
+    if (publisher_ == nullptr)
+    {
+        throw std::runtime_error("Publisher initialization failed");
+    }
+
+    // Create the topic
+    topic_ = participant_->create_topic(topic_name, type_.get_type_name(), TOPIC_QOS_DEFAULT);
+
+    if (topic_ == nullptr)
+    {
+        throw std::runtime_error("Topic initialization failed");
+    }
+
+    // Create de data writer
+    DataWriterQos wqos = getDataWriterQos(qos_profile);
+    writer_ = publisher_->create_datawriter(topic_, wqos, this);
+
+    if (writer_ == nullptr)
+    {
+        throw std::runtime_error("DataWriter initialization failed");
+    }
+}
+
+easyddsClientPublisherApp::~easyddsClientPublisherApp()
+{
+    if (nullptr != participant_)
+    {
+        // Delete DDS entities contained within the DomainParticipant
+        participant_->delete_contained_entities();
+
+        // Delete DomainParticipant
+        DomainParticipantFactory::get_instance()->delete_participant(participant_);
+    }
+}
+
+void easyddsClientPublisherApp::on_publication_matched(
+        DataWriter* /*writer*/,
+        const PublicationMatchedStatus& info)
+{
+    if (info.current_count_change == 1)
+    {
+        matched_ = static_cast<int16_t>(info.current_count);
+        std::cout << "Publisher matched." << std::endl;
+        //cv_.notify_one();
+    }
+    else if (info.current_count_change == -1)
+    {
+        matched_ = static_cast<int16_t>(info.current_count);
+        std::cout << "Publisher unmatched." << std::endl;
+    }
+    else
+    {
+        std::cout << info.current_count_change
+                  << " is not a valid value for PublicationMatchedStatus current count change" << std::endl;
+    }
+}
+
+void easyddsClientPublisherApp::run()
+{
+    // while (!is_stopped() && ((samples_ == 0) || (hello_.index() < samples_)))
+    // {
+    //     if (publish())
+    //     {
+    //         std::cout << "Message: '" << hello_.message() << "' with index: '" << hello_.index()
+    //                   << "' SENT" << std::endl;
+    //     }
+    //     // Wait for period or stop event
+    //     std::unique_lock<std::mutex> period_lock(mutex_);
+    //     cv_.wait_for(period_lock, std::chrono::milliseconds(period_ms_), [&]()
+    //             {
+    //                 return is_stopped();
+    //             });
+    // }
+}
+
+bool easyddsClientPublisherApp::getIsStopped()
+{
+    return is_stopped();
+}
+
+bool easyddsClientPublisherApp::send(const std::string & msg)
+{
+    bool ret = false;
+   
+    if (!is_stopped())
+    {
+        Employee sample_(msg);
+        // const clock_t begin_time = clock();
+        ret = (RETCODE_OK == writer_->write(&sample_));
+        // float mseconds = float(clock() - begin_time);
+    }
+    return ret;
+}
+
+DataWriterQos easyddsClientPublisherApp::getDataWriterQos(const qos_profile_s &qos_profile)
+{
+    return DataWriterQos();
+}
+
+bool easyddsClientPublisherApp::is_stopped()
+{
+    return stop_.load();
+}
+
+void easyddsClientPublisherApp::stop()
+{
+    stop_.store(true);
+}
