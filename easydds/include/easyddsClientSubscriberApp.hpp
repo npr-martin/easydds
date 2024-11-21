@@ -64,6 +64,8 @@ private:
         std::atomic<bool> stop_;
 
         int m_sampleCount;
+
+        std::string m_topicName;
 };
 
 #endif // EASYDDS_CLIENT_SUBSCRIBER_APP_HPP

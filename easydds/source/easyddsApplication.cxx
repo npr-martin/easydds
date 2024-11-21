@@ -199,7 +199,12 @@ DomainParticipantQos easyddsApplication::getClientDomainParticipantQos(const boo
 
     // Add descriptor
     pqos.transport().user_transports.push_back(descriptor);
-    return pqos;
+   
+     std::cout <<
+        "Publisher Participant " << pqos.name() <<
+        " connecting to server <" << server_locator  << "> " <<
+        std::endl;
+        return pqos;
 }
 
 DomainParticipantQos easyddsApplication::getServerDomainParticipantQos(const bool &monitorEnabled, const MONITOR_TOPIC::monitorItems &items, const SERVER::server_config &config)
@@ -323,6 +328,7 @@ DomainParticipantQos easyddsApplication::getServerDomainParticipantQos(const boo
         // Add remote SERVER to CLIENT's list of SERVERs
         pqos.wire_protocol().builtin.discovery_config.m_DiscoveryServers.push_back(connection_locator);
     }
+    
     return pqos;
 }
 

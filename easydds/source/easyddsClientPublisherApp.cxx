@@ -42,12 +42,6 @@ easyddsClientPublisherApp::easyddsClientPublisherApp(
         throw std::runtime_error("Participant initialization failed");
     }
 
-    std::cout <<
-        "Publisher Participant " << pqos.name() <<
-        " created with GUID " << participant_->guid() <<
-        " connecting to server <" << server_locator  << "> " <<
-        std::endl;
-
     // Regsiter type
     type_.register_type(participant_);
 
@@ -146,11 +140,6 @@ bool easyddsClientPublisherApp::send(const std::string & msg)
         // float mseconds = float(clock() - begin_time);
     }
     return ret;
-}
-
-DataWriterQos easyddsClientPublisherApp::getDataWriterQos(const qos_profile_s &qos_profile)
-{
-    return DataWriterQos();
 }
 
 bool easyddsClientPublisherApp::is_stopped()
