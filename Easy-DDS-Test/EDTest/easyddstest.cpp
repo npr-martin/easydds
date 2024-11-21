@@ -147,7 +147,7 @@ std::shared_ptr<easyddsPublisherApp> EasyDDSTest::createPubliserApp(int domain_i
                                                   , domain_id
                                                   , qos_profile_default
                                                   , ui->ckb_all->isChecked()
-                                                  , static_cast<MONITOR_TOPIC::monitorItems>(insertMonitorQos()));
+                                                  , insertMonitorQos());
 
         std::thread thread(&easyddsApplication::run, app);
         thread.detach();
@@ -194,7 +194,7 @@ std::shared_ptr<easyddsSubscriberApp> EasyDDSTest::createSubscriberApp(int domai
                                                    , domain_id
                                                    , qos_profile_default
                                                    , ui->ckb_all->isChecked()
-                                                   , static_cast<MONITOR_TOPIC::monitorItems>(insertMonitorQos()));
+                                                   , insertMonitorQos());
 
         std::thread thread(&easyddsApplication::run, app);
         thread.detach();
@@ -291,7 +291,7 @@ void EasyDDSTest::multiOp(const QString &op)
     }
 }
 
-uint64_t EasyDDSTest::insertMonitorQos()
+MONITOR_TOPIC::monitorItems EasyDDSTest::insertMonitorQos()
 {
     uint64_t monitorItems = 0;
     auto children = ui->wgt_monitor->findChildren<QCheckBox*>();
@@ -366,7 +366,7 @@ uint64_t EasyDDSTest::insertMonitorQos()
             }
         }
     }
-    return monitorItems;
+    return static_cast<MONITOR_TOPIC::monitorItems>(monitorItems);
 }
 
 void EasyDDSTest::addText(const QString &text)
@@ -410,14 +410,24 @@ void EasyDDSTest::addText(const QString &text)
     ui->textEdit->moveCursor(QTextCursor::End);
 }
 
-void EasyDDSTest::sendText(const std::shared_ptr<easyddsPublisherApp> &app, QString topicName, int frequency, std::string source)
+void EasyDDSTest::setWidgetsVisible(const QVector<QWidget *> widgets, bool visible)
+{
+    for(QWidget* widget : widgets)
+    {
+        widget->setVisible(visible);
+    }
+}
+
+void EasyDDSTest::sendText(const std::shared_ptr<easyddsPublisherApp> &app, QString topicName,
+                           int frequency, std::string source)
 {
     std::thread t([=]() {
         int sampleCount = 0;
         while(!app->getIsStopped())
         {
             app->send(source);
-            std::string printInfo = "Send [topic: " + topicName.toStdString() + "] Sample: " + std::to_string(sampleCount++) + "  \n";
+            std::string printInfo = "Send [topic: " + topicName.toStdString() + "] Sample: "
+                    + std::to_string(sampleCount++) + "  \n";
             std::cout << printInfo;
             QApplication::processEvents(QEventLoop::AllEvents, frequency);
             std::this_thread::sleep_for(std::chrono::milliseconds(frequency));
@@ -509,34 +519,19 @@ void EasyDDSTest::on_radioButton_2_toggled(bool checked)
 void EasyDDSTest::on_comboBox_currentTextChanged(const QString &arg1)
 {
     bool vis = arg1.contains("publisher") ? true : false;
-    ui->sbFrequency->setVisible(vis);
-    ui->lineEdit_2->setVisible(vis);
-    ui->pushButton_4->setVisible(vis);
-    ui->label_5->setVisible(vis);
-    ui->label_6->setVisible(vis);
+    setWidgetsVisible({ui->sbFrequency, ui->lineEdit_2, ui->pushButton_4,
+                      ui->label_5, ui->label_6}, vis);
 
     bool isServer = arg1.contains("server");
-    ui->lblTopic->setVisible(!isServer);
-    ui->lblNum->setVisible(!isServer);
-    ui->leTopic->setVisible(!isServer);
-    ui->sbNum->setVisible(!isServer);
+    setWidgetsVisible({ui->lblTopic, ui->leTopic, ui->lblNum, ui->sbNum},
+                      !isServer);
 
     if(ui->radioButton_2->isChecked())
     {
-        QVector<QWidget*> clientWidgets{
-            ui->lblIP, ui->leIP,
-                    ui->lblPort, ui->sbPort};
-        QVector<QWidget*> serverWidgets{
-            ui->lblListenIP, ui->sbListenPort,
-                    ui->lblListenPort, ui->leListenIP};
-        for(auto widget : clientWidgets)
-        {
-            widget->setVisible(!isServer);
-        }
-        for(auto widget : serverWidgets)
-        {
-            widget->setVisible(isServer);
-        }
+        setWidgetsVisible({ui->lblIP, ui->leIP, ui->lblPort, ui->sbPort},
+                          !isServer);
+        setWidgetsVisible({ui->lblListenIP, ui->sbListenPort,
+                           ui->lblListenPort, ui->leListenIP}, isServer);
     }
 }
 
@@ -548,8 +543,5 @@ void EasyDDSTest::initInvisible()
                 ui->lblListenIP, ui->sbListenPort,
                 ui->lblListenPort, ui->leListenIP};
 
-    for(auto widget : invisibles)
-    {
-        widget->setVisible(false);
-    }
+    setWidgetsVisible(invisibles, false);
 }

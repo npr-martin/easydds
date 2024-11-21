@@ -61,9 +61,11 @@ private:
     int getWidgetRow(QWidget* widget, int column);
 
     void multiOp(const QString& op);
-    uint64_t insertMonitorQos();
+    MONITOR_TOPIC::monitorItems insertMonitorQos();
 
     void addText(const QString& text);
+
+    void setWidgetsVisible(const QVector<QWidget*> widgets, bool visible = true);
 public slots:
     void sendText(const std::shared_ptr<easyddsPublisherApp> &app, QString topicName, int frequency = 500, std::string source = "");
 
