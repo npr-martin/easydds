@@ -129,15 +129,8 @@ void EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int
     std::shared_ptr<easyddsClientPublisherApp> app = nullptr;
     if(!topicName.isEmpty())
     {
-        easyddsClientConfig cc;
-        cc.qosProfile = qos_profile_default;
-        cc.open_monitor = ui->ckb_all->isChecked();
-        cc.items = insertMonitorQos();
-        cc.kind = getCurKind();
-        cc.clientConfig = getClientConfig();
-
         app = easyddsApplication::createClientPublisher(topicName.toStdString(),
-                                                        domain_id, cc);
+                                                        domain_id, getEasyConfig());
 
         std::thread thread(&easyddsApplication::run, app);
         thread.detach();
@@ -180,14 +173,8 @@ void EasyDDSTest::createSubscriberApp(int domain_id, const QString &topicName, i
     std::shared_ptr<easyddsClientSubscriberApp> app = nullptr;
     if(!topicName.isEmpty())
     {
-        easyddsClientConfig cc;
-        cc.qosProfile = qos_profile_default;
-        cc.open_monitor = ui->ckb_all->isChecked();
-        cc.items = insertMonitorQos();
-        cc.clientConfig = getClientConfig();
-
         app = easyddsApplication::createClientSubscriber(topicName.toStdString(),
-                                                         domain_id, cc);
+                                                         domain_id, getEasyConfig());
 
         std::thread thread(&easyddsApplication::run, app);
         thread.detach();
@@ -391,6 +378,18 @@ TransportKind EasyDDSTest::getCurKind()
     }
 
     return TransportKind::UDPv4;
+}
+
+easyddsClientConfig EasyDDSTest::getEasyConfig()
+{
+    easyddsClientConfig cc;
+    cc.qosProfile = qos_profile_default;
+    cc.open_monitor = ui->ckb_all->isChecked();
+    cc.items = insertMonitorQos();
+    cc.clientConfig = getClientConfig();
+    cc.useDiscoveryServer = ui->radioButton_2->isChecked();
+
+    return cc;
 }
 
 client_config EasyDDSTest::getClientConfig()

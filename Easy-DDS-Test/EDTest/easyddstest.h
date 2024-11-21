@@ -70,6 +70,8 @@ private:
 
     TransportKind getCurKind();
 
+    easyddsClientConfig getEasyConfig();
+
     client_config getClientConfig();
 
     server_config getServerConfig();
