@@ -5,8 +5,8 @@
 #include <QMap>
 #include "easyddsApplication.hpp"
 #include "qtstreambuf.h"
-#include "easyddsPublisherApp.hpp"
-#include "easyddsSubscriberApp.hpp"
+#include "easyddsClientPublisherApp.hpp"
+#include "easyddsClientSubscriberApp.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class EasyDDSTest; }
@@ -24,7 +24,7 @@ public:
 
 signals:
     void setCoutText(const QString& text);
-    void sendTextSignal(const std::shared_ptr<easyddsPublisherApp> &app , QString topicName, int frequency, std::string source);
+    void sendTextSignal(const std::shared_ptr<easyddsClientPublisherApp> &app , QString topicName, int frequency, std::string source);
 private slots:
     void on_pushButton_clicked();
 
@@ -49,33 +49,44 @@ private:
 
     void addInfoTab(const QString& topicName, int frequency = 500, std::string source = "");
 
-    std::shared_ptr<easyddsPublisherApp> createPubliserApp(int domain_id, const QString& topicName,
-                                                           int frequency = 500, std::string source = "",
-                                                           int curRow = 0,
-                                                           bool addRow = true);
-    std::shared_ptr<easyddsSubscriberApp> createSubscriberApp(int domain_id, const QString& topicName,
-                                                              int curRow = 0,
-                                                              bool addRow = true);
+    void createApp(int domain_id, const QString& topicName,
+                   int frequency = 500, std::string source = "",
+                   int curRow = 0, bool addRow = true);
+
+    void createPubliserApp(int domain_id, const QString& topicName,
+                           int frequency = 500, std::string source = "",
+                           int curRow = 0,
+                           bool addRow = true);
+    void createSubscriberApp(int domain_id, const QString& topicName,
+                             int curRow = 0,
+                             bool addRow = true);
     void stopApp(int curRow);
 
     int getWidgetRow(QWidget* widget, int column);
 
     void multiOp(const QString& op);
-    MONITOR_TOPIC::monitorItems insertMonitorQos();
+
+    monitorItems insertMonitorQos();
+
+    TransportKind getCurKind();
+
+    client_config getClientConfig();
+
+    server_config getServerConfig();
 
     void addText(const QString& text);
 
     void setWidgetsVisible(const QVector<QWidget*> widgets, bool visible = true);
 public slots:
-    void sendText(const std::shared_ptr<easyddsPublisherApp> &app, QString topicName, int frequency = 500, std::string source = "");
+    void sendText(const std::shared_ptr<easyddsClientPublisherApp> &app, QString topicName, int frequency = 500, std::string source = "");
 
-   static void printRecvMsg(std::string message);
+    static void printRecvMsg(std::string message);
 private:
     Ui::EasyDDSTest *ui;
 
     int m_index = 0;
-    QVector< std::shared_ptr<easyddsPublisherApp> > m_pubInfos;
-    QVector< std::shared_ptr<easyddsSubscriberApp> > m_subInfos;
+    QVector< std::shared_ptr<easyddsClientPublisherApp> > m_pubInfos;
+    QVector< std::shared_ptr<easyddsClientSubscriberApp> > m_subInfos;
     std::shared_ptr<qtStreamBuf> buffer;
 
     std::string m_source;

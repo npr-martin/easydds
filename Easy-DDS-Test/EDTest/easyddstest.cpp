@@ -28,7 +28,7 @@ EasyDDSTest::EasyDDSTest(QWidget *parent)
 
     ui->tableWidget->verticalHeader()->setVisible(false);
 
-    qRegisterMetaType<std::shared_ptr<easyddsPublisherApp>>("std::shared_ptr<easyddsPublisherApp>");
+    qRegisterMetaType<std::shared_ptr<easyddsClientPublisherApp>>("std::shared_ptr<easyddsClientPublisherApp>");
     qRegisterMetaType<std::string>("std::string");
     connect(this, &EasyDDSTest::setCoutText, this, &EasyDDSTest::addText);
     connect(this, &EasyDDSTest::sendTextSignal, this, & EasyDDSTest::sendText, Qt::QueuedConnection);
@@ -52,34 +52,16 @@ void EasyDDSTest::on_pushButton_clicked()
     int num = ui->sbNum->value();
     m_kindName = ui->comboBox->currentText().toStdString();
 
-    if("publisher" == m_kindName)
+    if(num == 1)
     {
-        if(num == 1)
-        {
-            createPubliserApp(0, ui->leTopic->text(), ui->sbFrequency->value(), m_source);
-        }
-        else
-        {
-            for(int i = 0; i < num; ++i)
-            {
-                QString topicName = QString("%1_%2").arg(ui->leTopic->text()).arg(i);
-                createPubliserApp(0, topicName, ui->sbFrequency->value(), m_source);
-            }
-        }
+        createApp(0, ui->leTopic->text(), ui->sbFrequency->value(), m_source);
     }
-    else if("subscriber" == m_kindName)
+    else
     {
-        if(num == 1)
+        for(int i = 0; i < num; ++i)
         {
-            createSubscriberApp(0, ui->leTopic->text());
-        }
-        else
-        {
-            for(int i = 0; i < num; ++i)
-            {
-                QString topicName = QString("%1_%2").arg(ui->leTopic->text()).arg(i);
-                createSubscriberApp(0, topicName);
-            }
+            QString topicName = QString("%1_%2").arg(ui->leTopic->text()).arg(i);
+            createApp(0, topicName, ui->sbFrequency->value(), m_source);
         }
     }
 }
@@ -114,14 +96,7 @@ void EasyDDSTest::addInfoTab(const QString &topicName, int frequency, std::strin
             else
             {
                 btn->setText("stop");
-                if("publisher" == m_kindName)
-                {
-                    createPubliserApp(0, topicName, ui->sbFrequency->value(), m_source, curRow, false);
-                }
-                else
-                {
-                    createSubscriberApp(0, topicName, curRow, false);
-                }
+                createApp(0, topicName, ui->sbFrequency->value(), m_source, curRow, false);
             }
         }
     });
@@ -137,22 +112,38 @@ void EasyDDSTest::addInfoTab(const QString &topicName, int frequency, std::strin
     ui->tableWidget->setItem(rowNum, 3, new QTableWidgetItem());
 }
 
-std::shared_ptr<easyddsPublisherApp> EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int frequency, std::string source, int curRow, bool addRow)
+void EasyDDSTest::createApp(int domain_id, const QString &topicName, int frequency, std::string source, int curRow, bool addRow)
 {
-    std::shared_ptr<easyddsPublisherApp> app = nullptr;
+    if("publisher" == m_kindName)
+    {
+        createPubliserApp(domain_id, topicName, frequency, source, curRow, addRow);
+    }
+    else
+    {
+        createSubscriberApp(domain_id, topicName, curRow, addRow);
+    }
+}
+void EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int frequency,
+                                    std::string source, int curRow, bool addRow)
+{
+    std::shared_ptr<easyddsClientPublisherApp> app = nullptr;
     if(!topicName.isEmpty())
     {
+        easyddsClientConfig cc;
+        cc.qosProfile = qos_profile_default;
+        cc.open_monitor = ui->ckb_all->isChecked();
+        cc.items = insertMonitorQos();
+        cc.kind = getCurKind();
+        cc.clientConfig = getClientConfig();
 
-        app = easyddsApplication::createPublisher(topicName.toStdString()
-                                                  , domain_id
-                                                  , qos_profile_default
-                                                  , ui->ckb_all->isChecked()
-                                                  , insertMonitorQos());
+        app = easyddsApplication::createClientPublisher(topicName.toStdString(),
+                                                        domain_id, cc);
 
         std::thread thread(&easyddsApplication::run, app);
         thread.detach();
 
-        std::cout << topicName.toStdString() << "'s publisher running. Please press stop Button to stop the publisher at any time." << std::endl;
+        std::cout << topicName.toStdString() << "'s publisher running. "
+                                                "Please press stop Button to stop the publisher at any time." << std::endl;
 
         if(addRow)
         {
@@ -181,25 +172,28 @@ std::shared_ptr<easyddsPublisherApp> EasyDDSTest::createPubliserApp(int domain_i
     }
 
     //    sendText(app, frequency, source);
-    return app;
 }
 
-std::shared_ptr<easyddsSubscriberApp> EasyDDSTest::createSubscriberApp(int domain_id, const QString &topicName, int curRow, bool addRow)
+void EasyDDSTest::createSubscriberApp(int domain_id, const QString &topicName, int curRow, bool addRow)
 {
 
-    std::shared_ptr<easyddsSubscriberApp> app = nullptr;
+    std::shared_ptr<easyddsClientSubscriberApp> app = nullptr;
     if(!topicName.isEmpty())
     {
-        app = easyddsApplication::createSubscriber(topicName.toStdString()
-                                                   , domain_id
-                                                   , qos_profile_default
-                                                   , ui->ckb_all->isChecked()
-                                                   , insertMonitorQos());
+        easyddsClientConfig cc;
+        cc.qosProfile = qos_profile_default;
+        cc.open_monitor = ui->ckb_all->isChecked();
+        cc.items = insertMonitorQos();
+        cc.clientConfig = getClientConfig();
+
+        app = easyddsApplication::createClientSubscriber(topicName.toStdString(),
+                                                         domain_id, cc);
 
         std::thread thread(&easyddsApplication::run, app);
         thread.detach();
 
-        std::cout << topicName.toStdString() << "'s subscriber running. Please press stop Button to stop the subscriber at any time." << std::endl;
+        std::cout << topicName.toStdString() << "'s subscriber running. "
+                                                "Please press stop Button to stop the subscriber at any time." << std::endl;
 
         if(addRow)
         {
@@ -227,7 +221,6 @@ std::shared_ptr<easyddsSubscriberApp> EasyDDSTest::createSubscriberApp(int domai
     }
 
     app->onMessageReceived(printRecvMsg);
-    return app;
 }
 
 void EasyDDSTest::stopApp(int curRow)
@@ -291,7 +284,7 @@ void EasyDDSTest::multiOp(const QString &op)
     }
 }
 
-MONITOR_TOPIC::monitorItems EasyDDSTest::insertMonitorQos()
+EASYDDS::monitorItems EasyDDSTest::insertMonitorQos()
 {
     uint64_t monitorItems = 0;
     auto children = ui->wgt_monitor->findChildren<QCheckBox*>();
@@ -302,71 +295,122 @@ MONITOR_TOPIC::monitorItems EasyDDSTest::insertMonitorQos()
             QString text = ckb->text();
             if("GAP_COUNT" == text)
             {
-                monitorItems |= MONITOR_TOPIC::GAP_COUNT_TOPIC;
+                monitorItems |= EASYDDS::GAP_COUNT_TOPIC;
             }
             else if("RTPS_LOST" == text)
             {
-                monitorItems |= MONITOR_TOPIC::RTPS_LOST_TOPIC;
+                monitorItems |= EASYDDS::RTPS_LOST_TOPIC;
             }
             else if("RTPS_SENT" == text)
             {
-                monitorItems |= MONITOR_TOPIC::RTPS_SENT_TOPIC;
+                monitorItems |= EASYDDS::RTPS_SENT_TOPIC;
             }
             else if("DATA_COUNT" == text)
             {
-                monitorItems |= MONITOR_TOPIC::DATA_COUNT_TOPIC;
+                monitorItems |= EASYDDS::DATA_COUNT_TOPIC;
             }
             else if("EDP_PACKETS" == text)
             {
-                monitorItems |= MONITOR_TOPIC::EDP_PACKETS_TOPIC;
+                monitorItems |= EASYDDS::EDP_PACKETS_TOPIC;
             }
             else if("PDP_PACKETS" == text)
             {
-                monitorItems |= MONITOR_TOPIC::PDP_PACKETS_TOPIC;
+                monitorItems |= EASYDDS::PDP_PACKETS_TOPIC;
             }
             else if("RESENT_DATAS" == text)
             {
-                monitorItems |= MONITOR_TOPIC::RESENT_DATAS_TOPIC;
+                monitorItems |= EASYDDS::RESENT_DATAS_TOPIC;
             }
             else if("SAMPLE_DATAS" == text)
             {
-                monitorItems |= MONITOR_TOPIC::SAMPLE_DATAS_TOPIC;
+                monitorItems |= EASYDDS::SAMPLE_DATAS_TOPIC;
             }
             else if("ACKNACK_COUNT" == text)
             {
-                monitorItems |= MONITOR_TOPIC::ACKNACK_COUNT_TOPIC;
+                monitorItems |= EASYDDS::ACKNACK_COUNT_TOPIC;
             }
             else if("PHYSICAL_DATA" == text)
             {
-                monitorItems |= MONITOR_TOPIC::PHYSICAL_DATA_TOPIC;
+                monitorItems |= EASYDDS::PHYSICAL_DATA_TOPIC;
             }
             else if("NACKFRAG_COUNT" == text)
             {
-                monitorItems |= MONITOR_TOPIC::NACKFRAG_COUNT_TOPIC;
+                monitorItems |= EASYDDS::NACKFRAG_COUNT_TOPIC;
             }
             else if("HEARTBEAT_COUNT" == text)
             {
-                monitorItems |= MONITOR_TOPIC::HEARTBEAT_COUNT_TOPIC;
+                monitorItems |= EASYDDS::HEARTBEAT_COUNT_TOPIC;
             }
             else if("HISTORY_LATENCY" == text)
             {
-                monitorItems |= MONITOR_TOPIC::HISTORY_LATENCY_TOPIC;
+                monitorItems |= EASYDDS::HISTORY_LATENCY_TOPIC;
             }
             else if("NETWORK_LATENCY" == text)
             {
-                monitorItems |= MONITOR_TOPIC::NETWORK_LATENCY_TOPIC;
+                monitorItems |= EASYDDS::NETWORK_LATENCY_TOPIC;
             }
             else if("PUB_THROUGHPUT" == text)
             {
-                monitorItems |= MONITOR_TOPIC::PUBLICATION_THROUGHPUT_TOPIC;
+                monitorItems |= EASYDDS::PUBLICATION_THROUGHPUT_TOPIC;
             }
             else if("SUB_THROUGHPUT" == text)
             {
-                monitorItems |= MONITOR_TOPIC::SUBSCRIPTION_THROUGHPUT_TOPIC;
+                monitorItems |= EASYDDS::SUBSCRIPTION_THROUGHPUT_TOPIC;
             }
         }
     }
-    return static_cast<MONITOR_TOPIC::monitorItems>(monitorItems);
+    return static_cast<EASYDDS::monitorItems>(monitorItems);
+}
+
+TransportKind EasyDDSTest::getCurKind()
+{
+    QString kind = ui->cmbTransKind->currentText();
+    if("SHM" == kind)
+    {
+        return TransportKind::SHM;
+    }
+    else if("TCPv4" == kind)
+    {
+        return TransportKind::TCPv4;
+    }
+    else if("TCPv6" == kind)
+    {
+        return TransportKind::TCPv6;
+    }
+    else if("UDPv6" == kind)
+    {
+        return TransportKind::UDPv6;
+    }
+    else if("DATA_SHARING" == kind)
+    {
+        return TransportKind::DATA_SHARING;
+    }
+    else if("LARGE_DATA" == kind)
+    {
+        return TransportKind::LARGE_DATA;
+    }
+
+    return TransportKind::UDPv4;
+}
+
+client_config EasyDDSTest::getClientConfig()
+{
+    client_config cc;
+    cc.connection_address = ui->leIP->text().toStdString();
+    cc.connection_port = ui->sbPort->value();
+    cc.transport_kind = getCurKind();
+
+    return cc;
+}
+
+server_config EasyDDSTest::getServerConfig()
+{
+    server_config sc;
+    sc.listening_address = ui->leListenIP->text().toStdString();
+    sc.listening_port = ui->sbListenPort->value();
+    sc.transport_kind = getCurKind();
+
+    return sc;
 }
 
 void EasyDDSTest::addText(const QString &text)
@@ -418,7 +462,7 @@ void EasyDDSTest::setWidgetsVisible(const QVector<QWidget *> widgets, bool visib
     }
 }
 
-void EasyDDSTest::sendText(const std::shared_ptr<easyddsPublisherApp> &app, QString topicName,
+void EasyDDSTest::sendText(const std::shared_ptr<easyddsClientPublisherApp> &app, QString topicName,
                            int frequency, std::string source)
 {
     std::thread t([=]() {
@@ -531,7 +575,8 @@ void EasyDDSTest::on_comboBox_currentTextChanged(const QString &arg1)
         setWidgetsVisible({ui->lblIP, ui->leIP, ui->lblPort, ui->sbPort},
                           !isServer);
         setWidgetsVisible({ui->lblListenIP, ui->sbListenPort,
-                           ui->lblListenPort, ui->leListenIP}, isServer);
+                           ui->lblListenPort, ui->leListenIP,
+                           ui->lblTimeout, ui->sbTimeout}, isServer);
     }
 }
 
@@ -540,7 +585,8 @@ void EasyDDSTest::initInvisible()
     QVector<QWidget*> invisibles{ui->lblIP, ui->leIP,
                 ui->lblPort, ui->sbPort,
                 ui->lblListenIP, ui->sbListenPort,
-                ui->lblListenPort, ui->leListenIP};
+                ui->lblListenPort, ui->leListenIP,
+                ui->lblTimeout, ui->sbTimeout};
 
     setWidgetsVisible(invisibles, false);
 }
