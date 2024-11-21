@@ -148,7 +148,7 @@ void easyddsClientSubscriberApp::stop()
 bool easyddsClientSubscriberApp::getIsStopped()
 {
     return is_stopped();
-
+}
 void easyddsClientSubscriberApp::onMessageReceived(const std::function<void(std::string)> &func)
 {
     receivedMsg = func;
