@@ -24,10 +24,23 @@ easyddsClientPublisherApp::easyddsClientPublisherApp(
     , writer_(nullptr), type_(new EmployeePubSubType()), matched_(0), stop_(false)
 {
     // Configure Participant QoS
-    DomainParticipantQos pqos = getClientDomainParticipantQos(config.open_monitor, config.items, config.clientConfig);
+    DomainParticipantQos pqos;
+    if(config.useDiscoveryServer)
+    {
+        pqos = getClientDomainParticipantQos(config.open_monitor, config.items, config.clientConfig);
+    }
+    else
+    {
+        pqos = getPubDomainParticipantQos(config.open_monitor, config.items, config.clientConfig, config.qosProfile.samples);
+    }
+    
 
     // Create Domainparticipant
-    participant_ = DomainParticipantFactory::get_instance()->create_participant(0, pqos, nullptr);
+    auto factory = DomainParticipantFactory::get_instance();
+    LibrarySettings library_settings;
+    library_settings.intraprocess_delivery = IntraprocessDeliveryType::INTRAPROCESS_OFF;
+    factory->set_library_settings(library_settings);
+    participant_ = factory->create_participant(0, pqos, nullptr);
 
     if (participant_ == nullptr)
     {

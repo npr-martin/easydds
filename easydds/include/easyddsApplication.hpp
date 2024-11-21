@@ -18,6 +18,10 @@
 #include "easyddsType.hpp"
 
 using namespace EASYDDS;
+using namespace eprosima;
+using namespace eprosima::fastdds;
+using namespace eprosima::fastdds::rtps;
+
 class easyddsPublisherApp;
 class easyddsSubscriberApp;
 class easyddsClientPublisherApp;
@@ -55,12 +59,26 @@ public:
         const int &domain_id = 0,
         const EASYDDS::easyddsServerConfig &config = EASYDDS::easyddsServerConfig());
 
-
-
 protected:
-    DomainParticipantQos getClientDomainParticipantQos(const bool &monitorEnabled, const EASYDDS::monitorItems &items, const EASYDDS::client_config &config);
-   
-    DomainParticipantQos getServerDomainParticipantQos(const bool &monitorEnabled, const EASYDDS::monitorItems &items, const EASYDDS::server_config &config);
+    DomainParticipantQos getClientDomainParticipantQos(const bool &monitorEnabled,
+                                                       const EASYDDS::monitorItems &items,
+                                                       const EASYDDS::client_config &config);
+
+    DomainParticipantQos getServerDomainParticipantQos(const bool &monitorEnabled,
+                                                       const EASYDDS::monitorItems &items,
+                                                       const EASYDDS::server_config &config);
+
+    DomainParticipantQos getPubDomainParticipantQos(const bool &monitorEnabled,
+                                                    const EASYDDS::monitorItems &items,
+                                                    const EASYDDS::client_config &config,
+                                                    const uint32_t &samples);
+
+    DomainParticipantQos getSubDomainParticipantQos(const bool &monitorEnabled,
+                                                    const EASYDDS::monitorItems &items,
+                                                    const EASYDDS::client_config &config,
+                                                    const uint32_t &samples);
+
+    void setMonitorContent(DomainParticipantQos pqos, const bool &monitorEnabled, const EASYDDS::monitorItems &items);
    
     template <typename T>
     T getDataQos(const qos_profile_s &qos_profile, T defaultValue);
@@ -82,7 +100,7 @@ T easyddsApplication::getDataQos(const EASYDDS::qos_profile_s &qos_profile, T de
     qos.liveliness().lease_duration.seconds = qos_profile.liveliness_lease_duration.sec;
     qos.liveliness().lease_duration.nanosec = qos_profile.liveliness_lease_duration.nsec;
     qos.liveliness().announcement_period = {TIME_T_INFINITE_SECONDS, TIME_T_INFINITE_NANOSECONDS};
-
+   
     uint32_t max_samples = qos_profile.samples;
     if (max_samples == 0)
     {

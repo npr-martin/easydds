@@ -27,7 +27,7 @@ namespace EASYDDS
 
         size_t depth;
 
-        uint16_t samples;
+        uint32_t samples;
 
         enum ReliabilityQosPolicyKind reliability;
 
@@ -149,7 +149,6 @@ namespace EASYDDS
     //! A server can, in turn, act as a client
     struct server_config : public client_config
     {
-        bool is_also_client{false};
         uint16_t listening_port{16166};
         uint16_t timeout{0};
         std::string listening_address{"127.0.0.1"};
@@ -203,7 +202,7 @@ namespace EASYDDS
         qos_profile_s qosProfile = qos_profile_default;
         bool open_monitor = false;
         monitorItems items = monitorItems_default;
-        TransportKind kind = TransportKind::UDPv4;
+        bool useDiscoveryServer = false;
     };
     struct easyddsClientConfig : public easyddsConfig
     {

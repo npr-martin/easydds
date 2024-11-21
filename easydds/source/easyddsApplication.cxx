@@ -9,7 +9,6 @@ std::shared_ptr<easyddsClientPublisherApp> easyddsApplication::
                           const int &domain_id,
                           const EASYDDS::easyddsClientConfig &config)
 {
-
     return std::make_shared<easyddsClientPublisherApp>(topic_name, domain_id, config);
 }
 
@@ -32,29 +31,10 @@ DomainParticipantQos easyddsApplication::getClientDomainParticipantQos(const boo
                                                                        const EASYDDS::monitorItems &items,
                                                                        const EASYDDS::client_config &config)
 {
-    DomainParticipantQos pqos;
+    DomainParticipantQos pqos = PARTICIPANT_QOS_DEFAULT;
 
-    // add monitor
-    std::string monitorTopic;
-
-    if (!monitorEnabled || items)
-    {
-        pqos.properties().properties().emplace_back("fastdds.statistics", "");
-    }
-    else
-    {
-        for (int i = 1; i < 16; ++i)
-        {
-            if (items & static_cast<uint64_t>(1 << i))
-            {
-                monitorTopic += EASYDDS::transTopic(static_cast<EASYDDS::monitorItems>(1 << i));
-                monitorTopic += ";";
-            }
-        }
-        monitorTopic.pop_back();
-        pqos.properties().properties().emplace_back("fastdds.statistics", monitorTopic);
-    }
-
+    setMonitorContent(pqos, monitorEnabled, items);
+    
     pqos.name("DS-Client_pub");
     pqos.transport().use_builtin_transports = false;
 
@@ -155,6 +135,9 @@ DomainParticipantQos easyddsApplication::getServerDomainParticipantQos(const boo
                                                                        const EASYDDS::server_config &config)
 {
     DomainParticipantQos pqos;
+
+    setMonitorContent(pqos, monitorEnabled, items);
+
     pqos.name("DS-Server");
     pqos.transport().use_builtin_transports = false;
 
@@ -169,17 +152,6 @@ DomainParticipantQos easyddsApplication::getServerDomainParticipantQos(const boo
     if (ip_listening_address.empty())
     {
         throw std::runtime_error("Invalid listening address");
-    }
-
-    // Do the same for connection
-    if (config.is_also_client && !EASYDDS::is_ip(config.connection_address))
-    {
-        ip_connection_address = EASYDDS::get_ip_from_dns(config.connection_address, config.transport_kind);
-    }
-
-    if (config.is_also_client && ip_connection_address.empty())
-    {
-        throw std::runtime_error("Invalid connection address");
     }
 
     // Configure Listening address
@@ -267,12 +239,223 @@ DomainParticipantQos easyddsApplication::getServerDomainParticipantQos(const boo
     // Set SERVER's listening locator for PDP
     pqos.wire_protocol().builtin.metatrafficUnicastLocatorList.push_back(listening_locator);
 
-    // Configure Connection address
-    if (config.is_also_client)
+    return pqos;
+}
+
+DomainParticipantQos easyddsApplication::getPubDomainParticipantQos(const bool &monitorEnabled,
+                                                                    const EASYDDS::monitorItems &items,
+                                                                    const EASYDDS::client_config &config,
+                                                                    const uint32_t &samples)
+{
+    DomainParticipantQos pqos = PARTICIPANT_QOS_DEFAULT;
+
+    setMonitorContent(pqos, monitorEnabled, items);
+
+    pqos.name("DeliveryMechanisms_pub_participant");
+    uint32_t max_samples = samples;
+    if (max_samples == 0)
     {
-        // Add remote SERVER to CLIENT's list of SERVERs
-        pqos.wire_protocol().builtin.discovery_config.m_DiscoveryServers.push_back(connection_locator);
+        max_samples = DATAWRITER_QOS_DEFAULT.resource_limits().max_samples_per_instance;
     }
 
+    // Transport default definitions
+    pqos.transport().use_builtin_transports = false;
+
+    switch (config.transport_kind)
+    {
+        case EASYDDS::TransportKind::SHM:
+        case EASYDDS::TransportKind::DATA_SHARING:
+        {
+            std::shared_ptr<SharedMemTransportDescriptor> shm_transport_ =
+                    std::make_shared<SharedMemTransportDescriptor>();
+            shm_transport_->segment_size(shm_transport_->max_message_size() * max_samples);
+            pqos.transport().user_transports.push_back(shm_transport_);
+            break;
+        }
+        case EASYDDS::TransportKind::LARGE_DATA:
+        {
+            // Large Data is a builtin transport
+            pqos.transport().use_builtin_transports = true;
+            pqos.setup_transports(BuiltinTransports::LARGE_DATA);
+            break;
+        }
+        case EASYDDS::TransportKind::TCPv4:
+        {
+            std::shared_ptr<TCPv4TransportDescriptor> tcp_v4_transport_ = std::make_shared<TCPv4TransportDescriptor>();
+            pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
+            pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
+            tcp_v4_transport_->sendBufferSize = 0;
+            tcp_v4_transport_->receiveBufferSize = 0;
+            std::string tcp_ip_address = "127.0.0.1";
+            if (!config.connection_address.empty())
+            {
+                tcp_ip_address = config.connection_address;
+            }
+            // Set unicast locators
+            Locator_t tcp_v4_locator_;
+            tcp_v4_locator_.kind = LOCATOR_KIND_TCPv4;
+            IPLocator::setIPv4(tcp_v4_locator_, tcp_ip_address);
+            IPLocator::setPhysicalPort(tcp_v4_locator_, 5100);
+            pqos.wire_protocol().builtin.metatrafficUnicastLocatorList.push_back(tcp_v4_locator_);
+            pqos.wire_protocol().default_unicast_locator_list.push_back(tcp_v4_locator_);
+            tcp_v4_transport_->set_WAN_address(tcp_ip_address);
+            tcp_v4_transport_->add_listener_port(5100);
+            pqos.transport().user_transports.push_back(tcp_v4_transport_);
+            break;
+        }
+        case EASYDDS::TransportKind::TCPv6:
+        {
+            std::shared_ptr<TCPv6TransportDescriptor> tcp_v6_transport_ = std::make_shared<TCPv6TransportDescriptor>();
+            pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
+            pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
+            tcp_v6_transport_->sendBufferSize = 0;
+            tcp_v6_transport_->receiveBufferSize = 0;
+            std::string tcp_ip_address = "::1";
+            if (!config.connection_address.empty())
+            {
+                tcp_ip_address = config.connection_address;
+            }
+            // Set unicast locators
+            Locator_t tcp_v6_locator_;
+            tcp_v6_locator_.kind = LOCATOR_KIND_TCPv6;
+            IPLocator::setIPv6(tcp_v6_locator_, tcp_ip_address);
+            IPLocator::setPhysicalPort(tcp_v6_locator_, 5100);
+            pqos.wire_protocol().builtin.metatrafficUnicastLocatorList.push_back(tcp_v6_locator_);
+            pqos.wire_protocol().default_unicast_locator_list.push_back(tcp_v6_locator_);
+            tcp_v6_transport_->add_listener_port(5100);
+            pqos.transport().user_transports.push_back(tcp_v6_transport_);
+            break;
+        }
+        case EASYDDS::TransportKind::UDPv4:
+        {
+            pqos.transport().user_transports.push_back(std::make_shared<UDPv4TransportDescriptor>());
+            break;
+        }
+        case EASYDDS::TransportKind::UDPv6:
+        {
+            pqos.transport().user_transports.push_back(std::make_shared<UDPv6TransportDescriptor>());
+            break;
+        }
+        default:
+        {
+            pqos.transport().use_builtin_transports = true;
+            break;
+        }
+    }
     return pqos;
+}
+
+DomainParticipantQos easyddsApplication::getSubDomainParticipantQos(const bool &monitorEnabled,
+                                                                    const EASYDDS::monitorItems &items,
+                                                                    const EASYDDS::client_config &config,
+                                                                    const uint32_t &samples)
+{
+    DomainParticipantQos pqos = PARTICIPANT_QOS_DEFAULT;
+
+    setMonitorContent(pqos, monitorEnabled, items);
+
+    pqos.name("DeliveryMechanisms_sub_participant");
+    pqos.transport().use_builtin_transports = false;
+    uint32_t max_samples = samples;
+    if (max_samples == 0)
+    {
+        max_samples = DATAREADER_QOS_DEFAULT.resource_limits().max_samples_per_instance;
+    }
+
+    // Transport default definitions
+    pqos.transport().use_builtin_transports = false;
+    switch (config.transport_kind)
+    {
+        case EASYDDS::TransportKind::SHM:
+        case EASYDDS::TransportKind::DATA_SHARING:
+        {
+            std::shared_ptr<SharedMemTransportDescriptor> shm_transport_ =
+                    std::make_shared<SharedMemTransportDescriptor>();
+            shm_transport_->segment_size(shm_transport_->max_message_size() * max_samples);
+            pqos.transport().user_transports.push_back(shm_transport_);
+            break;
+        }
+        case EASYDDS::TransportKind::LARGE_DATA:
+        {
+            // Large Data is a builtin transport
+            pqos.transport().use_builtin_transports = true;
+            pqos.setup_transports(BuiltinTransports::LARGE_DATA);
+            break;
+        }
+        case EASYDDS::TransportKind::TCPv4:
+        {
+            Locator tcp_v4_initial_peers_locator_;
+            tcp_v4_initial_peers_locator_.kind = LOCATOR_KIND_TCPv4;
+            tcp_v4_initial_peers_locator_.port = 5100;
+            std::string tcp_ip_address = "127.0.0.1";
+            if (!config.connection_address.empty())
+            {
+                tcp_ip_address = config.connection_address;
+            }
+            IPLocator::setIPv4(tcp_v4_initial_peers_locator_, tcp_ip_address);
+            pqos.wire_protocol().builtin.initialPeersList.push_back(tcp_v4_initial_peers_locator_);
+            pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
+            pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
+            pqos.transport().user_transports.push_back(std::make_shared<TCPv4TransportDescriptor>());
+            break;
+        }
+        case EASYDDS::TransportKind::TCPv6:
+        {
+            Locator tcp_v6_initial_peers_locator_;
+            tcp_v6_initial_peers_locator_.kind = LOCATOR_KIND_TCPv6;
+            tcp_v6_initial_peers_locator_.port = 5100;
+            std::string tcp_ip_address = "::1";
+            if (!config.connection_address.empty())
+            {
+                tcp_ip_address = config.connection_address;
+            }
+            IPLocator::setIPv6(tcp_v6_initial_peers_locator_, tcp_ip_address);
+            pqos.wire_protocol().builtin.initialPeersList.push_back(tcp_v6_initial_peers_locator_);
+            pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
+            pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
+            pqos.transport().user_transports.push_back(std::make_shared<TCPv6TransportDescriptor>());
+            break;
+        }
+        case EASYDDS::TransportKind::UDPv4:
+        {
+            pqos.transport().user_transports.push_back(std::make_shared<UDPv4TransportDescriptor>());
+            break;
+        }
+        case EASYDDS::TransportKind::UDPv6:
+        {
+            pqos.transport().user_transports.push_back(std::make_shared<UDPv6TransportDescriptor>());
+            break;
+        }
+        default:
+        {
+            pqos.transport().use_builtin_transports = true;
+            break;
+        }
+    }
+    return pqos;
+}
+
+void easyddsApplication::setMonitorContent(DomainParticipantQos pqos, const bool &monitorEnabled, const EASYDDS::monitorItems &items)
+{
+
+    // add monitor
+    std::string monitorTopic;
+
+    if (!monitorEnabled || items)
+    {
+        pqos.properties().properties().emplace_back("fastdds.statistics", "");
+    }
+    else
+    {
+        for (int i = 1; i < 16; ++i)
+        {
+            if (items & static_cast<uint64_t>(1 << i))
+            {
+                monitorTopic += EASYDDS::transTopic(static_cast<EASYDDS::monitorItems>(1 << i));
+                monitorTopic += ";";
+            }
+        }
+        monitorTopic.pop_back();
+        pqos.properties().properties().emplace_back("fastdds.statistics", monitorTopic);
+    }
 }

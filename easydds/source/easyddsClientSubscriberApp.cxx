@@ -25,9 +25,22 @@ easyddsClientSubscriberApp::easyddsClientSubscriberApp(
     : participant_(nullptr), subscriber_(nullptr), topic_(nullptr)
     , reader_(nullptr), type_(new EmployeePubSubType()), stop_(false), m_sampleCount(0), m_topicName(topic_name)
 {
-    DomainParticipantQos pqos = getClientDomainParticipantQos(config.open_monitor, config.items, config.clientConfig);
+    DomainParticipantQos pqos;
+    if(config.useDiscoveryServer)
+    {
+        pqos = getClientDomainParticipantQos(config.open_monitor, config.items, config.clientConfig);
+    }
+    else
+    {
+        pqos = getSubDomainParticipantQos(config.open_monitor, config.items, config.clientConfig, config.qosProfile.samples);
+    }
+
     // Create the Domainparticipant
-    participant_ = DomainParticipantFactory::get_instance()->create_participant(0, pqos, nullptr,
+     auto factory = DomainParticipantFactory::get_instance();
+    LibrarySettings library_settings;
+    library_settings.intraprocess_delivery = IntraprocessDeliveryType::INTRAPROCESS_OFF;
+    factory->set_library_settings(library_settings);
+    participant_ = factory->create_participant(0, pqos, nullptr,
                     StatusMask::all() >> StatusMask::data_on_readers());
 
     if (participant_ == nullptr)
