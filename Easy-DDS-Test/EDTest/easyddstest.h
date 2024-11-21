@@ -36,13 +36,17 @@ private slots:
 
     void on_ckb_all_toggled(bool checked);
 
-    void on_comboBox_currentIndexChanged(int index);
-
     void on_pushButton_5_clicked();
 
     void on_pushButton_6_clicked();
 
+    void on_radioButton_2_toggled(bool checked);
+
+    void on_comboBox_currentTextChanged(const QString &arg1);
+
 private:
+    void initInvisible();
+
     void addInfoTab(const QString& topicName, int frequency = 500, std::string source = "");
 
     std::shared_ptr<easyddsPublisherApp> createPubliserApp(int domain_id, const QString& topicName,

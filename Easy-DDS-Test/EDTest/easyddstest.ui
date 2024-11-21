@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>873</width>
+    <width>965</width>
     <height>639</height>
    </rect>
   </property>
@@ -346,6 +346,45 @@
       <property name="spacing">
        <number>6</number>
       </property>
+      <item row="10" column="1" colspan="2">
+       <widget class="QComboBox" name="cmbTransKind">
+        <item>
+         <property name="text">
+          <string>UDPv4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>UDPv6</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>TCPv4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>TCPv6</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>SHM</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="6" column="1" colspan="2">
+       <widget class="QLineEdit" name="leIP">
+        <property name="text">
+         <string>127.0.0.1</string>
+        </property>
+        <property name="maxLength">
+         <number>15</number>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1" colspan="2">
        <widget class="QComboBox" name="comboBox">
         <item>
@@ -360,13 +399,29 @@
         </item>
        </widget>
       </item>
-      <item row="7" column="1" colspan="2">
-       <widget class="QLineEdit" name="leIP"/>
-      </item>
       <item row="4" column="0">
        <widget class="QLabel" name="label_6">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>发送数据</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="lblPort">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>连接端口</string>
         </property>
        </widget>
       </item>
@@ -377,7 +432,7 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
+      <item row="5" column="1">
        <widget class="QRadioButton" name="radioButton">
         <property name="text">
          <string>默认发现方式</string>
@@ -387,29 +442,8 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_11">
-        <property name="text">
-         <string>发现类型</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>类型</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>创建数量</string>
-        </property>
-       </widget>
-      </item>
       <item row="5" column="0">
-       <widget class="QLabel" name="label_7">
+       <widget class="QLabel" name="label_11">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -417,11 +451,50 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>数据大小</string>
+         <string>发现类型</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>类型</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="0">
+       <widget class="QLabel" name="lblTransKind">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>传输类型</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lblNum">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>创建数量</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
        <widget class="QRadioButton" name="radioButton_2">
         <property name="text">
          <string>发现服务器</string>
@@ -429,38 +502,79 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="lblTopic">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>主题</string>
         </property>
        </widget>
       </item>
-      <item row="9" column="0" colspan="3">
+      <item row="9" column="0">
+       <widget class="QLabel" name="lblListenPort">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>监听端口</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1" colspan="2">
+       <widget class="QSpinBox" name="sbPort">
+        <property name="maximum">
+         <number>65535</number>
+        </property>
+        <property name="value">
+         <number>16166</number>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="0" colspan="3">
        <widget class="QPushButton" name="pushButton">
         <property name="text">
-         <string>create</string>
+         <string>创建</string>
         </property>
        </widget>
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="label_5">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>发送频率(ms)</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="0">
+      <item row="6" column="0">
        <widget class="QLabel" name="lblIP">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>连接IP</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1" colspan="2">
-       <widget class="QLineEdit" name="lineEdit"/>
+       <widget class="QLineEdit" name="leTopic"/>
       </item>
       <item row="2" column="1" colspan="2">
-       <widget class="QSpinBox" name="spinBox">
+       <widget class="QSpinBox" name="sbNum">
         <property name="minimum">
          <number>1</number>
         </property>
@@ -472,15 +586,8 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="1" colspan="2">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="1" colspan="2">
-       <widget class="QSpinBox" name="spinBox_2">
+       <widget class="QSpinBox" name="sbFrequency">
         <property name="maximum">
          <number>10000</number>
         </property>
@@ -500,16 +607,35 @@
        </widget>
       </item>
       <item row="8" column="0">
-       <widget class="QLabel" name="lblPort">
+       <widget class="QLabel" name="lblListenIP">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
-         <string>连接端口</string>
+         <string>监听IP</string>
         </property>
        </widget>
       </item>
       <item row="8" column="1" colspan="2">
-       <widget class="QSpinBox" name="sbPort">
+       <widget class="QLineEdit" name="leListenIP">
+        <property name="text">
+         <string>127.0.0.1</string>
+        </property>
+        <property name="maxLength">
+         <number>15</number>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1" colspan="2">
+       <widget class="QSpinBox" name="sbListenPort">
         <property name="maximum">
          <number>65535</number>
+        </property>
+        <property name="value">
+         <number>16166</number>
         </property>
        </widget>
       </item>
@@ -530,11 +656,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>375</x>
-     <y>220</y>
+     <y>190</y>
     </hint>
     <hint type="destinationlabel">
      <x>76</x>
-     <y>254</y>
+     <y>225</y>
     </hint>
    </hints>
   </connection>
@@ -546,11 +672,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>474</x>
-     <y>230</y>
+     <y>200</y>
     </hint>
     <hint type="destinationlabel">
      <x>450</x>
-     <y>254</y>
+     <y>224</y>
     </hint>
    </hints>
   </connection>
@@ -562,11 +688,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>491</x>
-     <y>219</y>
+     <y>189</y>
     </hint>
     <hint type="destinationlabel">
      <x>136</x>
-     <y>290</y>
+     <y>261</y>
     </hint>
    </hints>
   </connection>
@@ -578,11 +704,43 @@
    <hints>
     <hint type="sourcelabel">
      <x>473</x>
-     <y>221</y>
+     <y>191</y>
     </hint>
     <hint type="destinationlabel">
      <x>298</x>
-     <y>285</y>
+     <y>255</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_2</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lblTransKind</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>425</x>
+     <y>186</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>40</x>
+     <y>279</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_2</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cmbTransKind</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>471</x>
+     <y>187</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>360</x>
+     <y>280</y>
     </hint>
    </hints>
   </connection>
