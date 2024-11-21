@@ -118,9 +118,13 @@ void EasyDDSTest::createApp(int domain_id, const QString &topicName, int frequen
     {
         createPubliserApp(domain_id, topicName, frequency, source, curRow, addRow);
     }
-    else
+    else if("subscriber" == m_kindName)
     {
         createSubscriberApp(domain_id, topicName, curRow, addRow);
+    }
+    else //server
+    {
+        createServer(domain_id, curRow, addRow);
     }
 }
 void EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int frequency,
@@ -140,7 +144,6 @@ void EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int
 
         if(addRow)
         {
-            QString newName = QString("%1_%2").arg("publisher").arg(m_index++);
             addInfoTab(topicName, frequency, source);
             m_pubInfos.append(app);
         }
@@ -184,7 +187,6 @@ void EasyDDSTest::createSubscriberApp(int domain_id, const QString &topicName, i
 
         if(addRow)
         {
-            QString newName = QString("%1_%2").arg("subscriber").arg(m_index++);
             addInfoTab(topicName);
             m_subInfos.append(app);
         }
@@ -210,6 +212,37 @@ void EasyDDSTest::createSubscriberApp(int domain_id, const QString &topicName, i
     app->onMessageReceived(printRecvMsg);
 }
 
+void EasyDDSTest::createServer(int domain_id, int curRow, bool addRow)
+{
+    std::shared_ptr<easyddsServerApp> app = nullptr;
+
+    app = easyddsApplication::createServer(domain_id, getEasyServerConfig());
+
+    std::thread thread(&easyddsApplication::run, app);
+    thread.detach();
+
+    std::cout << "server is running. Please press stop Button to stop the server at any time." << std::endl;
+
+    if(addRow)
+    {
+        addInfoTab("server");
+        m_serverInfos.append(app);
+    }
+    else
+    {
+        if(curRow < m_serverInfos.size())
+        {
+            m_serverInfos[curRow] = app;
+        }
+        else
+        {
+            qDebug() << "wrong curRow for info buffer.(curRow = " << curRow << ", bufferSize = " << m_subInfos.size();
+        }
+    }
+
+    ui->comboBox->setEnabled(false);
+}
+
 void EasyDDSTest::stopApp(int curRow)
 {
     if("publisher" == m_kindName)
@@ -221,7 +254,7 @@ void EasyDDSTest::stopApp(int curRow)
             //        m_infos.remove(curRow);
         }
     }
-    else
+    else if("subscriber" == m_kindName)
     {
         if(curRow < m_subInfos.size())
         {
@@ -230,7 +263,14 @@ void EasyDDSTest::stopApp(int curRow)
             //        m_infos.remove(curRow);
         }
     }
-
+    else
+    {
+        if(curRow < m_serverInfos.size())
+        {
+            m_serverInfos[curRow]->stop();
+            m_serverInfos[curRow] = nullptr;
+        }
+    }
 }
 
 int EasyDDSTest::getWidgetRow(QWidget* widget, int column)
@@ -400,6 +440,13 @@ client_config EasyDDSTest::getClientConfig()
     cc.transport_kind = getCurKind();
 
     return cc;
+}
+
+easyddsServerConfig EasyDDSTest::getEasyServerConfig()
+{
+    easyddsServerConfig sc;
+
+    return sc;
 }
 
 server_config EasyDDSTest::getServerConfig()
