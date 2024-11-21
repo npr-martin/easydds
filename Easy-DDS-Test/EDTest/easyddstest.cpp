@@ -17,10 +17,7 @@ EasyDDSTest::EasyDDSTest(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->lblIP->setVisible(false);
-    ui->lblPort->setVisible(false);
-    ui->leIP->setVisible(false);
-    ui->sbPort->setVisible(false);
+    initInvisible();
 
     buffer = std::make_shared<qtStreamBuf>(this);
     new (&std::cout) std::ostream(buffer.get());
@@ -52,21 +49,21 @@ void EasyDDSTest::Append(const QString &text)
 
 void EasyDDSTest::on_pushButton_clicked()
 {
-    int num = ui->spinBox->value();
+    int num = ui->sbNum->value();
     m_kindName = ui->comboBox->currentText().toStdString();
 
     if("publisher" == m_kindName)
     {
         if(num == 1)
         {
-            createPubliserApp(0, ui->lineEdit->text(), ui->spinBox_2->value(), m_source);
+            createPubliserApp(0, ui->leTopic->text(), ui->sbFrequency->value(), m_source);
         }
         else
         {
             for(int i = 0; i < num; ++i)
             {
-                QString topicName = QString("%1_%2").arg(ui->lineEdit->text()).arg(i);
-                createPubliserApp(0, topicName, ui->spinBox_2->value(), m_source);
+                QString topicName = QString("%1_%2").arg(ui->leTopic->text()).arg(i);
+                createPubliserApp(0, topicName, ui->sbFrequency->value(), m_source);
             }
         }
     }
@@ -74,13 +71,13 @@ void EasyDDSTest::on_pushButton_clicked()
     {
         if(num == 1)
         {
-            createSubscriberApp(0, ui->lineEdit->text());
+            createSubscriberApp(0, ui->leTopic->text());
         }
         else
         {
             for(int i = 0; i < num; ++i)
             {
-                QString topicName = QString("%1_%2").arg(ui->lineEdit->text()).arg(i);
+                QString topicName = QString("%1_%2").arg(ui->leTopic->text()).arg(i);
                 createSubscriberApp(0, topicName);
             }
         }
@@ -119,7 +116,7 @@ void EasyDDSTest::addInfoTab(const QString &topicName, int frequency, std::strin
                 btn->setText("stop");
                 if("publisher" == m_kindName)
                 {
-                    createPubliserApp(0, topicName, ui->spinBox_2->value(), m_source, curRow, false);
+                    createPubliserApp(0, topicName, ui->sbFrequency->value(), m_source, curRow, false);
                 }
                 else
                 {
@@ -150,7 +147,7 @@ std::shared_ptr<easyddsPublisherApp> EasyDDSTest::createPubliserApp(int domain_i
                                                   , domain_id
                                                   , qos_profile_default
                                                   , ui->ckb_all->isChecked()
-                                                  , static_cast<MONITOR_TOPIC::monitorItems>(insertMonitorQos()));
+                                                  , insertMonitorQos());
 
         std::thread thread(&easyddsApplication::run, app);
         thread.detach();
@@ -197,7 +194,7 @@ std::shared_ptr<easyddsSubscriberApp> EasyDDSTest::createSubscriberApp(int domai
                                                    , domain_id
                                                    , qos_profile_default
                                                    , ui->ckb_all->isChecked()
-                                                   , static_cast<MONITOR_TOPIC::monitorItems>(insertMonitorQos()));
+                                                   , insertMonitorQos());
 
         std::thread thread(&easyddsApplication::run, app);
         thread.detach();
@@ -294,7 +291,7 @@ void EasyDDSTest::multiOp(const QString &op)
     }
 }
 
-uint64_t EasyDDSTest::insertMonitorQos()
+MONITOR_TOPIC::monitorItems EasyDDSTest::insertMonitorQos()
 {
     uint64_t monitorItems = 0;
     auto children = ui->wgt_monitor->findChildren<QCheckBox*>();
@@ -369,7 +366,7 @@ uint64_t EasyDDSTest::insertMonitorQos()
             }
         }
     }
-    return monitorItems;
+    return static_cast<MONITOR_TOPIC::monitorItems>(monitorItems);
 }
 
 void EasyDDSTest::addText(const QString &text)
@@ -413,14 +410,24 @@ void EasyDDSTest::addText(const QString &text)
     ui->textEdit->moveCursor(QTextCursor::End);
 }
 
-void EasyDDSTest::sendText(const std::shared_ptr<easyddsPublisherApp> &app, QString topicName, int frequency, std::string source)
+void EasyDDSTest::setWidgetsVisible(const QVector<QWidget *> widgets, bool visible)
+{
+    for(QWidget* widget : widgets)
+    {
+        widget->setVisible(visible);
+    }
+}
+
+void EasyDDSTest::sendText(const std::shared_ptr<easyddsPublisherApp> &app, QString topicName,
+                           int frequency, std::string source)
 {
     std::thread t([=]() {
         int sampleCount = 0;
         while(!app->getIsStopped())
         {
             app->send(source);
-            std::string printInfo = "Send [topic: " + topicName.toStdString() + "] Sample: " + std::to_string(sampleCount++) + "  \n";
+            std::string printInfo = "Send [topic: " + topicName.toStdString() + "] Sample: "
+                    + std::to_string(sampleCount++) + "  \n";
             std::cout << printInfo;
             QApplication::processEvents(QEventLoop::AllEvents, frequency);
             std::this_thread::sleep_for(std::chrono::milliseconds(frequency));
@@ -457,7 +464,7 @@ void EasyDDSTest::on_pushButton_4_clicked()
         {
             m_source = QString(f.readAll()).toStdString();
             // std::cout << "source is " << m_source << std::endl;
-            ui->label_8->setText(QString::number(m_source.size()));
+            ui->label_6->setText(QString("发送数据(size=%1)").arg(m_source.size()));
         }
         else
         {
@@ -471,14 +478,6 @@ void EasyDDSTest::on_ckb_all_toggled(bool checked)
     ui->wgt_monitor->setEnabled(checked);
     ui->pushButton_5->setEnabled(checked);
     ui->pushButton_6->setEnabled(checked);
-}
-
-void EasyDDSTest::on_comboBox_currentIndexChanged(int index)
-{
-    bool enable = index ==0 ? true : false;
-    ui->spinBox_2->setEnabled(enable);
-    ui->lineEdit_2->setEnabled(enable);
-    ui->pushButton_4->setEnabled(enable);
 }
 
 void EasyDDSTest::on_pushButton_5_clicked()
@@ -501,5 +500,47 @@ void EasyDDSTest::on_pushButton_6_clicked()
 
 void EasyDDSTest::on_radioButton_2_toggled(bool checked)
 {
+    QStringList serverList{"server"};
 
+    if(checked)
+    {
+        ui->comboBox->addItems(serverList);
+    }
+    else
+    {
+        for(int i = 0; i < serverList.size(); ++i)
+        {
+            ui->comboBox->removeItem(2);
+        }
+        initInvisible();
+    }
+}
+
+void EasyDDSTest::on_comboBox_currentTextChanged(const QString &arg1)
+{
+    bool vis = arg1.contains("publisher") ? true : false;
+    setWidgetsVisible({ui->sbFrequency, ui->lineEdit_2, ui->pushButton_4,
+                      ui->label_5, ui->label_6}, vis);
+
+    bool isServer = arg1.contains("server");
+    setWidgetsVisible({ui->lblTopic, ui->leTopic, ui->lblNum, ui->sbNum},
+                      !isServer);
+
+    if(ui->radioButton_2->isChecked())
+    {
+        setWidgetsVisible({ui->lblIP, ui->leIP, ui->lblPort, ui->sbPort},
+                          !isServer);
+        setWidgetsVisible({ui->lblListenIP, ui->sbListenPort,
+                           ui->lblListenPort, ui->leListenIP}, isServer);
+    }
+}
+
+void EasyDDSTest::initInvisible()
+{
+    QVector<QWidget*> invisibles{ui->lblIP, ui->leIP,
+                ui->lblPort, ui->sbPort,
+                ui->lblListenIP, ui->sbListenPort,
+                ui->lblListenPort, ui->leListenIP};
+
+    setWidgetsVisible(invisibles, false);
 }
