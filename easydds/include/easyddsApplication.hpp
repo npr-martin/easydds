@@ -87,7 +87,26 @@ protected:
     DomainParticipantQos getServerDomainParticipantQos(const bool &monitorEnabled, const MONITOR_TOPIC::monitorItems &items, const SERVER::server_config &config);
    
     template <typename T>
-    T getDataQos(const qos_profile_s &qos_profile);
+    T getDataQos(const qos_profile_s &qos_profile, T defaultValue);
 };
+
+template <typename T>
+T easyddsApplication::getDataQos(const qos_profile_s &qos_profile, T defaultValue)
+{
+    T qos = defaultValue;
+    qos.history().kind = qos_profile.history;
+    qos.history().depth = qos_profile.depth;
+    qos.reliability().kind = qos_profile.reliability;
+    qos.durability().kind = qos_profile.durability;
+    qos.deadline().period.seconds = qos_profile.deadline.sec;
+    qos.deadline().period.nanosec = qos_profile.deadline.nsec;
+    qos.lifespan().duration.seconds = qos_profile.lifespan.sec;
+    qos.lifespan().duration.nanosec = qos_profile.lifespan.nsec;
+    qos.liveliness().kind = qos_profile.liveliness;
+    qos.liveliness().lease_duration.seconds = qos_profile.liveliness_lease_duration.sec;
+    qos.liveliness().lease_duration.nanosec = qos_profile.liveliness_lease_duration.nsec;
+    qos.liveliness().announcement_period = {TIME_T_INFINITE_SECONDS, TIME_T_INFINITE_NANOSECONDS};
+    return qos;
+}
 
 #endif // EASYDDS_APPLICATION_HPP

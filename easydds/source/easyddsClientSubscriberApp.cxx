@@ -66,7 +66,7 @@ easyddsClientSubscriberApp::easyddsClientSubscriberApp(
     }
 
     // Create the data reader
-    DataReaderQos rqos = getDataQos<DataReaderQos>(qos_profile);
+    DataReaderQos rqos = getDataQos<DataReaderQos>(qos_profile, DATAREADER_QOS_DEFAULT);
     reader_ = subscriber_->create_datareader(topic_, rqos, this);
 
     if (reader_ == nullptr)

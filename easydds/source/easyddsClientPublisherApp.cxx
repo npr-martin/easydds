@@ -62,7 +62,7 @@ easyddsClientPublisherApp::easyddsClientPublisherApp(
     }
 
     // Create de data writer
-    DataWriterQos wqos = getDataQos<DataWriterQos>(qos_profile);
+    DataWriterQos wqos = getDataQos<DataWriterQos>(qos_profile, DATAWRITER_QOS_DEFAULT);
     writer_ = publisher_->create_datawriter(topic_, wqos, this);
 
     if (writer_ == nullptr)

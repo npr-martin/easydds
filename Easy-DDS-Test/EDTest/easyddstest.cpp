@@ -17,14 +17,15 @@ EasyDDSTest::EasyDDSTest(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->wgt_monitor->setEnabled(false);
-    ui->pushButton_5->setEnabled(false);
-    ui->pushButton_6->setEnabled(false);
+    ui->lblIP->setVisible(false);
+    ui->lblPort->setVisible(false);
+    ui->leIP->setVisible(false);
+    ui->sbPort->setVisible(false);
 
     buffer = std::make_shared<qtStreamBuf>(this);
     new (&std::cout) std::ostream(buffer.get());
 
-    QStringList labels({"topic", "status", "frequency", "source size"});
+    QStringList labels({"主题", "状态", "频率", "源大小"});
     ui->tableWidget->setColumnCount(labels.size());
     ui->tableWidget->setHorizontalHeaderLabels(labels);
 
@@ -496,4 +497,9 @@ void EasyDDSTest::on_pushButton_6_clicked()
     {
         ckb->setChecked(false);
     }
+}
+
+void EasyDDSTest::on_radioButton_2_toggled(bool checked)
+{
+
 }
