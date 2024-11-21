@@ -614,6 +614,11 @@
        <widget class="QComboBox" name="cmbTransKind">
         <item>
          <property name="text">
+          <string>DEFAULT</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>UDPv4</string>
          </property>
         </item>
