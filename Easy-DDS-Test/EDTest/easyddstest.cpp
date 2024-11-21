@@ -539,7 +539,6 @@ void EasyDDSTest::initInvisible()
 {
     QVector<QWidget*> invisibles{ui->lblIP, ui->leIP,
                 ui->lblPort, ui->sbPort,
-                ui->lblTransKind, ui->cmbTransKind,
                 ui->lblListenIP, ui->sbListenPort,
                 ui->lblListenPort, ui->leListenIP};
 
