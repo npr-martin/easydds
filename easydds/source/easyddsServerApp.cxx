@@ -16,17 +16,14 @@
 
 easyddsServerApp::easyddsServerApp(
         const int &domain_id,
-        const qos_profile_s &qos_profile,
-        const bool &open_monitor,
-        const MONITOR_TOPIC::monitorItems &items,
-        const SERVER::server_config &config)
+        const EASYDDS::easyddsServerConfig &config)
     : participant_(nullptr)
     , matched_(0)
-    , timeout_(config.timeout)
+    , timeout_(config.serverConfig.timeout)
     , start_time_(std::chrono::steady_clock::now())
     , stop_(false)
 {
-    DomainParticipantQos pqos = getServerDomainParticipantQos(open_monitor, items, config);
+    DomainParticipantQos pqos = getServerDomainParticipantQos(config.open_monitor, config.items, config.serverConfig);
     
     // Create Participant
     participant_ = DomainParticipantFactory::get_instance()->create_participant(0, pqos, this);

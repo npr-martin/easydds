@@ -16,21 +16,17 @@ using namespace eprosima::fastdds::dds;
 class easyddsServerApp : public easyddsApplication, public DomainParticipantListener
 {
 public:
-    easyddsServerApp(
-        const int &domain_id = 0,
-        const qos_profile_s &qos_profile = qos_profile_default,
-        const bool &open_monitor = false,
-        const MONITOR_TOPIC::monitorItems &items = MONITOR_TOPIC::monitorItems_default,
-        const SERVER::server_config &config = SERVER::server_config());
+    easyddsServerApp(const int &domain_id = 0,
+                     const EASYDDS::easyddsServerConfig &config = EASYDDS::easyddsServerConfig());
 
     ~easyddsServerApp();
 
     //! Publisher matched method
     void on_participant_discovery(
-            DomainParticipant* participant,
-            fastdds::rtps::ParticipantDiscoveryStatus status,
-            const fastdds::rtps::ParticipantBuiltinTopicData& info,
-            bool& should_be_ignored) override;
+        DomainParticipant *participant,
+        fastdds::rtps::ParticipantDiscoveryStatus status,
+        const fastdds::rtps::ParticipantBuiltinTopicData &info,
+        bool &should_be_ignored) override;
 
     //! Run publisher
     void run() override;
@@ -41,11 +37,10 @@ public:
     bool getIsStopped() override;
 
 private:
-
     //! Return the current state of execution
     bool is_stopped();
 
-    DomainParticipant* participant_;
+    DomainParticipant *participant_;
 
     int16_t matched_;
 

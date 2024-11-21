@@ -17,50 +17,44 @@ using namespace eprosima::fastdds::dds;
 class easyddsClientPublisherApp : public easyddsApplication, public DataWriterListener
 {
 public:
+        easyddsClientPublisherApp(const std::string &topic_name,
+                                  const int &domain_id = 0,
+                                  const EASYDDS::easyddsClientConfig &config = EASYDDS::easyddsClientConfig());
 
-    easyddsClientPublisherApp(
-            const std::string &topic_name,
-            const int &domain_id = 0,
-            const qos_profile_s &qos_profile = qos_profile_default,
-            const bool &open_monitor = false,
-            const MONITOR_TOPIC::monitorItems &items = MONITOR_TOPIC::monitorItems_default,
-            const SERVER::client_config& config = SERVER::client_config());
+        ~easyddsClientPublisherApp();
 
-    ~easyddsClientPublisherApp();
+        //! Publisher matched method
+        void on_publication_matched(
+            DataWriter *writer,
+            const PublicationMatchedStatus &info) override;
 
-    //! Publisher matched method
-    void on_publication_matched(
-            DataWriter* writer,
-            const PublicationMatchedStatus& info) override;
+        //! Run publisher
+        void run() override;
 
-    //! Run publisher
-    void run() override;
+        //! Stop publisher
+        void stop() override;
 
-    //! Stop publisher
-    void stop() override;
+        bool getIsStopped() override;
 
-    bool getIsStopped() override;
-
-     bool send(const std::string &msg) override;
+        bool send(const std::string &msg) override;
 
 private:
+        //! Return the current state of execution
+        bool is_stopped();
 
-    //! Return the current state of execution
-    bool is_stopped();
+        DomainParticipant *participant_;
 
-    DomainParticipant* participant_;
+        Publisher *publisher_;
 
-    Publisher* publisher_;
+        Topic *topic_;
 
-    Topic* topic_;
+        DataWriter *writer_;
 
-    DataWriter* writer_;
+        TypeSupport type_;
 
-    TypeSupport type_;
+        int16_t matched_;
 
-    int16_t matched_;
-
-    std::atomic<bool> stop_;
+        std::atomic<bool> stop_;
 };
 
 #endif // EASYDDS_CLIENT_PUBLIHSER_APP_HPP

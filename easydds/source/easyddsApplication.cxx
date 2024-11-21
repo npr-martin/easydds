@@ -1,67 +1,40 @@
 #include "easyddsApplication.hpp"
 
-#include "easyddsPublisherApp.hpp"
-#include "easyddsSubscriberApp.hpp"
 #include "easyddsClientPublisherApp.hpp"
 #include "easyddsClientSubscriberApp.hpp"
 #include "easyddsServerApp.hpp"
 
-std::shared_ptr<easyddsPublisherApp> easyddsApplication::
-    createPublisher(const std::string &topic_name,
-                    const int &domain_id,
-                    const qos_profile_s &qos_profile,
-                    const bool &open_monitor,
-                    const MONITOR_TOPIC::monitorItems &items)
-{
-    return std::make_shared<easyddsPublisherApp>(topic_name, domain_id, qos_profile, open_monitor, items);
-}
-
-std::shared_ptr<easyddsSubscriberApp> easyddsApplication::
-    createSubscriber(const std::string &topic_name,
-                     const int &domain_id,
-                     const qos_profile_s &qos_profile,
-                     const bool &open_monitor,
-                     const MONITOR_TOPIC::monitorItems &items)
-{
-    return std::make_shared<easyddsSubscriberApp>(topic_name, domain_id, qos_profile, open_monitor, items);
-}
-
 std::shared_ptr<easyddsClientPublisherApp> easyddsApplication::
     createClientPublisher(const std::string &topic_name,
                           const int &domain_id,
-                          const qos_profile_s &qos_profile,
-                          const bool &open_monitor,
-                          const MONITOR_TOPIC::monitorItems &items,
-                          const SERVER::client_config &config)
+                          const EASYDDS::easyddsClientConfig &config)
 {
 
-    return std::make_shared<easyddsClientPublisherApp>(topic_name, domain_id, qos_profile, open_monitor, items, config);
+    return std::make_shared<easyddsClientPublisherApp>(topic_name, domain_id, config);
 }
 
 std::shared_ptr<easyddsClientSubscriberApp> easyddsApplication::
     createClientSubscriber(const std::string &topic_name,
                            const int &domain_id,
-                           const qos_profile_s &qos_profile,
-                           const bool &open_monitor,
-                           const MONITOR_TOPIC::monitorItems &items,
-                           const SERVER::client_config &config)
+                           const EASYDDS::easyddsClientConfig &config)
 {
-    return std::make_shared<easyddsClientSubscriberApp>(topic_name, domain_id, qos_profile, open_monitor, items, config);
+    return std::make_shared<easyddsClientSubscriberApp>(topic_name, domain_id, config);
 }
 
 std::shared_ptr<easyddsServerApp> easyddsApplication::
     createServer(const int &domain_id,
-                 const qos_profile_s &qos_profile,
-                 const bool &open_monitor,
-                 const MONITOR_TOPIC::monitorItems &items,
-                 const SERVER::server_config &config)
+                 const EASYDDS::easyddsServerConfig &config)
 {
-    return std::make_shared<easyddsServerApp>(domain_id, qos_profile, open_monitor, items, config);
+    return std::make_shared<easyddsServerApp>(domain_id, config);
 }
 
-DomainParticipantQos easyddsApplication::getDomainParticipantQos(const bool &monitorEnabled, const MONITOR_TOPIC::monitorItems &items)
+DomainParticipantQos easyddsApplication::getClientDomainParticipantQos(const bool &monitorEnabled,
+                                                                       const EASYDDS::monitorItems &items,
+                                                                       const EASYDDS::client_config &config)
 {
-    DomainParticipantQos pqos = PARTICIPANT_QOS_DEFAULT;
+    DomainParticipantQos pqos;
+
+    // add monitor
     std::string monitorTopic;
 
     if (!monitorEnabled || items)
@@ -74,34 +47,7 @@ DomainParticipantQos easyddsApplication::getDomainParticipantQos(const bool &mon
         {
             if (items & static_cast<uint64_t>(1 << i))
             {
-                monitorTopic += MONITOR_TOPIC::transTopic(static_cast<MONITOR_TOPIC::monitorItems>(1 << i));
-                monitorTopic += ";";
-            }
-        }
-        monitorTopic.pop_back();
-        pqos.properties().properties().emplace_back("fastdds.statistics", monitorTopic);
-    }
-    return pqos;
-}
-
-DomainParticipantQos easyddsApplication::getClientDomainParticipantQos(const bool &monitorEnabled, const MONITOR_TOPIC::monitorItems &items, const SERVER::client_config &config)
-{
-    DomainParticipantQos pqos;
-
-    //add monitor 
-     std::string monitorTopic;
-
-    if (!monitorEnabled || items)
-    {
-        pqos.properties().properties().emplace_back("fastdds.statistics", "");
-    }
-    else
-    {
-        for (int i = 1; i < 16; ++i)
-        {
-            if (items & static_cast<uint64_t>(1 << i))
-            {
-                monitorTopic += MONITOR_TOPIC::transTopic(static_cast<MONITOR_TOPIC::monitorItems>(1 << i));
+                monitorTopic += EASYDDS::transTopic(static_cast<EASYDDS::monitorItems>(1 << i));
                 monitorTopic += ";";
             }
         }
@@ -117,9 +63,9 @@ DomainParticipantQos easyddsApplication::getClientDomainParticipantQos(const boo
     std::string ip_server_address(config.connection_address);
 
     // Check if DNS is required
-    if (!SERVER::is_ip(config.connection_address))
+    if (!EASYDDS::is_ip(config.connection_address))
     {
-        ip_server_address = SERVER::get_ip_from_dns(config.connection_address, config.transport_kind);
+        ip_server_address = EASYDDS::get_ip_from_dns(config.connection_address, config.transport_kind);
     }
 
     if (ip_server_address.empty())
@@ -135,12 +81,12 @@ DomainParticipantQos easyddsApplication::getClientDomainParticipantQos(const boo
 
     switch (config.transport_kind)
     {
-    case SERVER::TransportKind::SHM:
+    case EASYDDS::TransportKind::SHM:
         descriptor = std::make_shared<eprosima::fastdds::rtps::SharedMemTransportDescriptor>();
         server_locator.kind = LOCATOR_KIND_SHM;
         break;
 
-    case SERVER::TransportKind::UDPv4:
+    case EASYDDS::TransportKind::UDPv4:
     {
         auto descriptor_tmp = std::make_shared<eprosima::fastdds::rtps::UDPv4TransportDescriptor>();
         // descriptor_tmp->interfaceWhiteList.push_back(ip_server_address);
@@ -151,7 +97,7 @@ DomainParticipantQos easyddsApplication::getClientDomainParticipantQos(const boo
         break;
     }
 
-    case SERVER::TransportKind::UDPv6:
+    case EASYDDS::TransportKind::UDPv6:
     {
         auto descriptor_tmp = std::make_shared<eprosima::fastdds::rtps::UDPv6TransportDescriptor>();
         // descriptor_tmp->interfaceWhiteList.push_back(ip_server_address);
@@ -162,7 +108,7 @@ DomainParticipantQos easyddsApplication::getClientDomainParticipantQos(const boo
         break;
     }
 
-    case SERVER::TransportKind::TCPv4:
+    case EASYDDS::TransportKind::TCPv4:
     {
         auto descriptor_tmp = std::make_shared<eprosima::fastdds::rtps::TCPv4TransportDescriptor>();
         descriptor_tmp->add_listener_port(0);
@@ -174,7 +120,7 @@ DomainParticipantQos easyddsApplication::getClientDomainParticipantQos(const boo
         break;
     }
 
-    case SERVER::TransportKind::TCPv6:
+    case EASYDDS::TransportKind::TCPv6:
     {
         auto descriptor_tmp = std::make_shared<eprosima::fastdds::rtps::TCPv6TransportDescriptor>();
         descriptor_tmp->add_listener_port(0);
@@ -199,15 +145,14 @@ DomainParticipantQos easyddsApplication::getClientDomainParticipantQos(const boo
 
     // Add descriptor
     pqos.transport().user_transports.push_back(descriptor);
-   
-     std::cout <<
-        "Publisher Participant " << pqos.name() <<
-        " connecting to server <" << server_locator  << "> " <<
-        std::endl;
-        return pqos;
+
+    std::cout << "Publisher Participant " << pqos.name() << " connecting to server <" << server_locator << "> " << std::endl;
+    return pqos;
 }
 
-DomainParticipantQos easyddsApplication::getServerDomainParticipantQos(const bool &monitorEnabled, const MONITOR_TOPIC::monitorItems &items, const SERVER::server_config &config)
+DomainParticipantQos easyddsApplication::getServerDomainParticipantQos(const bool &monitorEnabled,
+                                                                       const EASYDDS::monitorItems &items,
+                                                                       const EASYDDS::server_config &config)
 {
     DomainParticipantQos pqos;
     pqos.name("DS-Server");
@@ -216,9 +161,9 @@ DomainParticipantQos easyddsApplication::getServerDomainParticipantQos(const boo
     std::string ip_listening_address(config.listening_address);
     std::string ip_connection_address(config.connection_address);
     // Check if DNS is required
-    if (!SERVER::is_ip(config.listening_address))
+    if (!EASYDDS::is_ip(config.listening_address))
     {
-        ip_listening_address = SERVER::get_ip_from_dns(config.listening_address, config.transport_kind);
+        ip_listening_address = EASYDDS::get_ip_from_dns(config.listening_address, config.transport_kind);
     }
 
     if (ip_listening_address.empty())
@@ -227,9 +172,9 @@ DomainParticipantQos easyddsApplication::getServerDomainParticipantQos(const boo
     }
 
     // Do the same for connection
-    if (config.is_also_client && !SERVER::is_ip(config.connection_address))
+    if (config.is_also_client && !EASYDDS::is_ip(config.connection_address))
     {
-        ip_connection_address = SERVER::get_ip_from_dns(config.connection_address, config.transport_kind);
+        ip_connection_address = EASYDDS::get_ip_from_dns(config.connection_address, config.transport_kind);
     }
 
     if (config.is_also_client && ip_connection_address.empty())
@@ -248,68 +193,68 @@ DomainParticipantQos easyddsApplication::getServerDomainParticipantQos(const boo
 
     switch (config.transport_kind)
     {
-        case SERVER::TransportKind::SHM:
-            descriptor = std::make_shared<eprosima::fastdds::rtps::SharedMemTransportDescriptor>();
-            listening_locator.kind = LOCATOR_KIND_SHM;
-            connection_locator.kind = LOCATOR_KIND_SHM;
-            break;
+    case EASYDDS::TransportKind::SHM:
+        descriptor = std::make_shared<eprosima::fastdds::rtps::SharedMemTransportDescriptor>();
+        listening_locator.kind = LOCATOR_KIND_SHM;
+        connection_locator.kind = LOCATOR_KIND_SHM;
+        break;
 
-        case SERVER::TransportKind::UDPv4:
-        {
-            auto descriptor_tmp = std::make_shared<eprosima::fastdds::rtps::UDPv4TransportDescriptor>();
-            descriptor = descriptor_tmp;
+    case EASYDDS::TransportKind::UDPv4:
+    {
+        auto descriptor_tmp = std::make_shared<eprosima::fastdds::rtps::UDPv4TransportDescriptor>();
+        descriptor = descriptor_tmp;
 
-            listening_locator.kind = LOCATOR_KIND_UDPv4;
-            eprosima::fastdds::rtps::IPLocator::setIPv4(listening_locator, ip_listening_address);
-            connection_locator.kind = LOCATOR_KIND_UDPv4;
-            eprosima::fastdds::rtps::IPLocator::setIPv4(connection_locator, ip_connection_address);
-            break;
-        }
+        listening_locator.kind = LOCATOR_KIND_UDPv4;
+        eprosima::fastdds::rtps::IPLocator::setIPv4(listening_locator, ip_listening_address);
+        connection_locator.kind = LOCATOR_KIND_UDPv4;
+        eprosima::fastdds::rtps::IPLocator::setIPv4(connection_locator, ip_connection_address);
+        break;
+    }
 
-        case SERVER::TransportKind::UDPv6:
-        {
-            auto descriptor_tmp = std::make_shared<eprosima::fastdds::rtps::UDPv6TransportDescriptor>();
-            descriptor = descriptor_tmp;
+    case EASYDDS::TransportKind::UDPv6:
+    {
+        auto descriptor_tmp = std::make_shared<eprosima::fastdds::rtps::UDPv6TransportDescriptor>();
+        descriptor = descriptor_tmp;
 
-            listening_locator.kind = LOCATOR_KIND_UDPv6;
-            eprosima::fastdds::rtps::IPLocator::setIPv6(listening_locator, ip_listening_address);
-            connection_locator.kind = LOCATOR_KIND_UDPv6;
-            eprosima::fastdds::rtps::IPLocator::setIPv6(connection_locator, ip_connection_address);
-            break;
-        }
+        listening_locator.kind = LOCATOR_KIND_UDPv6;
+        eprosima::fastdds::rtps::IPLocator::setIPv6(listening_locator, ip_listening_address);
+        connection_locator.kind = LOCATOR_KIND_UDPv6;
+        eprosima::fastdds::rtps::IPLocator::setIPv6(connection_locator, ip_connection_address);
+        break;
+    }
 
-        case SERVER::TransportKind::TCPv4:
-        {
-            auto descriptor_tmp = std::make_shared<eprosima::fastdds::rtps::TCPv4TransportDescriptor>();
-            descriptor_tmp->add_listener_port(config.listening_port);
-            descriptor = descriptor_tmp;
+    case EASYDDS::TransportKind::TCPv4:
+    {
+        auto descriptor_tmp = std::make_shared<eprosima::fastdds::rtps::TCPv4TransportDescriptor>();
+        descriptor_tmp->add_listener_port(config.listening_port);
+        descriptor = descriptor_tmp;
 
-            listening_locator.kind = LOCATOR_KIND_TCPv4;
-            eprosima::fastdds::rtps::IPLocator::setLogicalPort(listening_locator, config.listening_port);
-            eprosima::fastdds::rtps::IPLocator::setIPv4(listening_locator, ip_listening_address);
-            connection_locator.kind = LOCATOR_KIND_TCPv4;
-            eprosima::fastdds::rtps::IPLocator::setIPv4(connection_locator, ip_connection_address);
-            eprosima::fastdds::rtps::IPLocator::setLogicalPort(connection_locator, config.connection_port);
-            break;
-        }
+        listening_locator.kind = LOCATOR_KIND_TCPv4;
+        eprosima::fastdds::rtps::IPLocator::setLogicalPort(listening_locator, config.listening_port);
+        eprosima::fastdds::rtps::IPLocator::setIPv4(listening_locator, ip_listening_address);
+        connection_locator.kind = LOCATOR_KIND_TCPv4;
+        eprosima::fastdds::rtps::IPLocator::setIPv4(connection_locator, ip_connection_address);
+        eprosima::fastdds::rtps::IPLocator::setLogicalPort(connection_locator, config.connection_port);
+        break;
+    }
 
-        case SERVER::TransportKind::TCPv6:
-        {
-            auto descriptor_tmp = std::make_shared<eprosima::fastdds::rtps::TCPv6TransportDescriptor>();
-            descriptor_tmp->add_listener_port(config.listening_port);
-            descriptor = descriptor_tmp;
+    case EASYDDS::TransportKind::TCPv6:
+    {
+        auto descriptor_tmp = std::make_shared<eprosima::fastdds::rtps::TCPv6TransportDescriptor>();
+        descriptor_tmp->add_listener_port(config.listening_port);
+        descriptor = descriptor_tmp;
 
-            listening_locator.kind = LOCATOR_KIND_TCPv6;
-            eprosima::fastdds::rtps::IPLocator::setLogicalPort(listening_locator, config.listening_port);
-            eprosima::fastdds::rtps::IPLocator::setIPv6(listening_locator, ip_listening_address);
-            connection_locator.kind = LOCATOR_KIND_TCPv6;
-            eprosima::fastdds::rtps::IPLocator::setIPv6(connection_locator, ip_connection_address);
-            eprosima::fastdds::rtps::IPLocator::setLogicalPort(connection_locator, config.connection_port);
-            break;
-        }
+        listening_locator.kind = LOCATOR_KIND_TCPv6;
+        eprosima::fastdds::rtps::IPLocator::setLogicalPort(listening_locator, config.listening_port);
+        eprosima::fastdds::rtps::IPLocator::setIPv6(listening_locator, ip_listening_address);
+        connection_locator.kind = LOCATOR_KIND_TCPv6;
+        eprosima::fastdds::rtps::IPLocator::setIPv6(connection_locator, ip_connection_address);
+        eprosima::fastdds::rtps::IPLocator::setLogicalPort(connection_locator, config.connection_port);
+        break;
+    }
 
-        default:
-            break;
+    default:
+        break;
     }
 
     // Add descriptor
@@ -317,7 +262,7 @@ DomainParticipantQos easyddsApplication::getServerDomainParticipantQos(const boo
 
     // Set participant as SERVER
     pqos.wire_protocol().builtin.discovery_config.discoveryProtocol =
-            eprosima::fastdds::rtps::DiscoveryProtocol::SERVER;
+        eprosima::fastdds::rtps::DiscoveryProtocol::SERVER;
 
     // Set SERVER's listening locator for PDP
     pqos.wire_protocol().builtin.metatrafficUnicastLocatorList.push_back(listening_locator);
@@ -328,6 +273,6 @@ DomainParticipantQos easyddsApplication::getServerDomainParticipantQos(const boo
         // Add remote SERVER to CLIENT's list of SERVERs
         pqos.wire_protocol().builtin.discovery_config.m_DiscoveryServers.push_back(connection_locator);
     }
-    
+
     return pqos;
 }

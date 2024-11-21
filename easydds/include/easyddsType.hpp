@@ -3,52 +3,56 @@
 #include <fastdds/dds/core/policy/QosPolicies.hpp>
 
 using namespace eprosima::fastdds::dds;
-struct rmw_time_s
+namespace EASYDDS
 {
-    /// Seconds component
-    uint64_t sec;
 
-    /// Nanoseconds component
-    uint64_t nsec;
-};
-
-struct tims_s
-{
-    int32_t sec;
-    uint32_t nsec;
-};
-
-struct qos_profile_s
-{
-    enum HistoryQosPolicyKind history;
-
-    size_t depth;
-
-    enum ReliabilityQosPolicyKind reliability;
-
-    enum DurabilityQosPolicyKind durability;
-
-    struct rmw_time_s deadline;
-
-    struct rmw_time_s lifespan;
-
-    enum LivelinessQosPolicyKind liveliness;
-
-    struct tims_s liveliness_lease_duration;
-};
-static const qos_profile_s qos_profile_default =
+    struct rmw_time_s
     {
-        KEEP_LAST_HISTORY_QOS,
-        20,
-        RELIABLE_RELIABILITY_QOS,
-        VOLATILE_DURABILITY_QOS,
-        {0, 0},
-        {0, 0},
-        MANUAL_BY_PARTICIPANT_LIVELINESS_QOS,
-        {TIME_T_INFINITE_SECONDS, TIME_T_INFINITE_NANOSECONDS}};
+        /// Seconds component
+        uint64_t sec;
 
-namespace MONITOR_TOPIC
-{
+        /// Nanoseconds component
+        uint64_t nsec;
+    };
+
+    struct tims_s
+    {
+        int32_t sec;
+        uint32_t nsec;
+    };
+
+    struct qos_profile_s
+    {
+        enum HistoryQosPolicyKind history;
+
+        size_t depth;
+
+        uint16_t samples;
+
+        enum ReliabilityQosPolicyKind reliability;
+
+        enum DurabilityQosPolicyKind durability;
+
+        struct rmw_time_s deadline;
+
+        struct rmw_time_s lifespan;
+
+        enum LivelinessQosPolicyKind liveliness;
+
+        struct tims_s liveliness_lease_duration;
+    };
+    static const qos_profile_s qos_profile_default =
+        {
+            KEEP_LAST_HISTORY_QOS,
+            20,
+            10,
+            RELIABLE_RELIABILITY_QOS,
+            VOLATILE_DURABILITY_QOS,
+            {0, 0},
+            {0, 0},
+            MANUAL_BY_PARTICIPANT_LIVELINESS_QOS,
+            {TIME_T_INFINITE_SECONDS, TIME_T_INFINITE_NANOSECONDS}};
+
     enum monitorItems : uint64_t
     {
         HISTORY_LATENCY_TOPIC = 1 << 0,
@@ -124,11 +128,10 @@ namespace MONITOR_TOPIC
         return std::string();
     }
 
-}
-namespace SERVER
-{
     enum class TransportKind : uint8_t
     {
+        DATA_SHARING,
+        LARGE_DATA,
         UDPv4,
         UDPv6,
         TCPv4,
@@ -195,6 +198,21 @@ namespace SERVER
 
         return domain_name;
     }
-
+    struct easyddsConfig
+    {
+        qos_profile_s qosProfile = qos_profile_default;
+        bool open_monitor = false;
+        monitorItems items = monitorItems_default;
+        TransportKind kind = TransportKind::UDPv4;
+    };
+    struct easyddsClientConfig : public easyddsConfig
+    {
+        client_config clientConfig;
+    };
+    struct easyddsServerConfig : public easyddsConfig
+    {
+        server_config serverConfig;
+    };
+    
 }
 #endif // EASYDDS_TYPE_H

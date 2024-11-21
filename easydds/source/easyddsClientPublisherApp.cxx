@@ -19,20 +19,12 @@
 easyddsClientPublisherApp::easyddsClientPublisherApp(
     const std::string &topic_name,
     const int &domain_id,
-    const qos_profile_s &qos_profile,
-    const bool &open_monitor,
-    const MONITOR_TOPIC::monitorItems &items,
-    const SERVER::client_config &config)
-    : participant_(nullptr)
-    , publisher_(nullptr)
-    , topic_(nullptr)
-    , writer_(nullptr)
-    , type_(new EmployeePubSubType())
-    , matched_(0)
-    , stop_(false)
+    const EASYDDS::easyddsClientConfig &config)
+    : participant_(nullptr), publisher_(nullptr), topic_(nullptr)
+    , writer_(nullptr), type_(new EmployeePubSubType()), matched_(0), stop_(false)
 {
     // Configure Participant QoS
-    DomainParticipantQos pqos = getClientDomainParticipantQos(open_monitor, items, config);
+    DomainParticipantQos pqos = getClientDomainParticipantQos(config.open_monitor, config.items, config.clientConfig);
 
     // Create Domainparticipant
     participant_ = DomainParticipantFactory::get_instance()->create_participant(0, pqos, nullptr);
@@ -62,7 +54,7 @@ easyddsClientPublisherApp::easyddsClientPublisherApp(
     }
 
     // Create de data writer
-    DataWriterQos wqos = getDataQos<DataWriterQos>(qos_profile, DATAWRITER_QOS_DEFAULT);
+    DataWriterQos wqos = getDataQos<DataWriterQos>(config.qosProfile, DATAWRITER_QOS_DEFAULT);
     writer_ = publisher_->create_datawriter(topic_, wqos, this);
 
     if (writer_ == nullptr)
@@ -84,14 +76,14 @@ easyddsClientPublisherApp::~easyddsClientPublisherApp()
 }
 
 void easyddsClientPublisherApp::on_publication_matched(
-        DataWriter* /*writer*/,
-        const PublicationMatchedStatus& info)
+    DataWriter * /*writer*/,
+    const PublicationMatchedStatus &info)
 {
     if (info.current_count_change == 1)
     {
         matched_ = static_cast<int16_t>(info.current_count);
         std::cout << "Publisher matched." << std::endl;
-        //cv_.notify_one();
+        // cv_.notify_one();
     }
     else if (info.current_count_change == -1)
     {
@@ -128,10 +120,10 @@ bool easyddsClientPublisherApp::getIsStopped()
     return is_stopped();
 }
 
-bool easyddsClientPublisherApp::send(const std::string & msg)
+bool easyddsClientPublisherApp::send(const std::string &msg)
 {
     bool ret = false;
-   
+
     if (!is_stopped())
     {
         Employee sample_(msg);

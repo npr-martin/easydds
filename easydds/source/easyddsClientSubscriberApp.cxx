@@ -21,20 +21,11 @@
 easyddsClientSubscriberApp::easyddsClientSubscriberApp(
     const std::string &topic_name,
     const int &domain_id,
-    const qos_profile_s &qos_profile,
-    const bool &open_monitor,
-    const MONITOR_TOPIC::monitorItems &items,
-    const SERVER::client_config &config)
-    : participant_(nullptr)
-    , subscriber_(nullptr)
-    , topic_(nullptr)
-    , reader_(nullptr)
-    , type_(new EmployeePubSubType())
-    , stop_(false)
-    , m_sampleCount(0)
-    , m_topicName(topic_name)
+    const EASYDDS::easyddsClientConfig &config)
+    : participant_(nullptr), subscriber_(nullptr), topic_(nullptr)
+    , reader_(nullptr), type_(new EmployeePubSubType()), stop_(false), m_sampleCount(0), m_topicName(topic_name)
 {
-    DomainParticipantQos pqos = getClientDomainParticipantQos(open_monitor, items, config);
+    DomainParticipantQos pqos = getClientDomainParticipantQos(config.open_monitor, config.items, config.clientConfig);
     // Create the Domainparticipant
     participant_ = DomainParticipantFactory::get_instance()->create_participant(0, pqos, nullptr,
                     StatusMask::all() >> StatusMask::data_on_readers());
@@ -66,7 +57,7 @@ easyddsClientSubscriberApp::easyddsClientSubscriberApp(
     }
 
     // Create the data reader
-    DataReaderQos rqos = getDataQos<DataReaderQos>(qos_profile, DATAREADER_QOS_DEFAULT);
+    DataReaderQos rqos = getDataQos<DataReaderQos>(config.qosProfile, DATAREADER_QOS_DEFAULT);
     reader_ = subscriber_->create_datareader(topic_, rqos, this);
 
     if (reader_ == nullptr)

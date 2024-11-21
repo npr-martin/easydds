@@ -17,55 +17,51 @@ using namespace eprosima::fastdds::dds;
 class easyddsClientSubscriberApp : public easyddsApplication, public DataReaderListener
 {
 public:
-        easyddsClientSubscriberApp(
-            const std::string &topic_name,
-            const int &domain_id = 0,
-            const qos_profile_s &qos_profile = qos_profile_default,
-            const bool &open_monitor = false,
-            const MONITOR_TOPIC::monitorItems &items = MONITOR_TOPIC::monitorItems_default,
-            const SERVER::client_config &config = SERVER::client_config());
+    easyddsClientSubscriberApp(const std::string &topic_name,
+                               const int &domain_id = 0,
+                               const EASYDDS::easyddsClientConfig &config = EASYDDS::easyddsClientConfig());
 
-        ~easyddsClientSubscriberApp();
+    ~easyddsClientSubscriberApp();
 
-        //! Subscription callback
-        void on_data_available(
-            DataReader *reader) override;
+    //! Subscription callback
+    void on_data_available(
+        DataReader *reader) override;
 
-        //! Subscriber matched method
-        void on_subscription_matched(
-            DataReader *reader,
-            const SubscriptionMatchedStatus &info) override;
+    //! Subscriber matched method
+    void on_subscription_matched(
+        DataReader *reader,
+        const SubscriptionMatchedStatus &info) override;
 
-        //! Run subscriber
-        void run() override;
+    //! Run subscriber
+    void run() override;
 
-        //! Trigger the end of execution
-        void stop() override;
+    //! Trigger the end of execution
+    void stop() override;
 
-        bool getIsStopped() override;
-        
-        void onMessageReceived(const std::function<void(std::string)> &func) override;
+    bool getIsStopped() override;
+
+    void onMessageReceived(const std::function<void(std::string)> &func) override;
 
 private:
-        std::function<void(std::string)> receivedMsg;
-        //! Return the current state of execution
-        bool is_stopped();
+    std::function<void(std::string)> receivedMsg;
+    //! Return the current state of execution
+    bool is_stopped();
 
-        DomainParticipant *participant_;
+    DomainParticipant *participant_;
 
-        Subscriber *subscriber_;
+    Subscriber *subscriber_;
 
-        Topic *topic_;
+    Topic *topic_;
 
-        DataReader *reader_;
+    DataReader *reader_;
 
-        TypeSupport type_;
+    TypeSupport type_;
 
-        std::atomic<bool> stop_;
+    std::atomic<bool> stop_;
 
-        int m_sampleCount;
+    int m_sampleCount;
 
-        std::string m_topicName;
+    std::string m_topicName;
 };
 
 #endif // EASYDDS_CLIENT_SUBSCRIBER_APP_HPP

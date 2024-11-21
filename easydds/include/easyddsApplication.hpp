@@ -17,6 +17,7 @@
 #include <fastdds/rtps/transport/UDPv6TransportDescriptor.hpp>
 #include "easyddsType.hpp"
 
+using namespace EASYDDS;
 class easyddsPublisherApp;
 class easyddsSubscriberApp;
 class easyddsClientPublisherApp;
@@ -40,58 +41,33 @@ public:
     
     virtual bool getIsStopped() = 0;
 
-    static std::shared_ptr<easyddsPublisherApp> createPublisher(
-        const std::string &topic_name,
-        const int &domain_id = 0,
-        const qos_profile_s &qos_profile = qos_profile_default,
-        const bool &open_monitor = false,
-        const MONITOR_TOPIC::monitorItems &items = MONITOR_TOPIC::monitorItems_default);
-
-    static std::shared_ptr<easyddsSubscriberApp> createSubscriber(
-        const std::string &topic_name,
-        const int &domain_id = 0,
-        const qos_profile_s &qos_profile = qos_profile_default,
-        const bool &open_monitor = false,
-        const MONITOR_TOPIC::monitorItems &items = MONITOR_TOPIC::monitorItems_default);
-    
     static std::shared_ptr<easyddsClientPublisherApp> createClientPublisher(
         const std::string &topic_name,
         const int &domain_id = 0,
-        const qos_profile_s &qos_profile = qos_profile_default,
-        const bool &open_monitor = false,
-        const MONITOR_TOPIC::monitorItems &items = MONITOR_TOPIC::monitorItems_default,
-        const SERVER::client_config &config = SERVER::client_config());
+        const EASYDDS::easyddsClientConfig &config = EASYDDS::easyddsClientConfig());
 
     static std::shared_ptr<easyddsClientSubscriberApp> createClientSubscriber(  
         const std::string &topic_name,
         const int &domain_id = 0,
-        const qos_profile_s &qos_profile = qos_profile_default,
-        const bool &open_monitor = false,
-        const MONITOR_TOPIC::monitorItems &items = MONITOR_TOPIC::monitorItems_default,
-        const SERVER::client_config &config = SERVER::client_config());
+        const EASYDDS::easyddsClientConfig &config = EASYDDS::easyddsClientConfig());
 
     static std::shared_ptr<easyddsServerApp> createServer(  
         const int &domain_id = 0,
-        const qos_profile_s &qos_profile = qos_profile_default,
-        const bool &open_monitor = false,
-        const MONITOR_TOPIC::monitorItems &items = MONITOR_TOPIC::monitorItems_default,
-        const SERVER::server_config &config  = SERVER::server_config());
+        const EASYDDS::easyddsServerConfig &config = EASYDDS::easyddsServerConfig());
 
 
 
 protected:
-    DomainParticipantQos getDomainParticipantQos(const bool &monitorEnabled, const MONITOR_TOPIC::monitorItems &items);
-    
-    DomainParticipantQos getClientDomainParticipantQos(const bool &monitorEnabled, const MONITOR_TOPIC::monitorItems &items, const SERVER::client_config &config);
+    DomainParticipantQos getClientDomainParticipantQos(const bool &monitorEnabled, const EASYDDS::monitorItems &items, const EASYDDS::client_config &config);
    
-    DomainParticipantQos getServerDomainParticipantQos(const bool &monitorEnabled, const MONITOR_TOPIC::monitorItems &items, const SERVER::server_config &config);
+    DomainParticipantQos getServerDomainParticipantQos(const bool &monitorEnabled, const EASYDDS::monitorItems &items, const EASYDDS::server_config &config);
    
     template <typename T>
     T getDataQos(const qos_profile_s &qos_profile, T defaultValue);
 };
 
 template <typename T>
-T easyddsApplication::getDataQos(const qos_profile_s &qos_profile, T defaultValue)
+T easyddsApplication::getDataQos(const EASYDDS::qos_profile_s &qos_profile, T defaultValue)
 {
     T qos = defaultValue;
     qos.history().kind = qos_profile.history;
@@ -106,6 +82,16 @@ T easyddsApplication::getDataQos(const qos_profile_s &qos_profile, T defaultValu
     qos.liveliness().lease_duration.seconds = qos_profile.liveliness_lease_duration.sec;
     qos.liveliness().lease_duration.nanosec = qos_profile.liveliness_lease_duration.nsec;
     qos.liveliness().announcement_period = {TIME_T_INFINITE_SECONDS, TIME_T_INFINITE_NANOSECONDS};
+
+    uint32_t max_samples = qos_profile.samples;
+    if (max_samples == 0)
+    {
+        max_samples = DATAWRITER_QOS_DEFAULT.resource_limits().max_samples_per_instance;
+    }
+
+     qos.resource_limits().max_samples_per_instance = max_samples;
+    qos.resource_limits().max_samples = qos.resource_limits().max_instances * max_samples;
+
     return qos;
 }
 
