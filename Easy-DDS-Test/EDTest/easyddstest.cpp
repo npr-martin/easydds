@@ -404,6 +404,10 @@ TransportKind EasyDDSTest::getCurKind()
     {
         return TransportKind::TCPv6;
     }
+    else if("UDPv4" == kind)
+    {
+        return TransportKind::UDPv4;
+    }
     else if("UDPv6" == kind)
     {
         return TransportKind::UDPv6;
@@ -417,7 +421,7 @@ TransportKind EasyDDSTest::getCurKind()
         return TransportKind::LARGE_DATA;
     }
 
-    return TransportKind::UDPv4;
+    return TransportKind::DEFAULT;
 }
 
 easyddsClientConfig EasyDDSTest::getEasyConfig()

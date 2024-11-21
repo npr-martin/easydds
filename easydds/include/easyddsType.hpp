@@ -5,16 +5,6 @@
 using namespace eprosima::fastdds::dds;
 namespace EASYDDS
 {
-
-    struct rmw_time_s
-    {
-        /// Seconds component
-        uint64_t sec;
-
-        /// Nanoseconds component
-        uint64_t nsec;
-    };
-
     struct tims_s
     {
         int32_t sec;
@@ -33,9 +23,9 @@ namespace EASYDDS
 
         enum DurabilityQosPolicyKind durability;
 
-        struct rmw_time_s deadline;
+        struct tims_s deadline;
 
-        struct rmw_time_s lifespan;
+        struct tims_s lifespan;
 
         enum LivelinessQosPolicyKind liveliness;
 
@@ -48,10 +38,11 @@ namespace EASYDDS
             10,
             RELIABLE_RELIABILITY_QOS,
             VOLATILE_DURABILITY_QOS,
-            {0, 0},
-            {0, 0},
+            {TIME_T_INFINITE_SECONDS, TIME_T_INFINITE_NANOSECONDS},
+            {TIME_T_INFINITE_SECONDS, TIME_T_INFINITE_NANOSECONDS},
             MANUAL_BY_PARTICIPANT_LIVELINESS_QOS,
-            {TIME_T_INFINITE_SECONDS, TIME_T_INFINITE_NANOSECONDS}};
+            {TIME_T_INFINITE_SECONDS, TIME_T_INFINITE_NANOSECONDS}
+        };
 
     enum monitorItems : uint64_t
     {
@@ -137,6 +128,7 @@ namespace EASYDDS
         TCPv4,
         TCPv6,
         SHM,
+        DEFAULT
     };
     struct client_config
     {
