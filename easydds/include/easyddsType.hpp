@@ -121,6 +121,7 @@ namespace MONITOR_TOPIC
         default:
             break;
         }
+        return std::string();
     }
 
 }
