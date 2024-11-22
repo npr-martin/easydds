@@ -103,6 +103,8 @@ private:
     std::string m_monitorTopic;
     std::string m_kindName;
 
+    qos_profile_s m_qosProfile;
+
     //    TextEditStreamBuf streamBuffer;
 };
 #endif // EASYDDSTEST_H

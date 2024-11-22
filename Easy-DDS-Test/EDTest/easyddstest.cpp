@@ -127,6 +127,7 @@ void EasyDDSTest::createApp(int domain_id, const QString &topicName, int frequen
         createServer(domain_id, curRow, addRow);
     }
 }
+
 void EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int frequency,
                                     std::string source, int curRow, bool addRow)
 {
@@ -595,10 +596,30 @@ void EasyDDSTest::on_pushButton_6_clicked()
 void EasyDDSTest::on_radioButton_2_toggled(bool checked)
 {
     QStringList serverList{"server"};
+    QStringList deaultList{"DEFAULT","UDPv4","UDPv6","TCPv4",
+                           "TCPv6","SHM","DATA_SHARING","LARGE_DATA"};
+    QStringList discoverList{"UDPv4","UDPv6","TCPv4",
+                             "TCPv6","SHM"};
+    QString curTransKind = ui->cmbTransKind->currentText();
+
+    std::function<void(QStringList, QString)> changeList =
+            [=](QStringList list, QString curText)
+    {
+        ui->cmbTransKind->blockSignals(true);
+        ui->cmbTransKind->clear();
+        ui->cmbTransKind->addItems(list);
+        if(list.contains(curText))
+        {
+            ui->cmbTransKind->setCurrentText(curText);
+        }
+        ui->cmbTransKind->blockSignals(false);
+        ui->cmbTransKind->currentTextChanged(ui->cmbTransKind->currentText());
+    };
 
     if(checked)
     {
         ui->comboBox->addItems(serverList);
+        changeList(discoverList, curTransKind);
     }
     else
     {
@@ -607,6 +628,7 @@ void EasyDDSTest::on_radioButton_2_toggled(bool checked)
             ui->comboBox->removeItem(2);
         }
         initInvisible();
+        changeList(deaultList, curTransKind);
     }
 }
 
