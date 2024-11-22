@@ -71,6 +71,16 @@ easyddsClientSubscriberApp::easyddsClientSubscriberApp(
 
     // Create the data reader
     DataReaderQos rqos = getDataQos<DataReaderQos>(config.qosProfile, DATAREADER_QOS_DEFAULT);
+
+    if (config.clientConfig.transport_kind == EASYDDS::TransportKind::DATA_SHARING)
+    {
+        rqos.data_sharing().automatic();
+    }
+    else
+    {
+        rqos.data_sharing().off();
+    }
+
     reader_ = subscriber_->create_datareader(topic_, rqos, this);
 
     if (reader_ == nullptr)

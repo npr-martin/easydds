@@ -78,7 +78,7 @@ protected:
                                                     const EASYDDS::client_config &config,
                                                     const uint32_t &samples);
 
-    void setMonitorContent(DomainParticipantQos pqos, const bool &monitorEnabled, const EASYDDS::monitorItems &items);
+    void setMonitorContent(DomainParticipantQos &pqos, const bool &monitorEnabled, const EASYDDS::monitorItems &items);
    
     template <typename T>
     T getDataQos(const qos_profile_s &qos_profile, T defaultValue);
