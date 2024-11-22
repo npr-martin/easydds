@@ -10,6 +10,7 @@
 #include <QEventLoop>
 #include <thread>
 #include <iostream>
+#include "qosdialog.h"
 
 EasyDDSTest::EasyDDSTest(QWidget *parent)
     : QMainWindow(parent)
@@ -428,7 +429,7 @@ TransportKind EasyDDSTest::getCurKind()
 easyddsClientConfig EasyDDSTest::getEasyConfig()
 {
     easyddsClientConfig cc;
-    cc.qosProfile = qos_profile_default;
+    cc.qosProfile = m_qosProfile;
     cc.open_monitor = ui->ckb_all->isChecked();
     cc.items = insertMonitorQos();
     cc.clientConfig = getClientConfig();
@@ -661,4 +662,13 @@ void EasyDDSTest::initInvisible()
                 ui->lblTimeout, ui->sbTimeout};
 
     setWidgetsVisible(invisibles, false);
+}
+
+void EasyDDSTest::on_pushButton_7_clicked()
+{
+    QosDialog dialog(m_qosProfile, this);
+    if(dialog.exec())
+    {
+        m_qosProfile = dialog.getQoSProfile();
+    }
 }

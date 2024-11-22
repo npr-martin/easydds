@@ -45,6 +45,8 @@ private slots:
 
     void on_comboBox_currentTextChanged(const QString &arg1);
 
+    void on_pushButton_7_clicked();
+
 private:
     void initInvisible();
 
@@ -103,7 +105,7 @@ private:
     std::string m_monitorTopic;
     std::string m_kindName;
 
-    qos_profile_s m_qosProfile;
+    qos_profile_s m_qosProfile = qos_profile_default;
 
     //    TextEditStreamBuf streamBuffer;
 };

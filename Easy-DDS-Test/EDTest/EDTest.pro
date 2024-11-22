@@ -18,14 +18,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     main.cpp \
     easyddstest.cpp \
+    qosdialog.cpp \
     qtstreambuf.cpp
 
 HEADERS += \
     easyddstest.h \
+    qosdialog.h \
     qtstreambuf.h
 
 FORMS += \
-    easyddstest.ui
+    easyddstest.ui \
+    qosdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
