@@ -435,13 +435,13 @@ DomainParticipantQos easyddsApplication::getSubDomainParticipantQos(const bool &
     return pqos;
 }
 
-void easyddsApplication::setMonitorContent(DomainParticipantQos pqos, const bool &monitorEnabled, const EASYDDS::monitorItems &items)
+void easyddsApplication::setMonitorContent(DomainParticipantQos &pqos, const bool &monitorEnabled, const EASYDDS::monitorItems &items)
 {
 
     // add monitor
     std::string monitorTopic;
 
-    if (!monitorEnabled || items)
+    if (!monitorEnabled || !items)
     {
         pqos.properties().properties().emplace_back("fastdds.statistics", "");
     }
@@ -456,6 +456,7 @@ void easyddsApplication::setMonitorContent(DomainParticipantQos pqos, const bool
             }
         }
         monitorTopic.pop_back();
+        std::cout << "the monitor topic is: " << monitorTopic << std::endl;
         pqos.properties().properties().emplace_back("fastdds.statistics", monitorTopic);
     }
 }

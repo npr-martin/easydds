@@ -68,6 +68,16 @@ easyddsClientPublisherApp::easyddsClientPublisherApp(
 
     // Create de data writer
     DataWriterQos wqos = getDataQos<DataWriterQos>(config.qosProfile, DATAWRITER_QOS_DEFAULT);
+
+    if (config.clientConfig.transport_kind == EASYDDS::TransportKind::DATA_SHARING)
+    {
+        wqos.data_sharing().automatic();
+    }
+    else
+    {
+        wqos.data_sharing().off();
+    }
+
     writer_ = publisher_->create_datawriter(topic_, wqos, this);
 
     if (writer_ == nullptr)
