@@ -15,6 +15,10 @@ EasyDDSTest::EasyDDSTest(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::EasyDDSTest)
 {
+    QIcon appIcon(":/EDTest.png");
+
+    // 设置应用程序图标
+    this->setWindowIcon(appIcon);
     ui->setupUi(this);
 
     initInvisible();
@@ -636,7 +640,7 @@ void EasyDDSTest::on_comboBox_currentTextChanged(const QString &arg1)
 {
     bool vis = arg1.contains("publisher") ? true : false;
     setWidgetsVisible({ui->sbFrequency, ui->lineEdit_2, ui->pushButton_4,
-                      ui->label_5, ui->label_6}, vis);
+                       ui->label_5, ui->label_6}, vis);
 
     bool isServer = arg1.contains("server");
     setWidgetsVisible({ui->lblTopic, ui->leTopic, ui->lblNum, ui->sbNum},

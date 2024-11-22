@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>duicuo.svg</file>
         <file>duicuo-.svg</file>
+        <file>EDTest.png</file>
     </qresource>
 </RCC>
