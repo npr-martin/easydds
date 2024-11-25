@@ -455,6 +455,11 @@ client_config EasyDDSTest::getClientConfig()
 easyddsServerConfig EasyDDSTest::getEasyServerConfig()
 {
     easyddsServerConfig sc;
+    sc.qosProfile = m_qosProfile;
+    sc.serverConfig = getServerConfig();
+    sc.open_monitor = ui->ckb_all->isChecked();
+    sc.items = insertMonitorQos();
+    sc.useDiscoveryServer = ui->radioButton_2->isChecked();
 
     return sc;
 }

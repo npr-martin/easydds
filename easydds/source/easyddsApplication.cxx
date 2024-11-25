@@ -4,6 +4,8 @@
 #include "easyddsClientSubscriberApp.hpp"
 #include "easyddsServerApp.hpp"
 
+#include "fastdds/dds/log/Log.hpp"
+
 std::shared_ptr<easyddsClientPublisherApp> easyddsApplication::
     createClientPublisher(const std::string &topic_name,
                           const int &domain_id,
