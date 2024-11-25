@@ -350,7 +350,7 @@ if(CMAKE_BUILD_TYPE MATCHES "^([Dd][Ee][Bb][Uu][Gg])$"  # single config generato
    OR ("Debug" IN_LIST CMAKE_CONFIGURATION_TYPES))      # multi config generator
     option(LOG_NO_INFO ${LOG_NO_INFO_HELP} OFF)
 else()
-    option(LOG_NO_INFO ${LOG_NO_INFO_HELP} ON)
+    option(LOG_NO_INFO ${LOG_NO_INFO_HELP} OFF)
 endif()
 unset(LOG_NO_INFO_HELP)
 
@@ -363,7 +363,7 @@ option(ENABLE_OLD_LOG_MACROS "Compile logInfo, logWarning and logError macros" O
 cmake_dependent_option(
     FASTDDS_ENFORCE_LOG_INFO
     "The LOG_NO_INFO option must be enforced regardless of selected configuration"
-    OFF
+    ON
     "NOT LOG_NO_INFO"
     OFF)
 
