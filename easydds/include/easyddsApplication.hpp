@@ -4,6 +4,8 @@
 #include <atomic>
 #include <memory>
 #include <string>
+#include <chrono>
+#include <iomanip>
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
 #include <fastdds/dds/publisher/DataWriter.hpp>
@@ -82,6 +84,10 @@ protected:
    
     template <typename T>
     T getDataQos(const qos_profile_s &qos_profile, T defaultValue);
+
+    void printCurrentTime(const std::chrono::_V2::system_clock::time_point &now);
+
+    std::string getCurTimeStr(const std::chrono::_V2::system_clock::time_point &now);
 };
 
 template <typename T>

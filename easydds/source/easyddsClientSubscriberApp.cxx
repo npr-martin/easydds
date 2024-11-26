@@ -22,11 +22,10 @@ easyddsClientSubscriberApp::easyddsClientSubscriberApp(
     const std::string &topic_name,
     const int &domain_id,
     const EASYDDS::easyddsClientConfig &config)
-    : participant_(nullptr), subscriber_(nullptr), topic_(nullptr)
-    , reader_(nullptr), type_(new EmployeePubSubType()), stop_(false), m_sampleCount(0), m_topicName(topic_name)
+    : participant_(nullptr), subscriber_(nullptr), topic_(nullptr), reader_(nullptr), type_(new EmployeePubSubType()), stop_(false), m_sampleCount(0), m_topicName(topic_name)
 {
     DomainParticipantQos pqos;
-    if(config.useDiscoveryServer)
+    if (config.useDiscoveryServer)
     {
         pqos = getClientDomainParticipantQos(config.open_monitor, config.items, config.clientConfig);
     }
@@ -36,12 +35,14 @@ easyddsClientSubscriberApp::easyddsClientSubscriberApp(
     }
 
     // Create the Domainparticipant
-     auto factory = DomainParticipantFactory::get_instance();
+    auto factory = DomainParticipantFactory::get_instance();
+
     LibrarySettings library_settings;
     library_settings.intraprocess_delivery = IntraprocessDeliveryType::INTRAPROCESS_OFF;
     factory->set_library_settings(library_settings);
+
     participant_ = factory->create_participant(0, pqos, nullptr,
-                    StatusMask::all() >> StatusMask::data_on_readers());
+                                               StatusMask::all() >> StatusMask::data_on_readers());
 
     if (participant_ == nullptr)
     {
@@ -102,8 +103,8 @@ easyddsClientSubscriberApp::~easyddsClientSubscriberApp()
 }
 
 void easyddsClientSubscriberApp::on_subscription_matched(
-        DataReader* /*reader*/,
-        const SubscriptionMatchedStatus& info)
+    DataReader * /*reader*/,
+    const SubscriptionMatchedStatus &info)
 {
     if (info.current_count_change == 1)
     {
@@ -121,7 +122,7 @@ void easyddsClientSubscriberApp::on_subscription_matched(
 }
 
 void easyddsClientSubscriberApp::on_data_available(
-        DataReader* reader)
+    DataReader *reader)
 {
     Employee sample_;
     SampleInfo info;
@@ -129,9 +130,21 @@ void easyddsClientSubscriberApp::on_data_available(
     {
         if ((info.instance_state == ALIVE_INSTANCE_STATE) && info.valid_data)
         {
+
+            uint64_t duration_time = 0;
+            auto now = std::chrono::high_resolution_clock::now();
+
+            if (sample_.text().length() > 16)
+            {
+                auto duration = now.time_since_epoch();
+                uint64_t microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+                uint64_t start_time = std::stoull(sample_.text().substr(0, 16));
+                duration_time = microseconds - start_time;
+            }
             std::string printInfo = "Send [topic: " + m_topicName + "] Sample: " + std::to_string(m_sampleCount++) + "  \n";
             receivedMsg(printInfo);
-            std::cout << "sample received." << std::endl;
+            std::cout << "sample received duration is " << duration_time / 1000.0  << "(ms)" << std::endl
+                      << "the received time is " << getCurTimeStr(now) << std::endl;
         }
         else
         {

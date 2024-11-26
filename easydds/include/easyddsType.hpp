@@ -74,6 +74,9 @@ namespace EASYDDS
         case NETWORK_LATENCY_TOPIC:
             return "NETWORK_LATENCY_TOPIC";
             break;
+        case DATA_COUNT_TOPIC:
+            return "DATA_COUNT_TOPIC";
+            break;
         case PUBLICATION_THROUGHPUT_TOPIC:
             return "PUBLICATION_THROUGHPUT_TOPIC";
             break;

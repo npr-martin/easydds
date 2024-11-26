@@ -36,7 +36,7 @@ DomainParticipantQos easyddsApplication::getClientDomainParticipantQos(const boo
     DomainParticipantQos pqos = PARTICIPANT_QOS_DEFAULT;
 
     setMonitorContent(pqos, monitorEnabled, items);
-    
+
     pqos.name("DS-Client_pub");
     pqos.transport().use_builtin_transports = false;
 
@@ -265,84 +265,84 @@ DomainParticipantQos easyddsApplication::getPubDomainParticipantQos(const bool &
 
     switch (config.transport_kind)
     {
-        case EASYDDS::TransportKind::SHM:
-        case EASYDDS::TransportKind::DATA_SHARING:
+    case EASYDDS::TransportKind::SHM:
+    case EASYDDS::TransportKind::DATA_SHARING:
+    {
+        std::shared_ptr<SharedMemTransportDescriptor> shm_transport_ =
+            std::make_shared<SharedMemTransportDescriptor>();
+        shm_transport_->segment_size(shm_transport_->max_message_size() * max_samples);
+        pqos.transport().user_transports.push_back(shm_transport_);
+        break;
+    }
+    case EASYDDS::TransportKind::LARGE_DATA:
+    {
+        // Large Data is a builtin transport
+        pqos.transport().use_builtin_transports = true;
+        pqos.setup_transports(BuiltinTransports::LARGE_DATA);
+        break;
+    }
+    case EASYDDS::TransportKind::TCPv4:
+    {
+        std::shared_ptr<TCPv4TransportDescriptor> tcp_v4_transport_ = std::make_shared<TCPv4TransportDescriptor>();
+        pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
+        pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
+        tcp_v4_transport_->sendBufferSize = 0;
+        tcp_v4_transport_->receiveBufferSize = 0;
+        std::string tcp_ip_address = "127.0.0.1";
+        if (!config.connection_address.empty())
         {
-            std::shared_ptr<SharedMemTransportDescriptor> shm_transport_ =
-                    std::make_shared<SharedMemTransportDescriptor>();
-            shm_transport_->segment_size(shm_transport_->max_message_size() * max_samples);
-            pqos.transport().user_transports.push_back(shm_transport_);
-            break;
+            tcp_ip_address = config.connection_address;
         }
-        case EASYDDS::TransportKind::LARGE_DATA:
+        // Set unicast locators
+        Locator_t tcp_v4_locator_;
+        tcp_v4_locator_.kind = LOCATOR_KIND_TCPv4;
+        IPLocator::setIPv4(tcp_v4_locator_, tcp_ip_address);
+        IPLocator::setPhysicalPort(tcp_v4_locator_, 5100);
+        pqos.wire_protocol().builtin.metatrafficUnicastLocatorList.push_back(tcp_v4_locator_);
+        pqos.wire_protocol().default_unicast_locator_list.push_back(tcp_v4_locator_);
+        tcp_v4_transport_->set_WAN_address(tcp_ip_address);
+        tcp_v4_transport_->add_listener_port(5100);
+        pqos.transport().user_transports.push_back(tcp_v4_transport_);
+        break;
+    }
+    case EASYDDS::TransportKind::TCPv6:
+    {
+        std::shared_ptr<TCPv6TransportDescriptor> tcp_v6_transport_ = std::make_shared<TCPv6TransportDescriptor>();
+        pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
+        pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
+        tcp_v6_transport_->sendBufferSize = 0;
+        tcp_v6_transport_->receiveBufferSize = 0;
+        std::string tcp_ip_address = "::1";
+        if (!config.connection_address.empty())
         {
-            // Large Data is a builtin transport
-            pqos.transport().use_builtin_transports = true;
-            pqos.setup_transports(BuiltinTransports::LARGE_DATA);
-            break;
+            tcp_ip_address = config.connection_address;
         }
-        case EASYDDS::TransportKind::TCPv4:
-        {
-            std::shared_ptr<TCPv4TransportDescriptor> tcp_v4_transport_ = std::make_shared<TCPv4TransportDescriptor>();
-            pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
-            pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
-            tcp_v4_transport_->sendBufferSize = 0;
-            tcp_v4_transport_->receiveBufferSize = 0;
-            std::string tcp_ip_address = "127.0.0.1";
-            if (!config.connection_address.empty())
-            {
-                tcp_ip_address = config.connection_address;
-            }
-            // Set unicast locators
-            Locator_t tcp_v4_locator_;
-            tcp_v4_locator_.kind = LOCATOR_KIND_TCPv4;
-            IPLocator::setIPv4(tcp_v4_locator_, tcp_ip_address);
-            IPLocator::setPhysicalPort(tcp_v4_locator_, 5100);
-            pqos.wire_protocol().builtin.metatrafficUnicastLocatorList.push_back(tcp_v4_locator_);
-            pqos.wire_protocol().default_unicast_locator_list.push_back(tcp_v4_locator_);
-            tcp_v4_transport_->set_WAN_address(tcp_ip_address);
-            tcp_v4_transport_->add_listener_port(5100);
-            pqos.transport().user_transports.push_back(tcp_v4_transport_);
-            break;
-        }
-        case EASYDDS::TransportKind::TCPv6:
-        {
-            std::shared_ptr<TCPv6TransportDescriptor> tcp_v6_transport_ = std::make_shared<TCPv6TransportDescriptor>();
-            pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
-            pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
-            tcp_v6_transport_->sendBufferSize = 0;
-            tcp_v6_transport_->receiveBufferSize = 0;
-            std::string tcp_ip_address = "::1";
-            if (!config.connection_address.empty())
-            {
-                tcp_ip_address = config.connection_address;
-            }
-            // Set unicast locators
-            Locator_t tcp_v6_locator_;
-            tcp_v6_locator_.kind = LOCATOR_KIND_TCPv6;
-            IPLocator::setIPv6(tcp_v6_locator_, tcp_ip_address);
-            IPLocator::setPhysicalPort(tcp_v6_locator_, 5100);
-            pqos.wire_protocol().builtin.metatrafficUnicastLocatorList.push_back(tcp_v6_locator_);
-            pqos.wire_protocol().default_unicast_locator_list.push_back(tcp_v6_locator_);
-            tcp_v6_transport_->add_listener_port(5100);
-            pqos.transport().user_transports.push_back(tcp_v6_transport_);
-            break;
-        }
-        case EASYDDS::TransportKind::UDPv4:
-        {
-            pqos.transport().user_transports.push_back(std::make_shared<UDPv4TransportDescriptor>());
-            break;
-        }
-        case EASYDDS::TransportKind::UDPv6:
-        {
-            pqos.transport().user_transports.push_back(std::make_shared<UDPv6TransportDescriptor>());
-            break;
-        }
-        default:
-        {
-            pqos.transport().use_builtin_transports = true;
-            break;
-        }
+        // Set unicast locators
+        Locator_t tcp_v6_locator_;
+        tcp_v6_locator_.kind = LOCATOR_KIND_TCPv6;
+        IPLocator::setIPv6(tcp_v6_locator_, tcp_ip_address);
+        IPLocator::setPhysicalPort(tcp_v6_locator_, 5100);
+        pqos.wire_protocol().builtin.metatrafficUnicastLocatorList.push_back(tcp_v6_locator_);
+        pqos.wire_protocol().default_unicast_locator_list.push_back(tcp_v6_locator_);
+        tcp_v6_transport_->add_listener_port(5100);
+        pqos.transport().user_transports.push_back(tcp_v6_transport_);
+        break;
+    }
+    case EASYDDS::TransportKind::UDPv4:
+    {
+        pqos.transport().user_transports.push_back(std::make_shared<UDPv4TransportDescriptor>());
+        break;
+    }
+    case EASYDDS::TransportKind::UDPv6:
+    {
+        pqos.transport().user_transports.push_back(std::make_shared<UDPv6TransportDescriptor>());
+        break;
+    }
+    default:
+    {
+        pqos.transport().use_builtin_transports = true;
+        break;
+    }
     }
     return pqos;
 }
@@ -368,71 +368,71 @@ DomainParticipantQos easyddsApplication::getSubDomainParticipantQos(const bool &
     pqos.transport().use_builtin_transports = false;
     switch (config.transport_kind)
     {
-        case EASYDDS::TransportKind::SHM:
-        case EASYDDS::TransportKind::DATA_SHARING:
+    case EASYDDS::TransportKind::SHM:
+    case EASYDDS::TransportKind::DATA_SHARING:
+    {
+        std::shared_ptr<SharedMemTransportDescriptor> shm_transport_ =
+            std::make_shared<SharedMemTransportDescriptor>();
+        shm_transport_->segment_size(shm_transport_->max_message_size() * max_samples);
+        pqos.transport().user_transports.push_back(shm_transport_);
+        break;
+    }
+    case EASYDDS::TransportKind::LARGE_DATA:
+    {
+        // Large Data is a builtin transport
+        pqos.transport().use_builtin_transports = true;
+        pqos.setup_transports(BuiltinTransports::LARGE_DATA);
+        break;
+    }
+    case EASYDDS::TransportKind::TCPv4:
+    {
+        Locator tcp_v4_initial_peers_locator_;
+        tcp_v4_initial_peers_locator_.kind = LOCATOR_KIND_TCPv4;
+        tcp_v4_initial_peers_locator_.port = 5100;
+        std::string tcp_ip_address = "127.0.0.1";
+        if (!config.connection_address.empty())
         {
-            std::shared_ptr<SharedMemTransportDescriptor> shm_transport_ =
-                    std::make_shared<SharedMemTransportDescriptor>();
-            shm_transport_->segment_size(shm_transport_->max_message_size() * max_samples);
-            pqos.transport().user_transports.push_back(shm_transport_);
-            break;
+            tcp_ip_address = config.connection_address;
         }
-        case EASYDDS::TransportKind::LARGE_DATA:
+        IPLocator::setIPv4(tcp_v4_initial_peers_locator_, tcp_ip_address);
+        pqos.wire_protocol().builtin.initialPeersList.push_back(tcp_v4_initial_peers_locator_);
+        pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
+        pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
+        pqos.transport().user_transports.push_back(std::make_shared<TCPv4TransportDescriptor>());
+        break;
+    }
+    case EASYDDS::TransportKind::TCPv6:
+    {
+        Locator tcp_v6_initial_peers_locator_;
+        tcp_v6_initial_peers_locator_.kind = LOCATOR_KIND_TCPv6;
+        tcp_v6_initial_peers_locator_.port = 5100;
+        std::string tcp_ip_address = "::1";
+        if (!config.connection_address.empty())
         {
-            // Large Data is a builtin transport
-            pqos.transport().use_builtin_transports = true;
-            pqos.setup_transports(BuiltinTransports::LARGE_DATA);
-            break;
+            tcp_ip_address = config.connection_address;
         }
-        case EASYDDS::TransportKind::TCPv4:
-        {
-            Locator tcp_v4_initial_peers_locator_;
-            tcp_v4_initial_peers_locator_.kind = LOCATOR_KIND_TCPv4;
-            tcp_v4_initial_peers_locator_.port = 5100;
-            std::string tcp_ip_address = "127.0.0.1";
-            if (!config.connection_address.empty())
-            {
-                tcp_ip_address = config.connection_address;
-            }
-            IPLocator::setIPv4(tcp_v4_initial_peers_locator_, tcp_ip_address);
-            pqos.wire_protocol().builtin.initialPeersList.push_back(tcp_v4_initial_peers_locator_);
-            pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
-            pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
-            pqos.transport().user_transports.push_back(std::make_shared<TCPv4TransportDescriptor>());
-            break;
-        }
-        case EASYDDS::TransportKind::TCPv6:
-        {
-            Locator tcp_v6_initial_peers_locator_;
-            tcp_v6_initial_peers_locator_.kind = LOCATOR_KIND_TCPv6;
-            tcp_v6_initial_peers_locator_.port = 5100;
-            std::string tcp_ip_address = "::1";
-            if (!config.connection_address.empty())
-            {
-                tcp_ip_address = config.connection_address;
-            }
-            IPLocator::setIPv6(tcp_v6_initial_peers_locator_, tcp_ip_address);
-            pqos.wire_protocol().builtin.initialPeersList.push_back(tcp_v6_initial_peers_locator_);
-            pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
-            pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
-            pqos.transport().user_transports.push_back(std::make_shared<TCPv6TransportDescriptor>());
-            break;
-        }
-        case EASYDDS::TransportKind::UDPv4:
-        {
-            pqos.transport().user_transports.push_back(std::make_shared<UDPv4TransportDescriptor>());
-            break;
-        }
-        case EASYDDS::TransportKind::UDPv6:
-        {
-            pqos.transport().user_transports.push_back(std::make_shared<UDPv6TransportDescriptor>());
-            break;
-        }
-        default:
-        {
-            pqos.transport().use_builtin_transports = true;
-            break;
-        }
+        IPLocator::setIPv6(tcp_v6_initial_peers_locator_, tcp_ip_address);
+        pqos.wire_protocol().builtin.initialPeersList.push_back(tcp_v6_initial_peers_locator_);
+        pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
+        pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
+        pqos.transport().user_transports.push_back(std::make_shared<TCPv6TransportDescriptor>());
+        break;
+    }
+    case EASYDDS::TransportKind::UDPv4:
+    {
+        pqos.transport().user_transports.push_back(std::make_shared<UDPv4TransportDescriptor>());
+        break;
+    }
+    case EASYDDS::TransportKind::UDPv6:
+    {
+        pqos.transport().user_transports.push_back(std::make_shared<UDPv6TransportDescriptor>());
+        break;
+    }
+    default:
+    {
+        pqos.transport().use_builtin_transports = true;
+        break;
+    }
     }
     return pqos;
 }
@@ -461,4 +461,37 @@ void easyddsApplication::setMonitorContent(DomainParticipantQos &pqos, const boo
         std::cout << "the monitor topic is: " << monitorTopic << std::endl;
         pqos.properties().properties().emplace_back("fastdds.statistics", monitorTopic);
     }
+}
+
+void easyddsApplication::printCurrentTime(const std::chrono::_V2::system_clock::time_point &now)
+{
+    // 转换为自 epoch 以来的时间
+    auto since_epoch = now.time_since_epoch();
+
+    // 转换为微秒
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(since_epoch).count();
+
+    // 获取当前时间的 time_t 类型
+    std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
+
+    // 转换为 tm 结构体（本地时间）
+    std::tm now_tm = *std::localtime(&now_time_t);
+
+    // 打印当前时间，包括微秒
+    std::cout << "Current time: "
+              << std::put_time(&now_tm, "%Y-%m-%d %H:%M:%S") << "."
+              << std::setfill('0') << std::setw(6) << (microseconds % 1000000) << std::endl;
+}
+
+std::string easyddsApplication::getCurTimeStr(const std::chrono::_V2::system_clock::time_point &now)
+{
+    auto since_epoch = now.time_since_epoch();
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(since_epoch).count();
+    std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_time_t);
+    
+    std::stringstream ss;
+    ss << std::put_time(&now_tm, "%Y-%m-%d %H:%M:%S") << "."
+       << std::setfill('0') << std::setw(6) << (microseconds % 1000000);
+    return ss.str();
 }

@@ -4,7 +4,7 @@
 #include <fastdds/rtps/common/CdrSerialization.hpp>
 
 //#include "easyddsCdrAux.hpp"
-#include "easyddsTypeObjectSupport.hpp"
+//#include "easyddsTypeObjectSupport.hpp"
 
 using SerializedPayload_t = eprosima::fastdds::rtps::SerializedPayload_t;
 using InstanceHandle_t = eprosima::fastdds::rtps::InstanceHandle_t;
@@ -172,6 +172,7 @@ uint32_t EmployeePubSubType::calculate_serialized_size(
     {
         return 0;
     }
+      return 0;
 }
 
 void *EmployeePubSubType::create_data()
@@ -244,10 +245,10 @@ bool EmployeePubSubType::compute_key(
     return true;
 }
 
-void EmployeePubSubType::register_type_object_representation()
-{
-    register_Employee_type_identifier(type_identifiers_);
-}
+// void EmployeePubSubType::register_type_object_representation()
+// {
+//     register_Employee_type_identifier(type_identifiers_);
+// }
 
 // Include auxiliary functions like for serializing/deserializing.
 //#include "easyddsCdrAux.ipp"
