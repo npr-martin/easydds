@@ -149,26 +149,8 @@ bool easyddsClientPublisherApp::send(const std::string &msg)
 
     if (!is_stopped())
     {
-        Employee sample_;
-        // auto now_begin = std::chrono::system_clock::now();
-        // std::string sendmsg = getCurTimeStr(now_begin) + msg;
-        // sample_.text(sendmsg);
-
-        auto now = std::chrono::high_resolution_clock::now();
-        auto duration = now.time_since_epoch();
-        uint64_t microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-        std::string sendmsg = std::to_string(microseconds) + msg;
-     
-        sample_.text(sendmsg);
+        Employee sample_(msg);
         ret = (RETCODE_OK == writer_->write(&sample_));   
-        auto now_2 = std::chrono::high_resolution_clock::now();
-        std::cout << "the send time is " << getCurTimeStr(now) <<"   "<<getCurTimeStr(now_2)<<std::endl;
-        //auto now_finish = std::chrono::system_clock::now();
-
-        // printCurrentTime(now_begin);
-        // printCurrentTime(now_finish);
-
-
     }
     return ret;
 }

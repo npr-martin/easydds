@@ -130,21 +130,13 @@ void easyddsClientSubscriberApp::on_data_available(
     {
         if ((info.instance_state == ALIVE_INSTANCE_STATE) && info.valid_data)
         {
-
-            uint64_t duration_time = 0;
-            auto now = std::chrono::high_resolution_clock::now();
-
-            if (sample_.text().length() > 16)
-            {
-                auto duration = now.time_since_epoch();
-                uint64_t microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-                uint64_t start_time = std::stoull(sample_.text().substr(0, 16));
-                duration_time = microseconds - start_time;
-            }
+            auto duration = (info.reception_timestamp - info.source_timestamp).to_ns() / 1000.0;
             std::string printInfo = "Send [topic: " + m_topicName + "] Sample: " + std::to_string(m_sampleCount++) + "  \n";
             receivedMsg(printInfo);
-            std::cout << "sample received duration is " << duration_time / 1000.0  << "(ms)" << std::endl
-                      << "the received time is " << getCurTimeStr(now) << std::endl;
+
+            std::cout << "sample received duration is " << duration << "(μs)" << std::endl
+            << "the send time is " << getCurTimeStr(std::chrono::system_clock::from_time_t(static_cast<std::time_t>(info.source_timestamp.seconds())) + std::chrono::nanoseconds(info.source_timestamp.nanosec())) << std::endl
+            << "the received time is " << getCurTimeStr(std::chrono::system_clock::from_time_t(static_cast<std::time_t>(info.reception_timestamp.seconds())) + std::chrono::nanoseconds(info.reception_timestamp.nanosec()))<< std::endl;;
         }
         else
         {
