@@ -449,7 +449,7 @@ void easyddsApplication::setMonitorContent(DomainParticipantQos &pqos, const boo
     }
     else
     {
-        for (int i = 1; i < 16; ++i)
+        for (int i = 0; i < 16; ++i)
         {
             if (items & static_cast<uint64_t>(1 << i))
             {
