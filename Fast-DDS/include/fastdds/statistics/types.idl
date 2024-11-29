@@ -119,6 +119,18 @@ struct PhysicalData
     string process;
 };
 
+struct SentData
+{
+    @Key detail::SampleIdentity_s sample_id;
+    string sent_msg;
+}
+
+struct ReceivedData
+{
+    @Key detail::SampleIdentity_s sample_id;
+    @Key detail::GUID_s reader_guid;
+}
+
 module EventKind
 {
     const unsigned long HISTORY2HISTORY_LATENCY = 0x1;
@@ -138,6 +150,8 @@ module EventKind
     const unsigned long DISCOVERED_ENTITY = 0x4000;
     const unsigned long SAMPLE_DATAS = 0x8000;
     const unsigned long PHYSICAL_DATA = 0x10000;
+    const unsigned long SENT_DATA = 0x20000;
+    const unsigned long RECEIVED_DATA = 0x40000;
 };
 
 union Data switch(unsigned long)
@@ -167,6 +181,10 @@ union Data switch(unsigned long)
         SampleIdentityCount sample_identity_count;
     case EventKind::PHYSICAL_DATA:
         PhysicalData physical_data;
+    case EventKind::SENT_DATA:
+        SentData sent_data;
+    case EventKind::RECEIVED_DATA:
+        ReceivedData received_data;
 };
 
 }; // namespace statistics

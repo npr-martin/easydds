@@ -62,6 +62,11 @@ constexpr const char* PHYSICAL_DATA_TOPIC = "_fastdds_statistics_physical_data";
 //! Statistics topic that enables the monitor service feature
 constexpr const char* MONITOR_SERVICE_TOPIC = "_fastdds_monitor_service_status";
 
+//! User Statistics topic that reports the data has sent
+constexpr const char* SENT_DATA_TOPIC = "_fastdds_statistics_sent_data";
+//! User Statistics topic that reports the data has received
+constexpr const char* RECEIVED_DATA_TOPIC = "_fastdds_statistics_received_data";
+
 } // statistics
 } // fastdds
 } // eprosima

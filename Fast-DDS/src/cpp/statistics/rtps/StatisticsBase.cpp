@@ -213,7 +213,8 @@ bool StatisticsParticipantImpl::are_writers_involved(
             | EventKind::HEARTBEAT_COUNT \
             | EventKind::GAP_COUNT \
             | EventKind::DATA_COUNT \
-            | EventKind::SAMPLE_DATAS;
+            | EventKind::SAMPLE_DATAS \
+            | EventKind::SENT_DATA;
 
     return writers_maks & mask;
 }
@@ -224,7 +225,8 @@ bool StatisticsParticipantImpl::are_readers_involved(
     constexpr uint32_t readers_maks = EventKind::HISTORY2HISTORY_LATENCY \
             | EventKind::SUBSCRIPTION_THROUGHPUT \
             | EventKind::ACKNACK_COUNT \
-            | EventKind::NACKFRAG_COUNT;
+            | EventKind::NACKFRAG_COUNT \
+            | EventKind::RECEIVED_DATA;
 
     return readers_maks & mask;
 }

@@ -31,7 +31,8 @@
 
 #include "monitorservice_types.hpp"
 
-#include "typesPubSubTypes.hpp"
+// #include "typesPubSubTypes.hpp"
+#include <fastdds/statistics/types/typesPubSubTypes.hpp>
 
 #if !defined(FASTDDS_GEN_API_VER) || (FASTDDS_GEN_API_VER != 3)
 #error \

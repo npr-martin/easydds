@@ -21,7 +21,7 @@
 #include <fastdds/rtps/reader/RTPSReader.hpp>
 
 #include <rtps/reader/BaseReader.hpp>
-#include <statistics/types/types.hpp>
+#include <fastdds/statistics/types/types.hpp>
 
 using eprosima::fastdds::RecursiveTimedMutex;
 using eprosima::fastdds::rtps::RTPSReader;
@@ -73,6 +73,7 @@ void StatisticsReaderImpl::on_data_notify(
     {
         return;
     }
+    // EPROSIMA_LOG_ERROR("test","on_data_notify");
 
     // Get current timestamp
     fastdds::rtps::Time_t current_time;
@@ -90,6 +91,33 @@ void StatisticsReaderImpl::on_data_notify(
     Data data;
     // note that the setter sets HISTORY2HISTORY_LATENCY by default
     data.writer_reader_data(notification);
+
+    for_each_listener([&data](const std::shared_ptr<IListener>& listener)
+            {
+                listener->on_statistics_data(data);
+            });
+}
+
+void StatisticsReaderImpl::on_sample_received(const fastdds::rtps::SampleIdentity &sample_identity)
+{
+    // if (!are_statistics_writers_enabled(EventKind::RECEIVED_DATA))
+    // {
+    //     return;
+    // }
+    // EPROSIMA_LOG_ERROR("test","on_sample_received");
+
+    ReceivedData notification;
+    notification.sample_id(to_statistics_type(sample_identity));
+    notification.reader_guid(to_statistics_type(get_guid()));
+
+    static int index = 0;
+    EPROSIMA_LOG_ERROR("test","on_sample_received " + std::to_string(index++));
+
+    // Perform the callback
+    Data data;
+    // note that the setter sets HISTORY2HISTORY_LATENCY by default
+    data.received_data(notification);
+    data._d(EventKind::RECEIVED_DATA);
 
     for_each_listener([&data](const std::shared_ptr<IListener>& listener)
             {

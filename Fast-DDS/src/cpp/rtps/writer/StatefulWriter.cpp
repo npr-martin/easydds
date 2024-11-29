@@ -875,6 +875,10 @@ DeliveryRetCode StatefulWriter::deliver_sample_to_network(
 
                 on_sample_datas(change->write_params.sample_identity(), change->writer_info.num_sent_submessages);
                 on_data_sent();
+                SampleIdentity si;
+                si.sequence_number(change->sequenceNumber);
+                si.writer_guid(m_guid);
+                on_sample_sent(si, change->serializedPayload);
             }
         }
         catch (const RTPSMessageGroup::timeout&)

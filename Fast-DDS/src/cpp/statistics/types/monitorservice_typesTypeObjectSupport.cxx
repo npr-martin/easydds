@@ -35,7 +35,8 @@
 
 #include "monitorservice_types.hpp"
 
-#include "types.hpp"
+// #include "types.hpp"
+#include <fastdds/statistics/types/types.hpp>
 
 using namespace eprosima::fastdds::dds::xtypes;
 

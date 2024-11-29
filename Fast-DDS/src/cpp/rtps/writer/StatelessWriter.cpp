@@ -915,8 +915,11 @@ DeliveryRetCode StatelessWriter::deliver_sample_nts(
             on_sample_datas(cache_change->write_params.sample_identity(),
                     cache_change->writer_info.num_sent_submessages);
             on_data_sent();
+            SampleIdentity si;
+            si.sequence_number(cache_change->sequenceNumber);
+            si.writer_guid(m_guid);
+            on_sample_sent(si, cache_change->serializedPayload);
         }
-
     }
     catch (const RTPSMessageGroup::timeout&)
     {

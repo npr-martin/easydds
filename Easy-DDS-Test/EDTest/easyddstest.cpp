@@ -12,6 +12,9 @@
 #include <iostream>
 #include "qosdialog.h"
 
+#include "fastdds/dds/log/Log.hpp"
+#include "fastdds/dds/log/FileConsumer.hpp"
+
 EasyDDSTest::EasyDDSTest(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::EasyDDSTest)
@@ -37,6 +40,14 @@ EasyDDSTest::EasyDDSTest(QWidget *parent)
     qRegisterMetaType<std::string>("std::string");
     connect(this, &EasyDDSTest::setCoutText, this, &EasyDDSTest::addText);
     connect(this, &EasyDDSTest::sendTextSignal, this, & EasyDDSTest::sendText, Qt::QueuedConnection);
+
+    // First remove previous executions file
+    std::remove("/home/mhy/append.log");
+
+    Log::ClearConsumers();
+    Log::RegisterConsumer(std::unique_ptr<LogConsumer>(new FileConsumer("/home/mhy/append.log")));
+    Log::ReportFunctions(true);
+    Log::SetVerbosity(Log::Error);
 }
 
 EasyDDSTest::~EasyDDSTest()
@@ -127,9 +138,13 @@ void EasyDDSTest::createApp(int domain_id, const QString &topicName, int frequen
     {
         createSubscriberApp(domain_id, topicName, curRow, addRow);
     }
-    else //server
+    else if("server" == m_kindName)
     {
         createServer(domain_id, curRow, addRow);
+    }
+    else
+    {
+        createMonitor(domain_id, topicName, curRow, addRow);
     }
 }
 
@@ -218,6 +233,38 @@ void EasyDDSTest::createSubscriberApp(int domain_id, const QString &topicName, i
     app->onMessageReceived(printRecvMsg);
 }
 
+void EasyDDSTest::createMonitor(int domain_id, const QString &topicName, int curRow, bool addRow)
+{
+    std::shared_ptr<easyddsMonitorSub> app = nullptr;
+
+    app = easyddsApplication::createMoniterSubscriber(domain_id, topicName.toStdString());
+
+    std::thread thread(&easyddsApplication::run, app);
+    thread.detach();
+
+    std::cout << "Monitor " << topicName.toStdString()
+              << " is running. Please press stop Button to stop the server at any time." << std::endl;
+
+    if(addRow)
+    {
+        addInfoTab(topicName);
+        m_monitorInfos.append(app);
+    }
+    else
+    {
+        if(curRow < m_monitorInfos.size())
+        {
+            m_monitorInfos[curRow] = app;
+        }
+        else
+        {
+            qDebug() << "wrong curRow for info buffer.(curRow = " << curRow << ", bufferSize = " << m_subInfos.size();
+        }
+    }
+
+    ui->comboBox->setEnabled(false);
+}
+
 void EasyDDSTest::createServer(int domain_id, int curRow, bool addRow)
 {
     std::shared_ptr<easyddsServerApp> app = nullptr;
@@ -257,7 +304,6 @@ void EasyDDSTest::stopApp(int curRow)
         {
             m_pubInfos[curRow]->stop();
             m_pubInfos[curRow] = nullptr;
-            //        m_infos.remove(curRow);
         }
     }
     else if("subscriber" == m_kindName)
@@ -266,15 +312,22 @@ void EasyDDSTest::stopApp(int curRow)
         {
             m_subInfos[curRow]->stop();
             m_subInfos[curRow] = nullptr;
-            //        m_infos.remove(curRow);
         }
     }
-    else
+    else if("server" == m_kindName)
     {
         if(curRow < m_serverInfos.size())
         {
             m_serverInfos[curRow]->stop();
             m_serverInfos[curRow] = nullptr;
+        }
+    }
+    else
+    {
+        if(curRow < m_monitorInfos.size())
+        {
+            m_monitorInfos[curRow]->stop();
+            m_monitorInfos[curRow] = nullptr;
         }
     }
 }
@@ -635,7 +688,11 @@ void EasyDDSTest::on_radioButton_2_toggled(bool checked)
     {
         for(int i = 0; i < serverList.size(); ++i)
         {
-            ui->comboBox->removeItem(2);
+            int serverIndex = ui->comboBox->findText("server");
+            if(serverIndex != -1)
+            {
+                ui->comboBox->removeItem(serverIndex);
+            }
         }
         initInvisible();
         changeList(deaultList, curTransKind);

@@ -44,8 +44,8 @@
 #include <statistics/fastdds/publisher/PublisherImpl.hpp>
 #include <statistics/fastdds/subscriber/SubscriberImpl.hpp>
 #include <statistics/rtps/GuidUtils.hpp>
-#include <statistics/types/types.hpp>
-#include <statistics/types/typesPubSubTypes.hpp>
+#include <fastdds/statistics/types/types.hpp>
+#include <fastdds/statistics/types/typesPubSubTypes.hpp>
 #include <utils/SystemInfo.hpp>
 #include <xmlparser/attributes/PublisherAttributes.hpp>
 #include <xmlparser/XMLParserCommon.h>
@@ -77,6 +77,8 @@ constexpr const char* EDP_PACKETS_TOPIC_ALIAS = "EDP_PACKETS_TOPIC";
 constexpr const char* DISCOVERY_TOPIC_ALIAS = "DISCOVERY_TOPIC";
 constexpr const char* SAMPLE_DATAS_TOPIC_ALIAS = "SAMPLE_DATAS_TOPIC";
 constexpr const char* PHYSICAL_DATA_TOPIC_ALIAS = "PHYSICAL_DATA_TOPIC";
+constexpr const char* SENT_DATA_TOPIC_ALIAS = "SENT_DATA_TOPIC";
+constexpr const char* RECEIVED_DATA_TOPIC_ALIAS = "RECEIVED_DATA_TOPIC";
 constexpr const char* MONITOR_SERVICE_TOPIC_ALIAS = "MONITOR_SERVICE_TOPIC";
 
 static constexpr uint32_t participant_statistics_mask =
@@ -109,7 +111,9 @@ static const ValidEntry valid_entries[] =
     {EDP_PACKETS_TOPIC_ALIAS,             EDP_PACKETS_TOPIC,             EventKind::EDP_PACKETS},
     {DISCOVERY_TOPIC_ALIAS,               DISCOVERY_TOPIC,               EventKind::DISCOVERED_ENTITY},
     {SAMPLE_DATAS_TOPIC_ALIAS,            SAMPLE_DATAS_TOPIC,            EventKind::SAMPLE_DATAS},
-    {PHYSICAL_DATA_TOPIC_ALIAS,           PHYSICAL_DATA_TOPIC,           EventKind::PHYSICAL_DATA}
+    {PHYSICAL_DATA_TOPIC_ALIAS,           PHYSICAL_DATA_TOPIC,           EventKind::PHYSICAL_DATA},
+    {SENT_DATA_TOPIC_ALIAS,               SENT_DATA_TOPIC,               EventKind::SENT_DATA},
+    {RECEIVED_DATA_TOPIC_ALIAS,           RECEIVED_DATA_TOPIC,           EventKind::RECEIVED_DATA}
 };
 
 ReturnCode_t DomainParticipantImpl::enable_statistics_datawriter(
@@ -562,6 +566,18 @@ bool DomainParticipantImpl::register_statistics_type_and_topic(
         efd::TypeSupport physical_data_type(new PhysicalDataPubSubType);
         physical_data_type->register_type_object_representation();
         return_code = find_or_create_topic_and_type(topic, topic_name, physical_data_type);
+    }
+    else if (SENT_DATA_TOPIC == topic_name)
+    {
+        efd::TypeSupport sent_data_type(new SentDataPubSubType);
+        sent_data_type->register_type_object_representation();
+        return_code = find_or_create_topic_and_type(topic, topic_name, sent_data_type);
+    }
+    else if (RECEIVED_DATA_TOPIC == topic_name)
+    {
+        efd::TypeSupport received_data_type(new ReceivedDataPubSubType);
+        received_data_type->register_type_object_representation();
+        return_code = find_or_create_topic_and_type(topic, topic_name, received_data_type);
     }
     return return_code;
 }

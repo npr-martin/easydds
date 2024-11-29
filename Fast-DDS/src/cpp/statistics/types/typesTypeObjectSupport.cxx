@@ -33,7 +33,8 @@
 #include <fastdds/dds/xtypes/type_representation/TypeObject.hpp>
 #include <fastdds/dds/xtypes/type_representation/TypeObjectUtils.hpp>
 
-#include "types.hpp"
+// #include "types.hpp"
+#include <fastdds/statistics/types/types.hpp>
 
 
 using namespace eprosima::fastdds::dds::xtypes;
@@ -1864,6 +1865,225 @@ void register_PhysicalData_type_identifier(
         }
     }
 }
+// TypeIdentifier is returned by reference: dependent structures/unions are registered in this same method
+void register_SentData_type_identifier(
+        TypeIdentifierPair& type_ids_SentData)
+{
+
+    ReturnCode_t return_code_SentData {eprosima::fastdds::dds::RETCODE_OK};
+    return_code_SentData =
+        eprosima::fastdds::dds::DomainParticipantFactory::get_instance()->type_object_registry().get_type_identifiers(
+        "eprosima::fastdds::statistics::SentData", type_ids_SentData);
+    if (eprosima::fastdds::dds::RETCODE_OK != return_code_SentData)
+    {
+        StructTypeFlag struct_flags_SentData = TypeObjectUtils::build_struct_type_flag(eprosima::fastdds::dds::xtypes::ExtensibilityKind::APPENDABLE,
+                false, false);
+        QualifiedTypeName type_name_SentData = "eprosima::fastdds::statistics::SentData";
+        eprosima::fastcdr::optional<AppliedBuiltinTypeAnnotations> type_ann_builtin_SentData;
+        eprosima::fastcdr::optional<AppliedAnnotationSeq> ann_custom_SentData;
+        CompleteTypeDetail detail_SentData = TypeObjectUtils::build_complete_type_detail(type_ann_builtin_SentData, ann_custom_SentData, type_name_SentData.to_string());
+        CompleteStructHeader header_SentData;
+        header_SentData = TypeObjectUtils::build_complete_struct_header(TypeIdentifier(), detail_SentData);
+        CompleteStructMemberSeq member_seq_SentData;
+        {
+            TypeIdentifierPair type_ids_sample_id;
+            ReturnCode_t return_code_sample_id {eprosima::fastdds::dds::RETCODE_OK};
+            return_code_sample_id =
+                eprosima::fastdds::dds::DomainParticipantFactory::get_instance()->type_object_registry().get_type_identifiers(
+                "eprosima::fastdds::statistics::detail::GUID_s", type_ids_sample_id);
+
+            if (eprosima::fastdds::dds::RETCODE_OK != return_code_sample_id)
+            {
+                eprosima::fastdds::statistics::detail::register_GUID_s_type_identifier(type_ids_sample_id);
+            }
+            StructMemberFlag member_flags_sample_id = TypeObjectUtils::build_struct_member_flag(eprosima::fastdds::dds::xtypes::TryConstructFailAction::DISCARD,
+                    false, false, true, false);
+            MemberId member_id_sample_id = 0x00000000;
+            bool common_sample_id_ec {false};
+            CommonStructMember common_sample_id {TypeObjectUtils::build_common_struct_member(member_id_sample_id, member_flags_sample_id, TypeObjectUtils::retrieve_complete_type_identifier(type_ids_sample_id, common_sample_id_ec))};
+            if (!common_sample_id_ec)
+            {
+                EPROSIMA_LOG_ERROR(XTYPES_TYPE_REPRESENTATION, "Structure sample_id member TypeIdentifier inconsistent.");
+                return;
+            }
+            MemberName name_sample_id = "sample_id";
+            eprosima::fastcdr::optional<AppliedBuiltinMemberAnnotations> member_ann_builtin_sample_id;
+            ann_custom_SentData.reset();
+            AppliedAnnotationSeq tmp_ann_custom_sample_id;
+            eprosima::fastcdr::optional<std::string> unit_sample_id;
+            eprosima::fastcdr::optional<AnnotationParameterValue> min_sample_id;
+            eprosima::fastcdr::optional<AnnotationParameterValue> max_sample_id;
+            eprosima::fastcdr::optional<std::string> hash_id_sample_id;
+            if (unit_sample_id.has_value() || min_sample_id.has_value() || max_sample_id.has_value() || hash_id_sample_id.has_value())
+            {
+                member_ann_builtin_sample_id = TypeObjectUtils::build_applied_builtin_member_annotations(unit_sample_id, min_sample_id, max_sample_id, hash_id_sample_id);
+            }
+            if (!tmp_ann_custom_sample_id.empty())
+            {
+                ann_custom_SentData = tmp_ann_custom_sample_id;
+            }
+            CompleteMemberDetail detail_sample_id = TypeObjectUtils::build_complete_member_detail(name_sample_id, member_ann_builtin_sample_id, ann_custom_SentData);
+            CompleteStructMember member_sample_id = TypeObjectUtils::build_complete_struct_member(common_sample_id, detail_sample_id);
+            TypeObjectUtils::add_complete_struct_member(member_seq_SentData, member_sample_id);
+        }
+        {
+            TypeIdentifierPair type_ids_sent_msg;
+            ReturnCode_t return_code_sent_msg {eprosima::fastdds::dds::RETCODE_OK};
+            return_code_sent_msg =
+                eprosima::fastdds::dds::DomainParticipantFactory::get_instance()->type_object_registry().get_type_identifiers(
+                "anonymous_string_unbounded", type_ids_sent_msg);
+
+            if (eprosima::fastdds::dds::RETCODE_OK != return_code_sent_msg)
+            {
+                {
+                    SBound bound = 0;
+                    StringSTypeDefn string_sdefn = TypeObjectUtils::build_string_s_type_defn(bound);
+                    if (eprosima::fastdds::dds::RETCODE_BAD_PARAMETER ==
+                            TypeObjectUtils::build_and_register_s_string_type_identifier(string_sdefn,
+                            "anonymous_string_unbounded", type_ids_sent_msg))
+                    {
+                        EPROSIMA_LOG_ERROR(XTYPES_TYPE_REPRESENTATION,
+                            "anonymous_string_unbounded already registered in TypeObjectRegistry for a different type.");
+                    }
+                }
+            }
+            StructMemberFlag member_flags_sent_msg = TypeObjectUtils::build_struct_member_flag(eprosima::fastdds::dds::xtypes::TryConstructFailAction::DISCARD,
+                    false, false, false, false);
+            MemberId member_id_sent_msg = 0x00000002;
+            bool common_sent_msg_ec {false};
+            CommonStructMember common_sent_msg {TypeObjectUtils::build_common_struct_member(member_id_sent_msg, member_flags_sent_msg, TypeObjectUtils::retrieve_complete_type_identifier(type_ids_sent_msg, common_sent_msg_ec))};
+            if (!common_sent_msg_ec)
+            {
+                EPROSIMA_LOG_ERROR(XTYPES_TYPE_REPRESENTATION, "Structure sent_msg member TypeIdentifier inconsistent.");
+                return;
+            }
+            MemberName name_sent_msg = "sent_msg";
+            eprosima::fastcdr::optional<AppliedBuiltinMemberAnnotations> member_ann_builtin_sent_msg;
+            ann_custom_SentData.reset();
+            CompleteMemberDetail detail_sent_msg = TypeObjectUtils::build_complete_member_detail(name_sent_msg, member_ann_builtin_sent_msg, ann_custom_SentData);
+            CompleteStructMember member_sent_msg = TypeObjectUtils::build_complete_struct_member(common_sent_msg, detail_sent_msg);
+            TypeObjectUtils::add_complete_struct_member(member_seq_SentData, member_sent_msg);
+        }
+        CompleteStructType struct_type_SentData = TypeObjectUtils::build_complete_struct_type(struct_flags_SentData, header_SentData, member_seq_SentData);
+        if (eprosima::fastdds::dds::RETCODE_BAD_PARAMETER ==
+                TypeObjectUtils::build_and_register_struct_type_object(struct_type_SentData, type_name_SentData.to_string(), type_ids_SentData))
+        {
+            EPROSIMA_LOG_ERROR(XTYPES_TYPE_REPRESENTATION,
+                    "eprosima::fastdds::statistics::SentData already registered in TypeObjectRegistry for a different type.");
+        }
+    }
+}
+// TypeIdentifier is returned by reference: dependent structures/unions are registered in this same method
+void register_ReceivedData_type_identifier(
+        TypeIdentifierPair& type_ids_ReceivedData)
+{
+
+    ReturnCode_t return_code_ReceivedData {eprosima::fastdds::dds::RETCODE_OK};
+    return_code_ReceivedData =
+        eprosima::fastdds::dds::DomainParticipantFactory::get_instance()->type_object_registry().get_type_identifiers(
+        "eprosima::fastdds::statistics::ReceivedData", type_ids_ReceivedData);
+    if (eprosima::fastdds::dds::RETCODE_OK != return_code_ReceivedData)
+    {
+        StructTypeFlag struct_flags_ReceivedData = TypeObjectUtils::build_struct_type_flag(eprosima::fastdds::dds::xtypes::ExtensibilityKind::APPENDABLE,
+                false, false);
+        QualifiedTypeName type_name_ReceivedData = "eprosima::fastdds::statistics::ReceivedData";
+        eprosima::fastcdr::optional<AppliedBuiltinTypeAnnotations> type_ann_builtin_ReceivedData;
+        eprosima::fastcdr::optional<AppliedAnnotationSeq> ann_custom_ReceivedData;
+        CompleteTypeDetail detail_ReceivedData = TypeObjectUtils::build_complete_type_detail(type_ann_builtin_ReceivedData, ann_custom_ReceivedData, type_name_ReceivedData.to_string());
+        CompleteStructHeader header_ReceivedData;
+        header_ReceivedData = TypeObjectUtils::build_complete_struct_header(TypeIdentifier(), detail_ReceivedData);
+        CompleteStructMemberSeq member_seq_ReceivedData;
+        {
+            TypeIdentifierPair type_ids_sample_id;
+            ReturnCode_t return_code_sample_id {eprosima::fastdds::dds::RETCODE_OK};
+            return_code_sample_id =
+                eprosima::fastdds::dds::DomainParticipantFactory::get_instance()->type_object_registry().get_type_identifiers(
+                "eprosima::fastdds::statistics::detail::GUID_s", type_ids_sample_id);
+
+            if (eprosima::fastdds::dds::RETCODE_OK != return_code_sample_id)
+            {
+                eprosima::fastdds::statistics::detail::register_GUID_s_type_identifier(type_ids_sample_id);
+            }
+            StructMemberFlag member_flags_sample_id = TypeObjectUtils::build_struct_member_flag(eprosima::fastdds::dds::xtypes::TryConstructFailAction::DISCARD,
+                    false, false, true, false);
+            MemberId member_id_sample_id = 0x00000000;
+            bool common_sample_id_ec {false};
+            CommonStructMember common_sample_id {TypeObjectUtils::build_common_struct_member(member_id_sample_id, member_flags_sample_id, TypeObjectUtils::retrieve_complete_type_identifier(type_ids_sample_id, common_sample_id_ec))};
+            if (!common_sample_id_ec)
+            {
+                EPROSIMA_LOG_ERROR(XTYPES_TYPE_REPRESENTATION, "Structure sample_id member TypeIdentifier inconsistent.");
+                return;
+            }
+            MemberName name_sample_id = "sample_id";
+            eprosima::fastcdr::optional<AppliedBuiltinMemberAnnotations> member_ann_builtin_sample_id;
+            ann_custom_ReceivedData.reset();
+            AppliedAnnotationSeq tmp_ann_custom_sample_id;
+            eprosima::fastcdr::optional<std::string> unit_sample_id;
+            eprosima::fastcdr::optional<AnnotationParameterValue> min_sample_id;
+            eprosima::fastcdr::optional<AnnotationParameterValue> max_sample_id;
+            eprosima::fastcdr::optional<std::string> hash_id_sample_id;
+            if (unit_sample_id.has_value() || min_sample_id.has_value() || max_sample_id.has_value() || hash_id_sample_id.has_value())
+            {
+                member_ann_builtin_sample_id = TypeObjectUtils::build_applied_builtin_member_annotations(unit_sample_id, min_sample_id, max_sample_id, hash_id_sample_id);
+            }
+            if (!tmp_ann_custom_sample_id.empty())
+            {
+                ann_custom_ReceivedData = tmp_ann_custom_sample_id;
+            }
+            CompleteMemberDetail detail_sample_id = TypeObjectUtils::build_complete_member_detail(name_sample_id, member_ann_builtin_sample_id, ann_custom_ReceivedData);
+            CompleteStructMember member_sample_id = TypeObjectUtils::build_complete_struct_member(common_sample_id, detail_sample_id);
+            TypeObjectUtils::add_complete_struct_member(member_seq_ReceivedData, member_sample_id);
+        }
+        {
+            TypeIdentifierPair type_ids_reader_guid;
+            ReturnCode_t return_code_reader_guid {eprosima::fastdds::dds::RETCODE_OK};
+            return_code_reader_guid =
+                eprosima::fastdds::dds::DomainParticipantFactory::get_instance()->type_object_registry().get_type_identifiers(
+                "eprosima::fastdds::statistics::detail::GUID_s", type_ids_reader_guid);
+
+            if (eprosima::fastdds::dds::RETCODE_OK != return_code_reader_guid)
+            {
+                eprosima::fastdds::statistics::detail::register_GUID_s_type_identifier(type_ids_reader_guid);
+            }
+            StructMemberFlag member_flags_reader_guid = TypeObjectUtils::build_struct_member_flag(eprosima::fastdds::dds::xtypes::TryConstructFailAction::DISCARD,
+                    false, false, true, false);
+            MemberId member_id_reader_guid = 0x00000001;
+            bool common_reader_guid_ec {false};
+            CommonStructMember common_reader_guid {TypeObjectUtils::build_common_struct_member(member_id_reader_guid, member_flags_reader_guid, TypeObjectUtils::retrieve_complete_type_identifier(type_ids_reader_guid, common_reader_guid_ec))};
+            if (!common_reader_guid_ec)
+            {
+                EPROSIMA_LOG_ERROR(XTYPES_TYPE_REPRESENTATION, "Structure reader_guid member TypeIdentifier inconsistent.");
+                return;
+            }
+            MemberName name_reader_guid = "reader_guid";
+            eprosima::fastcdr::optional<AppliedBuiltinMemberAnnotations> member_ann_builtin_reader_guid;
+            ann_custom_ReceivedData.reset();
+            AppliedAnnotationSeq tmp_ann_custom_reader_guid;
+            eprosima::fastcdr::optional<std::string> unit_reader_guid;
+            eprosima::fastcdr::optional<AnnotationParameterValue> min_reader_guid;
+            eprosima::fastcdr::optional<AnnotationParameterValue> max_reader_guid;
+            eprosima::fastcdr::optional<std::string> hash_id_reader_guid;
+            if (unit_reader_guid.has_value() || min_reader_guid.has_value() || max_reader_guid.has_value() || hash_id_reader_guid.has_value())
+            {
+                member_ann_builtin_reader_guid = TypeObjectUtils::build_applied_builtin_member_annotations(unit_reader_guid, min_reader_guid, max_reader_guid, hash_id_reader_guid);
+            }
+            if (!tmp_ann_custom_reader_guid.empty())
+            {
+                ann_custom_ReceivedData = tmp_ann_custom_reader_guid;
+            }
+            CompleteMemberDetail detail_reader_guid = TypeObjectUtils::build_complete_member_detail(name_reader_guid, member_ann_builtin_reader_guid, ann_custom_ReceivedData);
+            CompleteStructMember member_reader_guid = TypeObjectUtils::build_complete_struct_member(common_reader_guid, detail_reader_guid);
+            TypeObjectUtils::add_complete_struct_member(member_seq_ReceivedData, member_reader_guid);
+        }
+        CompleteStructType struct_type_ReceivedData = TypeObjectUtils::build_complete_struct_type(struct_flags_ReceivedData, header_ReceivedData, member_seq_ReceivedData);
+        if (eprosima::fastdds::dds::RETCODE_BAD_PARAMETER ==
+                TypeObjectUtils::build_and_register_struct_type_object(struct_type_ReceivedData, type_name_ReceivedData.to_string(), type_ids_ReceivedData))
+        {
+            EPROSIMA_LOG_ERROR(XTYPES_TYPE_REPRESENTATION,
+                    "eprosima::fastdds::statistics::ReceivedData already registered in TypeObjectRegistry for a different type.");
+        }
+    }
+}
 namespace EventKind {
 } // namespace EventKind
 // TypeIdentifier is returned by reference: dependent structures/unions are registered in this same method
@@ -2163,6 +2383,66 @@ void register_Data_type_identifier(
             CompleteMemberDetail detail_physical_data = TypeObjectUtils::build_complete_member_detail(name_physical_data, member_ann_builtin_physical_data, ann_custom_Data);
             CompleteUnionMember member_physical_data = TypeObjectUtils::build_complete_union_member(common_physical_data, detail_physical_data);
             TypeObjectUtils::add_complete_union_member(member_seq_Data, member_physical_data);
+        }
+        {
+            return_code_Data =
+                eprosima::fastdds::dds::DomainParticipantFactory::get_instance()->type_object_registry().get_type_identifiers(
+                "eprosima::fastdds::statistics::SentData", type_ids_Data);
+
+            if (eprosima::fastdds::dds::RETCODE_OK != return_code_Data)
+            {
+                eprosima::fastdds::statistics::register_SentData_type_identifier(type_ids_Data);
+            }
+            UnionMemberFlag member_flags_sent_data = TypeObjectUtils::build_union_member_flag(eprosima::fastdds::dds::xtypes::TryConstructFailAction::DISCARD,
+                    false, false);
+            UnionCaseLabelSeq label_seq_sent_data;
+            TypeObjectUtils::add_union_case_label(label_seq_sent_data, static_cast<int32_t>(EventKind::SENT_DATA));
+            MemberId member_id_sent_data = 0x00000009;
+            bool common_sent_data_ec {false};
+            CommonUnionMember common_sent_data {TypeObjectUtils::build_common_union_member(member_id_sent_data,
+                    member_flags_sent_data, TypeObjectUtils::retrieve_complete_type_identifier(type_ids_Data,
+                        common_sent_data_ec), label_seq_sent_data)};
+            if (!common_sent_data_ec)
+            {
+                EPROSIMA_LOG_ERROR(XTYPES_TYPE_REPRESENTATION, "Union sent_data member TypeIdentifier inconsistent.");
+                return;
+            }
+            MemberName name_sent_data = "sent_data";
+            eprosima::fastcdr::optional<AppliedBuiltinMemberAnnotations> member_ann_builtin_sent_data;
+            ann_custom_Data.reset();
+            CompleteMemberDetail detail_sent_data = TypeObjectUtils::build_complete_member_detail(name_sent_data, member_ann_builtin_sent_data, ann_custom_Data);
+            CompleteUnionMember member_sent_data = TypeObjectUtils::build_complete_union_member(common_sent_data, detail_sent_data);
+            TypeObjectUtils::add_complete_union_member(member_seq_Data, member_sent_data);
+        }
+        {
+            return_code_Data =
+                eprosima::fastdds::dds::DomainParticipantFactory::get_instance()->type_object_registry().get_type_identifiers(
+                "eprosima::fastdds::statistics::ReceivedData", type_ids_Data);
+
+            if (eprosima::fastdds::dds::RETCODE_OK != return_code_Data)
+            {
+                eprosima::fastdds::statistics::register_ReceivedData_type_identifier(type_ids_Data);
+            }
+            UnionMemberFlag member_flags_received_data = TypeObjectUtils::build_union_member_flag(eprosima::fastdds::dds::xtypes::TryConstructFailAction::DISCARD,
+                    false, false);
+            UnionCaseLabelSeq label_seq_received_data;
+            TypeObjectUtils::add_union_case_label(label_seq_received_data, static_cast<int32_t>(EventKind::RECEIVED_DATA));
+            MemberId member_id_received_data = 0x0000000A;
+            bool common_received_data_ec {false};
+            CommonUnionMember common_received_data {TypeObjectUtils::build_common_union_member(member_id_received_data,
+                    member_flags_received_data, TypeObjectUtils::retrieve_complete_type_identifier(type_ids_Data,
+                        common_received_data_ec), label_seq_received_data)};
+            if (!common_received_data_ec)
+            {
+                EPROSIMA_LOG_ERROR(XTYPES_TYPE_REPRESENTATION, "Union received_data member TypeIdentifier inconsistent.");
+                return;
+            }
+            MemberName name_received_data = "received_data";
+            eprosima::fastcdr::optional<AppliedBuiltinMemberAnnotations> member_ann_builtin_received_data;
+            ann_custom_Data.reset();
+            CompleteMemberDetail detail_received_data = TypeObjectUtils::build_complete_member_detail(name_received_data, member_ann_builtin_received_data, ann_custom_Data);
+            CompleteUnionMember member_received_data = TypeObjectUtils::build_complete_union_member(common_received_data, detail_received_data);
+            TypeObjectUtils::add_complete_union_member(member_seq_Data, member_received_data);
         }
         CompleteUnionType union_type_Data = TypeObjectUtils::build_complete_union_type(union_flags_Data, header_Data, discriminator_Data,
                 member_seq_Data);

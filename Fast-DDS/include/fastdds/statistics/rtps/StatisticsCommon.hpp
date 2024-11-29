@@ -25,6 +25,7 @@
 #include <fastdds/rtps/common/Guid.hpp>
 #include <fastdds/rtps/common/SampleIdentity.hpp>
 #include <fastdds/rtps/common/Time_t.hpp>
+#include <fastdds/rtps/common/SerializedPayload.hpp>
 #include <fastdds/statistics/IListeners.hpp>
 #include <fastdds/utils/TimedMutex.hpp>
 
@@ -190,6 +191,12 @@ protected:
     /// Notify listeners of DATA / DATA_FRAG counts
     void on_data_sent();
 
+    /// @brief Notify sample sent
+    /// @param sample_identity SampleIdentity of the affected sample.
+    /// @param payload content in sample
+    void on_sample_sent(const fastdds::rtps::SampleIdentity &sample_identity,
+                        const fastdds::rtps::SerializedPayload_t &payload);
+
     /**
      * @brief Reports publication throughtput based on last added sample to writer's history
      * @param payload size of the message sent
@@ -251,6 +258,10 @@ protected:
     void on_data_notify(
             const fastdds::rtps::GUID_t& writer_guid,
             const fastdds::rtps::Time_t& source_timestamp);
+
+    /// @brief Report that a sample has been received
+    /// @param sample_identity SampleIdentity of the affected sample.
+    void on_sample_received(const fastdds::rtps::SampleIdentity &sample_identity);
 
     /**
      * @brief Report that an ACKNACK message is sent
@@ -318,6 +329,14 @@ protected:
     {
     }
 
+    /// @brief Notify sample sent
+    /// @param sample_identity identity of sample
+    /// @param payload content in sample
+    void on_sample_sent(const fastdds::rtps::SampleIdentity &sample_identity,
+                        const fastdds::rtps::SerializedPayload_t &payload)
+    {
+    }
+
     /**
      * @brief Reports publication throughtput based on last added sample to writer's history
      * Parameter: size of the message sent
@@ -359,6 +378,12 @@ protected:
     inline void on_data_notify(
             const fastdds::rtps::GUID_t&,
             const fastdds::rtps::Time_t&)
+    {
+    }
+
+    /// @brief Report that a sample has been received
+    /// @param sample_identity SampleIdentity of the affected sample.
+    void on_sample_received(const fastdds::rtps::SampleIdentity &sample_identity)
     {
     }
 

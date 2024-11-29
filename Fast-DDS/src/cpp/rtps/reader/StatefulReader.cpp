@@ -1242,6 +1242,10 @@ void StatefulReader::NotifyChanges(
         new_data_available = true;
         ++total_unread_;
         on_data_notify(proxGUID, aux_ch->sourceTimestamp);
+        SampleIdentity si;
+        si.writer_guid(proxGUID);
+        si.sequence_number(aux_ch->sequenceNumber);
+        on_sample_received(si);
 
         ++it;
         do

@@ -108,6 +108,14 @@ void DomainParticipantStatisticsListener::on_statistics_data(
             case EventKind::PHYSICAL_DATA:
                 data_sample = &statistics_data.physical_data();
                 break;
+
+            case EventKind::SENT_DATA:
+                data_sample = &statistics_data.sent_data();
+                break;
+
+            case EventKind::RECEIVED_DATA:
+                data_sample = &statistics_data.received_data();
+                break;
         }
 
         writer->write(const_cast<void*>(data_sample));

@@ -8,6 +8,7 @@
 #include "easyddsClientPublisherApp.hpp"
 #include "easyddsClientSubscriberApp.hpp"
 #include "easyddsServerApp.hpp"
+#include "easyddsMonitorSub.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class EasyDDSTest; }
@@ -63,6 +64,8 @@ private:
     void createSubscriberApp(int domain_id, const QString& topicName,
                              int curRow = 0,
                              bool addRow = true);
+    void createMonitor(int domain_id, const QString& topicName,
+                       int curRow = 0, bool addRow = true);
 
     void createServer(int domain_id, int curRow = 0, bool addRow = true);
 
@@ -98,6 +101,7 @@ private:
     QVector< std::shared_ptr<easyddsClientPublisherApp> > m_pubInfos;
     QVector< std::shared_ptr<easyddsClientSubscriberApp> > m_subInfos;
     QVector< std::shared_ptr<easyddsServerApp> > m_serverInfos;
+    QVector< std::shared_ptr<easyddsMonitorSub> > m_monitorInfos;
     std::shared_ptr<qtStreamBuf> buffer;
 
     std::string m_source;

@@ -378,6 +378,10 @@ bool StatelessReader::change_received(
             ++total_unread_;
 
             on_data_notify(guid, change->sourceTimestamp);
+            SampleIdentity si;
+            si.writer_guid(guid);
+            si.sequence_number(change->sequenceNumber);
+            on_sample_received(si);
 
             auto listener = get_listener();
             if (listener != nullptr)

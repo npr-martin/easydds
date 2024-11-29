@@ -30,7 +30,8 @@
 
 #include <fastcdr/exceptions/BadParamException.h>
 
-#include "types.hpp"
+// #include "types.hpp"
+#include <fastdds/statistics/types/types.hpp>
 
 #if defined(_WIN32)
 #if defined(EPROSIMA_USER_DLL_EXPORT)

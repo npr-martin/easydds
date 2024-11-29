@@ -3,6 +3,7 @@
 #include "easyddsClientPublisherApp.hpp"
 #include "easyddsClientSubscriberApp.hpp"
 #include "easyddsServerApp.hpp"
+#include "easyddsMonitorSub.hpp"
 
 #include "fastdds/dds/log/Log.hpp"
 
@@ -27,6 +28,12 @@ std::shared_ptr<easyddsServerApp> easyddsApplication::
                  const EASYDDS::easyddsServerConfig &config)
 {
     return std::make_shared<easyddsServerApp>(domain_id, config);
+}
+
+std::shared_ptr<easyddsMonitorSub> easyddsApplication::createMoniterSubscriber(
+    const int &domain_id, const std::string &topic_name)
+{
+    return std::make_shared<easyddsMonitorSub>(domain_id, topic_name);
 }
 
 DomainParticipantQos easyddsApplication::getClientDomainParticipantQos(const bool &monitorEnabled,
@@ -449,7 +456,7 @@ void easyddsApplication::setMonitorContent(DomainParticipantQos &pqos, const boo
     }
     else
     {
-        for (int i = 1; i < 16; ++i)
+        for (int i = 0; i < 16; ++i)
         {
             if (items & static_cast<uint64_t>(1 << i))
             {
@@ -457,6 +464,8 @@ void easyddsApplication::setMonitorContent(DomainParticipantQos &pqos, const boo
                 monitorTopic += ";";
             }
         }
+        // add data monitor
+        monitorTopic += "SENT_DATA_TOPIC;RECEIVED_DATA_TOPIC;";
         monitorTopic.pop_back();
         std::cout << "the monitor topic is: " << monitorTopic << std::endl;
         pqos.properties().properties().emplace_back("fastdds.statistics", monitorTopic);

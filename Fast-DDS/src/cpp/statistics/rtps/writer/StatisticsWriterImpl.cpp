@@ -19,7 +19,7 @@
 #include <statistics/rtps/StatisticsBase.hpp>
 
 #include <rtps/writer/BaseWriter.hpp>
-#include <statistics/types/types.hpp>
+#include <fastdds/statistics/types/types.hpp>
 
 
 namespace eprosima {
@@ -116,6 +116,30 @@ void StatisticsWriterImpl::on_data_sent()
     // note that the setter sets RESENT_DATAS by default
     data.entity_count(std::move(notification));
     data._d(EventKind::DATA_COUNT);
+
+    for_each_listener([&data](const std::shared_ptr<IListener>& listener)
+            {
+                listener->on_statistics_data(data);
+            });
+}
+
+void StatisticsWriterImpl::on_sample_sent(const fastdds::rtps::SampleIdentity &sample_identity,
+                                          const fastdds::rtps::SerializedPayload_t &payload)
+{
+    if (!are_statistics_writers_enabled(EventKind::SENT_DATA))
+    {
+        return;
+    }
+
+    SentData notification;
+    notification.sample_id(to_statistics_type(sample_identity));
+    notification.sent_msg(std::string(reinterpret_cast<char *>(payload.data), payload.length - 1));
+
+    // Perform the callbacks
+    Data data;
+    // note that the setter sets RESENT_DATAS by default
+    data.sent_data(std::move(notification));
+    data._d(EventKind::SENT_DATA);
 
     for_each_listener([&data](const std::shared_ptr<IListener>& listener)
             {

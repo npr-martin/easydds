@@ -2925,6 +2925,345 @@ private:
     std::string m_process;
 
 };
+/*!
+ * @brief This class represents the structure SentData defined by the user in the IDL file.
+ * @ingroup types
+ */
+class SentData
+{
+public:
+
+    /*!
+     * @brief Default constructor.
+     */
+    eProsima_user_DllExport SentData()
+    {
+    }
+
+    /*!
+     * @brief Default destructor.
+     */
+    eProsima_user_DllExport ~SentData()
+    {
+    }
+
+    /*!
+     * @brief Copy constructor.
+     * @param x Reference to the object SentData that will be copied.
+     */
+    eProsima_user_DllExport SentData(
+            const SentData& x)
+    {
+                    m_sample_id = x.m_sample_id;
+
+                    m_sent_msg = x.m_sent_msg;
+
+    }
+
+    /*!
+     * @brief Move constructor.
+     * @param x Reference to the object SentData that will be copied.
+     */
+    eProsima_user_DllExport SentData(
+            SentData&& x) noexcept
+    {
+        m_sample_id = std::move(x.m_sample_id);
+        m_sent_msg = x.m_sent_msg;
+    }
+
+    /*!
+     * @brief Copy assignment.
+     * @param x Reference to the object SentData that will be copied.
+     */
+    eProsima_user_DllExport SentData& operator =(
+            const SentData& x)
+    {
+
+                    m_sample_id = x.m_sample_id;
+
+                    m_sent_msg = x.m_sent_msg;
+
+        return *this;
+    }
+
+    /*!
+     * @brief Move assignment.
+     * @param x Reference to the object SentData that will be copied.
+     */
+    eProsima_user_DllExport SentData& operator =(
+            SentData&& x) noexcept
+    {
+
+        m_sample_id = std::move(x.m_sample_id);
+        m_sent_msg = x.m_sent_msg;
+        return *this;
+    }
+
+    /*!
+     * @brief Comparison operator.
+     * @param x SentData object to compare.
+     */
+    eProsima_user_DllExport bool operator ==(
+            const SentData& x) const
+    {
+        return (m_sample_id == x.m_sample_id &&
+           m_sent_msg == x.m_sent_msg);
+    }
+
+    /*!
+     * @brief Comparison operator.
+     * @param x SentData object to compare.
+     */
+    eProsima_user_DllExport bool operator !=(
+            const SentData& x) const
+    {
+        return !(*this == x);
+    }
+
+    /*!
+     * @brief This function copies the value in member sample_id
+     * @param _sample_id New value to be copied in member sample_id
+     */
+    eProsima_user_DllExport void sample_id(
+            const detail::SampleIdentity_s& _sample_id)
+    {
+        m_sample_id = _sample_id;
+    }
+
+    /*!
+     * @brief This function moves the value in member sample_id
+     * @param _sample_id New value to be moved in member sample_id
+     */
+    eProsima_user_DllExport void sample_id(
+            detail::SampleIdentity_s&& _sample_id)
+    {
+        m_sample_id = std::move(_sample_id);
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member sample_id
+     * @return Constant reference to member sample_id
+     */
+    eProsima_user_DllExport const detail::SampleIdentity_s& sample_id() const
+    {
+        return m_sample_id;
+    }
+
+    /*!
+     * @brief This function returns a reference to member sample_id
+     * @return Reference to member sample_id
+     */
+    eProsima_user_DllExport detail::SampleIdentity_s& sample_id()
+    {
+        return m_sample_id;
+    }
+
+
+    /*!
+     * @brief This function sets a value in member sent_msg
+     * @param _sent_msg New value for member sent_msg
+     */
+    eProsima_user_DllExport void sent_msg(
+            std::string _sent_msg)
+    {
+        m_sent_msg = _sent_msg;
+    }
+
+    /*!
+     * @brief This function returns the value of member sent_msg
+     * @return Value of member sent_msg
+     */
+    eProsima_user_DllExport std::string sent_msg() const
+    {
+        return m_sent_msg;
+    }
+
+    /*!
+     * @brief This function returns a reference to member sent_msg
+     * @return Reference to member sent_msg
+     */
+    eProsima_user_DllExport std::string& sent_msg()
+    {
+        return m_sent_msg;
+    }
+
+
+
+private:
+
+    detail::SampleIdentity_s m_sample_id;
+    std::string m_sent_msg;
+
+};
+/*!
+ * @brief This class represents the structure ReceivedData defined by the user in the IDL file.
+ * @ingroup types
+ */
+class ReceivedData
+{
+public:
+
+    /*!
+     * @brief Default constructor.
+     */
+    eProsima_user_DllExport ReceivedData()
+    {
+    }
+
+    /*!
+     * @brief Default destructor.
+     */
+    eProsima_user_DllExport ~ReceivedData()
+    {
+    }
+
+    /*!
+     * @brief Copy constructor.
+     * @param x Reference to the object ReceivedData that will be copied.
+     */
+    eProsima_user_DllExport ReceivedData(
+            const ReceivedData& x)
+    {
+                    m_sample_id = x.m_sample_id;
+
+                    m_reader_guid = x.m_reader_guid;
+
+    }
+
+    /*!
+     * @brief Move constructor.
+     * @param x Reference to the object ReceivedData that will be copied.
+     */
+    eProsima_user_DllExport ReceivedData(
+            ReceivedData&& x) noexcept
+    {
+        m_sample_id = std::move(x.m_sample_id);
+        m_reader_guid = x.m_reader_guid;
+    }
+
+    /*!
+     * @brief Copy assignment.
+     * @param x Reference to the object ReceivedData that will be copied.
+     */
+    eProsima_user_DllExport ReceivedData& operator =(
+            const ReceivedData& x)
+    {
+
+                    m_sample_id = x.m_sample_id;
+
+                    m_reader_guid = x.m_reader_guid;
+
+        return *this;
+    }
+
+    /*!
+     * @brief Move assignment.
+     * @param x Reference to the object ReceivedData that will be copied.
+     */
+    eProsima_user_DllExport ReceivedData& operator =(
+            ReceivedData&& x) noexcept
+    {
+
+        m_sample_id = std::move(x.m_sample_id);
+        m_reader_guid = x.m_reader_guid;
+        return *this;
+    }
+
+    /*!
+     * @brief Comparison operator.
+     * @param x ReceivedData object to compare.
+     */
+    eProsima_user_DllExport bool operator ==(
+            const ReceivedData& x) const
+    {
+        return (m_sample_id == x.m_sample_id &&
+           m_reader_guid == x.m_reader_guid);
+    }
+
+    /*!
+     * @brief Comparison operator.
+     * @param x ReceivedData object to compare.
+     */
+    eProsima_user_DllExport bool operator !=(
+            const ReceivedData& x) const
+    {
+        return !(*this == x);
+    }
+
+    /*!
+     * @brief This function copies the value in member sample_id
+     * @param _sample_id New value to be copied in member sample_id
+     */
+    eProsima_user_DllExport void sample_id(
+            const detail::SampleIdentity_s& _sample_id)
+    {
+        m_sample_id = _sample_id;
+    }
+
+    /*!
+     * @brief This function moves the value in member sample_id
+     * @param _sample_id New value to be moved in member sample_id
+     */
+    eProsima_user_DllExport void sample_id(
+            detail::SampleIdentity_s&& _sample_id)
+    {
+        m_sample_id = std::move(_sample_id);
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member sample_id
+     * @return Constant reference to member sample_id
+     */
+    eProsima_user_DllExport const detail::SampleIdentity_s& sample_id() const
+    {
+        return m_sample_id;
+    }
+
+    /*!
+     * @brief This function returns a reference to member sample_id
+     * @return Reference to member sample_id
+     */
+    eProsima_user_DllExport detail::SampleIdentity_s& sample_id()
+    {
+        return m_sample_id;
+    }
+
+
+    /*!
+     * @brief This function sets a value in member reader_guid
+     * @param _reader_guid New value for member reader_guid
+     */
+    eProsima_user_DllExport void reader_guid(
+            detail::GUID_s _reader_guid)
+    {
+        m_reader_guid = _reader_guid;
+    }
+
+    /*!
+     * @brief This function returns the value of member reader_guid
+     * @return Value of member reader_guid
+     */
+    eProsima_user_DllExport detail::GUID_s reader_guid() const
+    {
+        return m_reader_guid;
+    }
+
+    /*!
+     * @brief This function returns a reference to member reader_guid
+     * @return Reference to member reader_guid
+     */
+    eProsima_user_DllExport detail::GUID_s& reader_guid()
+    {
+        return m_reader_guid;
+    }
+
+private:
+
+    detail::SampleIdentity_s m_sample_id;
+    detail::GUID_s m_reader_guid;
+
+};
+
 namespace EventKind {
 
 const uint32_t HISTORY2HISTORY_LATENCY = 0x1;
@@ -2944,6 +3283,12 @@ const uint32_t EDP_PACKETS = 0x2000;
 const uint32_t DISCOVERED_ENTITY = 0x4000;
 const uint32_t SAMPLE_DATAS = 0x8000;
 const uint32_t PHYSICAL_DATA = 0x10000;
+const uint32_t SENT_DATA = 0x20000;
+const uint32_t RECEIVED_DATA = 0x40000;
+// const uint32_t SENT_DATA = 0x80;
+// const uint32_t RECEIVED_DATA = 0x100;
+// const uint32_t HEARTBEAT_COUNT = 0x20000;
+// const uint32_t ACKNACK_COUNT = 0x40000;
 
 } // namespace EventKind
 /*!
@@ -2983,38 +3328,45 @@ public:
 
         switch (x.selected_member_)
         {
-                        case 0x00000001:
-                            writer_reader_data_() = x.m_writer_reader_data;
-                            break;
+        case 0x00000001:
+            writer_reader_data_() = x.m_writer_reader_data;
+            break;
 
-                        case 0x00000002:
-                            locator2locator_data_() = x.m_locator2locator_data;
-                            break;
+        case 0x00000002:
+            locator2locator_data_() = x.m_locator2locator_data;
+            break;
 
-                        case 0x00000003:
-                            entity_data_() = x.m_entity_data;
-                            break;
+        case 0x00000003:
+            entity_data_() = x.m_entity_data;
+            break;
 
-                        case 0x00000004:
-                            entity2locator_traffic_() = x.m_entity2locator_traffic;
-                            break;
+        case 0x00000004:
+            entity2locator_traffic_() = x.m_entity2locator_traffic;
+            break;
 
-                        case 0x00000005:
-                            entity_count_() = x.m_entity_count;
-                            break;
+        case 0x00000005:
+            entity_count_() = x.m_entity_count;
+            break;
 
-                        case 0x00000006:
-                            discovery_time_() = x.m_discovery_time;
-                            break;
+        case 0x00000006:
+            discovery_time_() = x.m_discovery_time;
+            break;
 
-                        case 0x00000007:
-                            sample_identity_count_() = x.m_sample_identity_count;
-                            break;
+        case 0x00000007:
+            sample_identity_count_() = x.m_sample_identity_count;
+            break;
 
-                        case 0x00000008:
-                            physical_data_() = x.m_physical_data;
-                            break;
+        case 0x00000008:
+            physical_data_() = x.m_physical_data;
+            break;
 
+        case 0x00000009:
+            sent_data_() = x.m_sent_data;
+            break;
+
+        case 0x0000000A:
+            received_data_() = x.m_received_data;
+            break;
         }
     }
 
@@ -3029,38 +3381,45 @@ public:
 
         switch (x.selected_member_)
         {
-                        case 0x00000001:
-                            writer_reader_data_() = std::move(x.m_writer_reader_data);
-                            break;
+        case 0x00000001:
+            writer_reader_data_() = std::move(x.m_writer_reader_data);
+            break;
 
-                        case 0x00000002:
-                            locator2locator_data_() = std::move(x.m_locator2locator_data);
-                            break;
+        case 0x00000002:
+            locator2locator_data_() = std::move(x.m_locator2locator_data);
+            break;
 
-                        case 0x00000003:
-                            entity_data_() = std::move(x.m_entity_data);
-                            break;
+        case 0x00000003:
+            entity_data_() = std::move(x.m_entity_data);
+            break;
 
-                        case 0x00000004:
-                            entity2locator_traffic_() = std::move(x.m_entity2locator_traffic);
-                            break;
+        case 0x00000004:
+            entity2locator_traffic_() = std::move(x.m_entity2locator_traffic);
+            break;
 
-                        case 0x00000005:
-                            entity_count_() = std::move(x.m_entity_count);
-                            break;
+        case 0x00000005:
+            entity_count_() = std::move(x.m_entity_count);
+            break;
 
-                        case 0x00000006:
-                            discovery_time_() = std::move(x.m_discovery_time);
-                            break;
+        case 0x00000006:
+            discovery_time_() = std::move(x.m_discovery_time);
+            break;
 
-                        case 0x00000007:
-                            sample_identity_count_() = std::move(x.m_sample_identity_count);
-                            break;
+        case 0x00000007:
+            sample_identity_count_() = std::move(x.m_sample_identity_count);
+            break;
 
-                        case 0x00000008:
-                            physical_data_() = std::move(x.m_physical_data);
-                            break;
+        case 0x00000008:
+            physical_data_() = std::move(x.m_physical_data);
+            break;
 
+        case 0x00000009:
+            sent_data_() = std::move(x.m_sent_data);
+            break;
+
+        case 0x0000000A:
+            received_data_() = std::move(x.m_received_data);
+            break;
         }
     }
 
@@ -3075,38 +3434,45 @@ public:
 
         switch (x.selected_member_)
         {
-                        case 0x00000001:
-                            writer_reader_data_() = x.m_writer_reader_data;
-                            break;
+        case 0x00000001:
+            writer_reader_data_() = x.m_writer_reader_data;
+            break;
 
-                        case 0x00000002:
-                            locator2locator_data_() = x.m_locator2locator_data;
-                            break;
+        case 0x00000002:
+            locator2locator_data_() = x.m_locator2locator_data;
+            break;
 
-                        case 0x00000003:
-                            entity_data_() = x.m_entity_data;
-                            break;
+        case 0x00000003:
+            entity_data_() = x.m_entity_data;
+            break;
 
-                        case 0x00000004:
-                            entity2locator_traffic_() = x.m_entity2locator_traffic;
-                            break;
+        case 0x00000004:
+            entity2locator_traffic_() = x.m_entity2locator_traffic;
+            break;
 
-                        case 0x00000005:
-                            entity_count_() = x.m_entity_count;
-                            break;
+        case 0x00000005:
+            entity_count_() = x.m_entity_count;
+            break;
 
-                        case 0x00000006:
-                            discovery_time_() = x.m_discovery_time;
-                            break;
+        case 0x00000006:
+            discovery_time_() = x.m_discovery_time;
+            break;
 
-                        case 0x00000007:
-                            sample_identity_count_() = x.m_sample_identity_count;
-                            break;
+        case 0x00000007:
+            sample_identity_count_() = x.m_sample_identity_count;
+            break;
 
-                        case 0x00000008:
-                            physical_data_() = x.m_physical_data;
-                            break;
+        case 0x00000008:
+            physical_data_() = x.m_physical_data;
+            break;
 
+        case 0x00000009:
+            sent_data_() = x.m_sent_data;
+            break;
+
+        case 0x0000000A:
+            received_data_() = x.m_received_data;
+            break;
         }
 
         return *this;
@@ -3123,38 +3489,45 @@ public:
 
         switch (x.selected_member_)
         {
-                        case 0x00000001:
-                            writer_reader_data_() = std::move(x.m_writer_reader_data);
-                            break;
+        case 0x00000001:
+            writer_reader_data_() = std::move(x.m_writer_reader_data);
+            break;
 
-                        case 0x00000002:
-                            locator2locator_data_() = std::move(x.m_locator2locator_data);
-                            break;
+        case 0x00000002:
+            locator2locator_data_() = std::move(x.m_locator2locator_data);
+            break;
 
-                        case 0x00000003:
-                            entity_data_() = std::move(x.m_entity_data);
-                            break;
+        case 0x00000003:
+            entity_data_() = std::move(x.m_entity_data);
+            break;
 
-                        case 0x00000004:
-                            entity2locator_traffic_() = std::move(x.m_entity2locator_traffic);
-                            break;
+        case 0x00000004:
+            entity2locator_traffic_() = std::move(x.m_entity2locator_traffic);
+            break;
 
-                        case 0x00000005:
-                            entity_count_() = std::move(x.m_entity_count);
-                            break;
+        case 0x00000005:
+            entity_count_() = std::move(x.m_entity_count);
+            break;
 
-                        case 0x00000006:
-                            discovery_time_() = std::move(x.m_discovery_time);
-                            break;
+        case 0x00000006:
+            discovery_time_() = std::move(x.m_discovery_time);
+            break;
 
-                        case 0x00000007:
-                            sample_identity_count_() = std::move(x.m_sample_identity_count);
-                            break;
+        case 0x00000007:
+            sample_identity_count_() = std::move(x.m_sample_identity_count);
+            break;
 
-                        case 0x00000008:
-                            physical_data_() = std::move(x.m_physical_data);
-                            break;
+        case 0x00000008:
+            physical_data_() = std::move(x.m_physical_data);
+            break;
 
+        case 0x00000009:
+            sent_data_() = std::move(x.m_sent_data);
+            break;
+
+        case 0x0000000A:
+            received_data_() = std::move(x.m_received_data);
+            break;
         }
 
         return *this;
@@ -3177,38 +3550,45 @@ public:
                 {
                     switch (selected_member_)
                     {
-                                                    case 0x00000001:
-                                                        ret_value = (x.m_writer_reader_data == m_writer_reader_data);
-                                                        break;
+                    case 0x00000001:
+                        ret_value = (x.m_writer_reader_data == m_writer_reader_data);
+                        break;
 
-                                                    case 0x00000002:
-                                                        ret_value = (x.m_locator2locator_data == m_locator2locator_data);
-                                                        break;
+                    case 0x00000002:
+                        ret_value = (x.m_locator2locator_data == m_locator2locator_data);
+                        break;
 
-                                                    case 0x00000003:
-                                                        ret_value = (x.m_entity_data == m_entity_data);
-                                                        break;
+                    case 0x00000003:
+                        ret_value = (x.m_entity_data == m_entity_data);
+                        break;
 
-                                                    case 0x00000004:
-                                                        ret_value = (x.m_entity2locator_traffic == m_entity2locator_traffic);
-                                                        break;
+                    case 0x00000004:
+                        ret_value = (x.m_entity2locator_traffic == m_entity2locator_traffic);
+                        break;
 
-                                                    case 0x00000005:
-                                                        ret_value = (x.m_entity_count == m_entity_count);
-                                                        break;
+                    case 0x00000005:
+                        ret_value = (x.m_entity_count == m_entity_count);
+                        break;
 
-                                                    case 0x00000006:
-                                                        ret_value = (x.m_discovery_time == m_discovery_time);
-                                                        break;
+                    case 0x00000006:
+                        ret_value = (x.m_discovery_time == m_discovery_time);
+                        break;
 
-                                                    case 0x00000007:
-                                                        ret_value = (x.m_sample_identity_count == m_sample_identity_count);
-                                                        break;
+                    case 0x00000007:
+                        ret_value = (x.m_sample_identity_count == m_sample_identity_count);
+                        break;
 
-                                                    case 0x00000008:
-                                                        ret_value = (x.m_physical_data == m_physical_data);
-                                                        break;
+                    case 0x00000008:
+                        ret_value = (x.m_physical_data == m_physical_data);
+                        break;
 
+                    case 0x00000009:
+                        ret_value = (x.m_sent_data == m_sent_data);
+                        break;
+
+                    case 0x0000000A:
+                        ret_value = (x.m_received_data == m_received_data);
+                        break;
                     }
                 }
             }
@@ -3303,6 +3683,20 @@ public:
 
                         case EventKind::PHYSICAL_DATA:
                             if (0x00000008 == selected_member_)
+                            {
+                                valid_discriminator = true;
+                            }
+                            break;
+
+                        case EventKind::SENT_DATA:
+                            if (0x00000009 == selected_member_)
+                            {
+                                valid_discriminator = true;
+                            }
+                            break;
+
+                        case EventKind::RECEIVED_DATA:
+                            if (0x0000000A == selected_member_)
                             {
                                 valid_discriminator = true;
                             }
@@ -3750,6 +4144,109 @@ public:
         return m_physical_data;
     }
 
+    /*!
+     * @brief This function copies the value in member sent_data
+     * @param _sent_data New value to be copied in member sent_data
+     */
+    eProsima_user_DllExport void sent_data(
+            const SentData& _sent_data)
+    {
+        sent_data_() = _sent_data;
+        m__d = EventKind::SENT_DATA;
+    }
+
+    /*!
+     * @brief This function moves the value in member sent_data
+     * @param _sent_data New value to be moved in member sent_data
+     */
+    eProsima_user_DllExport void sent_data(
+            SentData&& _sent_data)
+    {
+        sent_data_() = _sent_data;
+        m__d = EventKind::SENT_DATA;
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member sent_data
+     * @return Constant reference to member sent_data
+     * @exception eprosima::fastcdr::exception::BadParamException This exception is thrown if the requested union member is not the current selection.
+     */
+    eProsima_user_DllExport const SentData& sent_data() const
+    {
+        if (0x00000009 != selected_member_)
+        {
+            throw eprosima::fastcdr::exception::BadParamException("This member has not been selected");
+        }
+
+        return m_sent_data;
+    }
+
+    /*!
+     * @brief This function returns a reference to member sent_data
+     * @return Reference to member sent_data
+     * @exception eprosima::fastcdr::exception::BadParamException This exception is thrown if the requested union member is not the current selection.
+     */
+    eProsima_user_DllExport SentData& sent_data()
+    {
+        if (0x00000009 != selected_member_)
+        {
+            throw eprosima::fastcdr::exception::BadParamException("This member has not been selected");
+        }
+
+        return m_sent_data;
+    }
+
+    /*!
+     * @brief This function copies the value in member received_data
+     * @param _received_data New value to be copied in member received_data
+     */
+    eProsima_user_DllExport void received_data(
+            const ReceivedData& _received_data)
+    {
+        received_data_() = _received_data;
+        m__d = EventKind::RECEIVED_DATA;
+    }
+
+    /*!
+     * @brief This function moves the value in member received_data
+     * @param _received_data New value to be moved in member received_data
+     */
+    eProsima_user_DllExport void received_data(
+            ReceivedData&& _received_data)
+    {
+        received_data_() = _received_data;
+        m__d = EventKind::RECEIVED_DATA;
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member received_data
+     * @return Constant reference to member received_data
+     * @exception eprosima::fastcdr::exception::BadParamException This exception is thrown if the requested union member is not the current selection.
+     */
+    eProsima_user_DllExport const ReceivedData& received_data() const
+    {
+        if (0x0000000A != selected_member_)
+        {
+            throw eprosima::fastcdr::exception::BadParamException("This member has not been selected");
+        }
+
+        return m_received_data;
+    }
+
+    /*!
+     * @brief This function returns a reference to member received_data
+     * @return Reference to member received_data
+     * @exception eprosima::fastcdr::exception::BadParamException This exception is thrown if the requested union member is not the current selection.
+     */
+    eProsima_user_DllExport ReceivedData& received_data()
+    {
+        if (0x0000000A != selected_member_)
+        {
+            throw eprosima::fastcdr::exception::BadParamException("This member has not been selected");
+        }
+
+        return m_received_data;
+    }
 
     void _default()
     {
@@ -3932,6 +4429,47 @@ private:
                 return m_physical_data;
             }
 
+            SentData& sent_data_()
+            {
+                if (0x00000009 != selected_member_)
+                {
+                    if (member_destructor_)
+                    {
+                        member_destructor_();
+                    }
+
+                    selected_member_ = 0x00000009;
+                    member_destructor_ = [&]()
+                    {
+                        m_sent_data.~SentData();
+                    };
+                    new(&m_sent_data) SentData();
+
+                }
+
+                return m_sent_data;
+            }
+
+            ReceivedData& received_data_()
+            {
+                if (0x0000000A != selected_member_)
+                {
+                    if (member_destructor_)
+                    {
+                        member_destructor_();
+                    }
+
+                    selected_member_ = 0x0000000A;
+                    member_destructor_ = [&]()
+                    {
+                        m_received_data.~ReceivedData();
+                    };
+                    new(&m_received_data) ReceivedData();
+
+                }
+
+                return m_received_data;
+            }
 
     uint32_t m__d {2147483647};
 
@@ -3945,6 +4483,8 @@ private:
         DiscoveryTime m_discovery_time;
         SampleIdentityCount m_sample_identity_count;
         PhysicalData m_physical_data;
+        SentData m_sent_data;
+        ReceivedData m_received_data;
     };
 
     uint32_t selected_member_ {0x0FFFFFFFu};
