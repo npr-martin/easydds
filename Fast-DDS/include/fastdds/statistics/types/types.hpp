@@ -3285,10 +3285,6 @@ const uint32_t SAMPLE_DATAS = 0x8000;
 const uint32_t PHYSICAL_DATA = 0x10000;
 const uint32_t SENT_DATA = 0x20000;
 const uint32_t RECEIVED_DATA = 0x40000;
-// const uint32_t SENT_DATA = 0x80;
-// const uint32_t RECEIVED_DATA = 0x100;
-// const uint32_t HEARTBEAT_COUNT = 0x20000;
-// const uint32_t ACKNACK_COUNT = 0x40000;
 
 } // namespace EventKind
 /*!

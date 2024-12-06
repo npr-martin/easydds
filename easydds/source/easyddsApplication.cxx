@@ -456,7 +456,7 @@ void easyddsApplication::setMonitorContent(DomainParticipantQos &pqos, const boo
     }
     else
     {
-        for (int i = 0; i < 16; ++i)
+        for (int i = 0; i < 18; ++i)
         {
             if (items & static_cast<uint64_t>(1 << i))
             {
@@ -465,7 +465,6 @@ void easyddsApplication::setMonitorContent(DomainParticipantQos &pqos, const boo
             }
         }
         // add data monitor
-        monitorTopic += "SENT_DATA_TOPIC;RECEIVED_DATA_TOPIC;";
         monitorTopic.pop_back();
         std::cout << "the monitor topic is: " << monitorTopic << std::endl;
         pqos.properties().properties().emplace_back("fastdds.statistics", monitorTopic);

@@ -1,6 +1,12 @@
 #ifndef EASYDDSTEST_H
 #define EASYDDSTEST_H
 
+#define FASTDDS_ENFORCE_LOG_INFO
+#ifdef HAVE_LOG_NO_INFO
+#undef HAVE_LOG_NO_INFO
+#endif // HAVE_LOG_NO_INFO
+#define HAVE_LOG_NO_INFO 0
+
 #include <QMainWindow>
 #include <QMap>
 #include "easyddsApplication.hpp"
@@ -46,7 +52,7 @@ private slots:
 
     void on_comboBox_currentTextChanged(const QString &arg1);
 
-    void on_pushButton_7_clicked();
+    void on_pbQos_clicked();
 
 private:
     void initInvisible();

@@ -332,8 +332,8 @@ protected:
     /// @brief Notify sample sent
     /// @param sample_identity identity of sample
     /// @param payload content in sample
-    void on_sample_sent(const fastdds::rtps::SampleIdentity &sample_identity,
-                        const fastdds::rtps::SerializedPayload_t &payload)
+    inline void on_sample_sent(const fastdds::rtps::SampleIdentity &sample_identity,
+                               const fastdds::rtps::SerializedPayload_t &payload)
     {
     }
 
@@ -383,7 +383,7 @@ protected:
 
     /// @brief Report that a sample has been received
     /// @param sample_identity SampleIdentity of the affected sample.
-    void on_sample_received(const fastdds::rtps::SampleIdentity &sample_identity)
+    inline void on_sample_received(const fastdds::rtps::SampleIdentity &sample_identity)
     {
     }
 

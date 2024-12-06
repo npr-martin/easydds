@@ -1890,11 +1890,11 @@ void register_SentData_type_identifier(
             ReturnCode_t return_code_sample_id {eprosima::fastdds::dds::RETCODE_OK};
             return_code_sample_id =
                 eprosima::fastdds::dds::DomainParticipantFactory::get_instance()->type_object_registry().get_type_identifiers(
-                "eprosima::fastdds::statistics::detail::GUID_s", type_ids_sample_id);
+                "eprosima::fastdds::statistics::detail::SampleIdentity_s", type_ids_sample_id);
 
             if (eprosima::fastdds::dds::RETCODE_OK != return_code_sample_id)
             {
-                eprosima::fastdds::statistics::detail::register_GUID_s_type_identifier(type_ids_sample_id);
+                eprosima::fastdds::statistics::detail::register_SampleIdentity_s_type_identifier(type_ids_sample_id);
             }
             StructMemberFlag member_flags_sample_id = TypeObjectUtils::build_struct_member_flag(eprosima::fastdds::dds::xtypes::TryConstructFailAction::DISCARD,
                     false, false, true, false);
@@ -1949,7 +1949,7 @@ void register_SentData_type_identifier(
             }
             StructMemberFlag member_flags_sent_msg = TypeObjectUtils::build_struct_member_flag(eprosima::fastdds::dds::xtypes::TryConstructFailAction::DISCARD,
                     false, false, false, false);
-            MemberId member_id_sent_msg = 0x00000002;
+            MemberId member_id_sent_msg = 0x00000001;
             bool common_sent_msg_ec {false};
             CommonStructMember common_sent_msg {TypeObjectUtils::build_common_struct_member(member_id_sent_msg, member_flags_sent_msg, TypeObjectUtils::retrieve_complete_type_identifier(type_ids_sent_msg, common_sent_msg_ec))};
             if (!common_sent_msg_ec)
@@ -1998,11 +1998,11 @@ void register_ReceivedData_type_identifier(
             ReturnCode_t return_code_sample_id {eprosima::fastdds::dds::RETCODE_OK};
             return_code_sample_id =
                 eprosima::fastdds::dds::DomainParticipantFactory::get_instance()->type_object_registry().get_type_identifiers(
-                "eprosima::fastdds::statistics::detail::GUID_s", type_ids_sample_id);
+                "eprosima::fastdds::statistics::detail::SampleIdentity_s", type_ids_sample_id);
 
             if (eprosima::fastdds::dds::RETCODE_OK != return_code_sample_id)
             {
-                eprosima::fastdds::statistics::detail::register_GUID_s_type_identifier(type_ids_sample_id);
+                eprosima::fastdds::statistics::detail::register_SampleIdentity_s_type_identifier(type_ids_sample_id);
             }
             StructMemberFlag member_flags_sample_id = TypeObjectUtils::build_struct_member_flag(eprosima::fastdds::dds::xtypes::TryConstructFailAction::DISCARD,
                     false, false, true, false);

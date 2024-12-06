@@ -28,6 +28,7 @@
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
 #include <fastdds/dds/subscriber/DataReaderListener.hpp>
 #include <fastdds/dds/topic/TypeSupport.hpp>
+#include <fastdds/dds/subscriber/DataReader.hpp>
 
 #include "easydds.hpp"
 #include "easyddsApplication.hpp"
@@ -63,6 +64,9 @@ private:
     //! Return the current state of execution
     bool is_stopped();
 
+    template <typename T>
+    void dealSample(DataReader* reader, std::function<void(T)> func);
+
     std::string m_topicName;
 
     std::shared_ptr<eprosima::fastdds::dds::DomainParticipantFactory> factory_;
@@ -76,5 +80,23 @@ private:
     mutable std::mutex terminate_cv_mtx_;
     std::condition_variable terminate_cv_;
 };
+
+template <typename T>
+void easyddsMonitorSub::dealSample(DataReader* reader, std::function<void(T)> func)
+{
+    T sample_;
+    eprosima::fastdds::dds::SampleInfo info;
+
+    while ((!is_stopped()) && (RETCODE_OK == reader->take_next_sample(&sample_, &info)))
+    {
+        if ((info.instance_state == eprosima::fastdds::dds::ALIVE_INSTANCE_STATE)
+             && info.valid_data)
+        {
+            func(sample_);
+            std::cout << "instanceHandle = " << info.instance_handle << std::endl;
+            std::cout << "pubInsHandle = " << info.publication_handle << std::endl;
+        }
+    }
+}
 
 #endif // FAST_DDS_GENERATED__EASYDDSMONITORSUB_HPP

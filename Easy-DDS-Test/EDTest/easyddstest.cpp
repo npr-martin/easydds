@@ -15,6 +15,8 @@
 #include "fastdds/dds/log/Log.hpp"
 #include "fastdds/dds/log/FileConsumer.hpp"
 
+#include <unistd.h>
+
 EasyDDSTest::EasyDDSTest(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::EasyDDSTest)
@@ -42,12 +44,16 @@ EasyDDSTest::EasyDDSTest(QWidget *parent)
     connect(this, &EasyDDSTest::sendTextSignal, this, & EasyDDSTest::sendText, Qt::QueuedConnection);
 
     // First remove previous executions file
-    std::remove("/home/mhy/append.log");
+    pid_t pid = getpid();
+
+    std::string logName = "/home/mhy/append_" + std::to_string(pid) + ".log";
+
+    std::remove(logName.c_str());
 
     Log::ClearConsumers();
-    Log::RegisterConsumer(std::unique_ptr<LogConsumer>(new FileConsumer("/home/mhy/append.log")));
+    Log::RegisterConsumer(std::unique_ptr<LogConsumer>(new FileConsumer(logName)));
     Log::ReportFunctions(true);
-    Log::SetVerbosity(Log::Error);
+    Log::SetVerbosity(Log::Info);
 }
 
 EasyDDSTest::~EasyDDSTest()
@@ -70,7 +76,10 @@ void EasyDDSTest::on_pushButton_clicked()
 
     if(num == 1)
     {
-        createApp(0, ui->leTopic->text(), ui->sbFrequency->value(), m_source);
+        QString leTopicName = ui->leTopic->text();
+        QString cmbTopicName = ui->cmbTopic->currentText();
+        createApp(0, m_kindName == "monitor" ? cmbTopicName : leTopicName,
+                  ui->sbFrequency->value(), m_source);
     }
     else
     {
@@ -146,6 +155,8 @@ void EasyDDSTest::createApp(int domain_id, const QString &topicName, int frequen
     {
         createMonitor(domain_id, topicName, curRow, addRow);
     }
+
+    EPROSIMA_LOG_ERROR("type",m_kindName);
 }
 
 void EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int frequency,
@@ -160,8 +171,9 @@ void EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int
         std::thread thread(&easyddsApplication::run, app);
         thread.detach();
 
-        std::cout << topicName.toStdString() << "'s publisher running. "
-                                                "Please press stop Button to stop the publisher at any time." << std::endl;
+        std::cout << topicName.toStdString()
+                  << "'s publisher running. "
+                     "Please press stop Button to stop the publisher at any time." << std::endl;
 
         if(addRow)
         {
@@ -176,7 +188,7 @@ void EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int
             }
             else
             {
-                qDebug() << "wrong curRow for info buffer.(curRow = " << curRow << ", bufferSize = " << m_pubInfos.size();
+                qDebug() << "Wrong curRow for info buffer.(curRow = " << curRow << ", bufferSize = " << m_pubInfos.size();
             }
         }
 
@@ -219,7 +231,7 @@ void EasyDDSTest::createSubscriberApp(int domain_id, const QString &topicName, i
             }
             else
             {
-                qDebug() << "wrong curRow for info buffer.(curRow = " << curRow << ", bufferSize = " << m_subInfos.size();
+                qDebug() << "Wrong curRow for info buffer.(curRow = " << curRow << ", bufferSize = " << m_subInfos.size();
             }
         }
 
@@ -243,7 +255,7 @@ void EasyDDSTest::createMonitor(int domain_id, const QString &topicName, int cur
     thread.detach();
 
     std::cout << "Monitor " << topicName.toStdString()
-              << " is running. Please press stop Button to stop the server at any time." << std::endl;
+              << " is running. Please press stop Button to stop the monitor at any time." << std::endl;
 
     if(addRow)
     {
@@ -258,7 +270,7 @@ void EasyDDSTest::createMonitor(int domain_id, const QString &topicName, int cur
         }
         else
         {
-            qDebug() << "wrong curRow for info buffer.(curRow = " << curRow << ", bufferSize = " << m_subInfos.size();
+            qDebug() << "Wrong curRow for info buffer.(curRow = " << curRow << ", bufferSize = " << m_subInfos.size();
         }
     }
 
@@ -274,7 +286,7 @@ void EasyDDSTest::createServer(int domain_id, int curRow, bool addRow)
     std::thread thread(&easyddsApplication::run, app);
     thread.detach();
 
-    std::cout << "server is running. Please press stop Button to stop the server at any time." << std::endl;
+    std::cout << "Server is running. Please press stop Button to stop the server at any time." << std::endl;
 
     if(addRow)
     {
@@ -442,6 +454,14 @@ EASYDDS::monitorItems EasyDDSTest::insertMonitorQos()
             else if("SUB_THROUGHPUT" == text)
             {
                 monitorItems |= EASYDDS::SUBSCRIPTION_THROUGHPUT_TOPIC;
+            }
+            else if("SENT_DATA" == text)
+            {
+                monitorItems |= EASYDDS::SENT_DATA_TOPIC;
+            }
+            else if("RECEIVED_DATA" == text)
+            {
+                monitorItems |= EASYDDS::RECEIVED_DATA_TOPIC;
             }
         }
     }
@@ -709,6 +729,12 @@ void EasyDDSTest::on_comboBox_currentTextChanged(const QString &arg1)
     setWidgetsVisible({ui->lblTopic, ui->leTopic, ui->lblNum, ui->sbNum},
                       !isServer);
 
+    bool isMonitor = arg1.contains("monitor");
+    setWidgetsVisible({ui->cmbTopic}, isMonitor);
+    setWidgetsVisible({ui->leTopic, ui->lblQos, ui->pbQos,
+                      ui->lblTransKind, ui->cmbTransKind,
+                      ui->lblNum, ui->sbNum}, !isMonitor);
+
     if(ui->radioButton_2->isChecked())
     {
         setWidgetsVisible({ui->lblIP, ui->leIP, ui->lblPort, ui->sbPort},
@@ -725,12 +751,13 @@ void EasyDDSTest::initInvisible()
                 ui->lblPort, ui->sbPort,
                 ui->lblListenIP, ui->sbListenPort,
                 ui->lblListenPort, ui->leListenIP,
-                ui->lblTimeout, ui->sbTimeout};
+                ui->lblTimeout, ui->sbTimeout,
+                                ui->cmbTopic};
 
     setWidgetsVisible(invisibles, false);
 }
 
-void EasyDDSTest::on_pushButton_7_clicked()
+void EasyDDSTest::on_pbQos_clicked()
 {
     QosDialog dialog(m_qosProfile, this);
     if(dialog.exec())

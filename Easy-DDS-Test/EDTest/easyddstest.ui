@@ -14,66 +14,7 @@
    <string>EasyDDSTest</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_3" columnstretch="2,1,2">
-    <item row="1" column="1" colspan="2">
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <widget class="QLabel" name="label_9">
-        <property name="text">
-         <string>控制台输出</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTextEdit" name="textEdit"/>
-      </item>
-     </layout>
-    </item>
-    <item row="1" column="0">
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <property name="spacing">
-       <number>6</number>
-      </property>
-      <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>列表</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QPushButton" name="pushButton_2">
-          <property name="text">
-           <string>选择项批量开始</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_3">
-          <property name="text">
-           <string>选择项批量停止</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QTableWidget" name="tableWidget">
-        <property name="sizeAdjustPolicy">
-         <enum>QAbstractScrollArea::AdjustToContents</enum>
-        </property>
-        <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
-        </property>
-        <property name="selectionMode">
-         <enum>QAbstractItemView::MultiSelection</enum>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
+   <layout class="QGridLayout" name="gridLayout_3" columnstretch="2,0,0">
     <item row="0" column="2">
      <layout class="QVBoxLayout" name="verticalLayout_6" stretch="1,10">
       <property name="spacing">
@@ -208,17 +149,31 @@
            <property name="verticalSpacing">
             <number>11</number>
            </property>
-           <item row="3" column="1">
-            <widget class="QCheckBox" name="ckb_gap_count">
-             <property name="text">
-              <string>GAP_COUNT</string>
-             </property>
-            </widget>
-           </item>
            <item row="7" column="0">
             <widget class="QCheckBox" name="ckb_edp_packets">
              <property name="text">
               <string>EDP_PACKETS</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QCheckBox" name="ckb_pub_throughtput">
+             <property name="text">
+              <string>PUB_THROUGHPUT</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QCheckBox" name="ckb_data_count">
+             <property name="text">
+              <string>DATA_COUNT</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="1">
+            <widget class="QCheckBox" name="ckb_monitor_service">
+             <property name="text">
+              <string>MONITOR_SERVICE</string>
              </property>
             </widget>
            </item>
@@ -229,10 +184,17 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
-            <widget class="QCheckBox" name="ckb_acknack_count">
+           <item row="3" column="1">
+            <widget class="QCheckBox" name="ckb_gap_count">
              <property name="text">
-              <string>ACKNACK_COUNT</string>
+              <string>GAP_COUNT</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QCheckBox" name="ckb_network_latency">
+             <property name="text">
+              <string>NETWORK_LATENCY</string>
              </property>
             </widget>
            </item>
@@ -243,10 +205,52 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QCheckBox" name="ckb_network_latency">
+           <item row="4" column="0">
+            <widget class="QCheckBox" name="ckb_acknack_count">
              <property name="text">
-              <string>NETWORK_LATENCY</string>
+              <string>ACKNACK_COUNT</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QCheckBox" name="ckb_sample_data">
+             <property name="text">
+              <string>SAMPLE_DATAS</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0">
+            <widget class="QCheckBox" name="ckb_physical_data">
+             <property name="text">
+              <string>PHYSICAL_DATA</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QCheckBox" name="ckb_sub_throughtput">
+             <property name="text">
+              <string>SUB_THROUGHPUT</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="1">
+            <widget class="QCheckBox" name="ckb_discovery">
+             <property name="text">
+              <string>DISCOVERY</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QCheckBox" name="ckb_nackfrag_count">
+             <property name="text">
+              <string>NACKFRAG_COUNT</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QCheckBox" name="ckb_rtps_lost">
+             <property name="text">
+              <string>RTPS_LOST</string>
              </property>
             </widget>
            </item>
@@ -264,48 +268,6 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QCheckBox" name="ckb_pub_throughtput">
-             <property name="text">
-              <string>PUB_THROUGHPUT</string>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="0">
-            <widget class="QCheckBox" name="ckb_physical_data">
-             <property name="text">
-              <string>PHYSICAL_DATA</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QCheckBox" name="ckb_data_count">
-             <property name="text">
-              <string>DATA_COUNT</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QCheckBox" name="ckb_nackfrag_count">
-             <property name="text">
-              <string>NACKFRAG_COUNT</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QCheckBox" name="ckb_sub_throughtput">
-             <property name="text">
-              <string>SUB_THROUGHPUT</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1">
-            <widget class="QCheckBox" name="ckb_sample_data">
-             <property name="text">
-              <string>SAMPLE_DATAS</string>
-             </property>
-            </widget>
-           </item>
            <item row="5" column="1">
             <widget class="QCheckBox" name="ckb_resent_data">
              <property name="text">
@@ -313,24 +275,17 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
-            <widget class="QCheckBox" name="ckb_rtps_lost">
+           <item row="9" column="0">
+            <widget class="QCheckBox" name="ckb_sent_data">
              <property name="text">
-              <string>RTPS_LOST</string>
+              <string>SENT_DATA</string>
              </property>
             </widget>
            </item>
-           <item row="8" column="1">
-            <widget class="QCheckBox" name="ckb_monitor_service">
+           <item row="9" column="1">
+            <widget class="QCheckBox" name="ckb_received_data">
              <property name="text">
-              <string>MONITOR_SERVICE</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="1">
-            <widget class="QCheckBox" name="ckb_discovery">
-             <property name="text">
-              <string>DISCOVERY</string>
+              <string>RECEIVED_DATA</string>
              </property>
             </widget>
            </item>
@@ -341,57 +296,97 @@
       </item>
      </layout>
     </item>
+    <item row="1" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>6</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>列表</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="pushButton_2">
+          <property name="text">
+           <string>选择项批量开始</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_3">
+          <property name="text">
+           <string>选择项批量停止</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="tableWidget">
+        <property name="sizeAdjustPolicy">
+         <enum>QAbstractScrollArea::AdjustToContents</enum>
+        </property>
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::MultiSelection</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="1" colspan="2">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>控制台输出</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTextEdit" name="textEdit"/>
+      </item>
+     </layout>
+    </item>
     <item row="0" column="0" colspan="2">
      <layout class="QGridLayout" name="gridLayout" columnstretch="1,1,1">
       <property name="spacing">
        <number>6</number>
       </property>
-      <item row="11" column="1" colspan="2">
-       <widget class="QLineEdit" name="leListenIP">
-        <property name="text">
-         <string>127.0.0.1</string>
+      <item row="12" column="1" colspan="2">
+       <widget class="QSpinBox" name="sbPort">
+        <property name="maximum">
+         <number>65535</number>
         </property>
-        <property name="maxLength">
-         <number>15</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="lblNum">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>创建数量</string>
+        <property name="value">
+         <number>16166</number>
         </property>
        </widget>
       </item>
-      <item row="13" column="0">
-       <widget class="QLabel" name="lblTimeout">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+      <item row="15" column="1" colspan="2">
+       <widget class="QSpinBox" name="sbTimeout">
+        <property name="maximum">
+         <number>9999999</number>
         </property>
-        <property name="text">
-         <string>网络逾时(ms)</string>
+        <property name="singleStep">
+         <number>100</number>
         </property>
        </widget>
       </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="lblIP">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+      <item row="14" column="1" colspan="2">
+       <widget class="QSpinBox" name="sbListenPort">
+        <property name="maximum">
+         <number>65535</number>
         </property>
-        <property name="text">
-         <string>连接IP</string>
+        <property name="value">
+         <number>16166</number>
         </property>
        </widget>
       </item>
@@ -414,10 +409,72 @@
         </item>
        </widget>
       </item>
-      <item row="5" column="2">
-       <widget class="QPushButton" name="pushButton_4">
+      <item row="0" column="2">
+       <widget class="QRadioButton" name="radioButton_2">
         <property name="text">
-         <string>...</string>
+         <string>发现服务器</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="0">
+       <widget class="QLabel" name="lblPort">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>连接端口</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>发送频率(ms)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="14" column="0">
+       <widget class="QLabel" name="lblListenPort">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>监听端口</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>类型</string>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="1" colspan="2">
+       <widget class="QLineEdit" name="leListenIP">
+        <property name="text">
+         <string>127.0.0.1</string>
+        </property>
+        <property name="maxLength">
+         <number>15</number>
         </property>
        </widget>
       </item>
@@ -435,158 +492,6 @@
        </widget>
       </item>
       <item row="9" column="1" colspan="2">
-       <widget class="QLineEdit" name="leIP">
-        <property name="text">
-         <string>127.0.0.1</string>
-        </property>
-        <property name="maxLength">
-         <number>15</number>
-        </property>
-       </widget>
-      </item>
-      <item row="13" column="1" colspan="2">
-       <widget class="QSpinBox" name="sbTimeout">
-        <property name="maximum">
-         <number>9999999</number>
-        </property>
-        <property name="singleStep">
-         <number>100</number>
-        </property>
-       </widget>
-      </item>
-      <item row="12" column="0">
-       <widget class="QLabel" name="lblListenPort">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>监听端口</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QRadioButton" name="radioButton_2">
-        <property name="text">
-         <string>发现服务器</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0">
-       <widget class="QLabel" name="lblPort">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>连接端口</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QLineEdit" name="lineEdit_2">
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1" colspan="2">
-       <widget class="QLineEdit" name="leTopic"/>
-      </item>
-      <item row="12" column="1" colspan="2">
-       <widget class="QSpinBox" name="sbListenPort">
-        <property name="maximum">
-         <number>65535</number>
-        </property>
-        <property name="value">
-         <number>16166</number>
-        </property>
-       </widget>
-      </item>
-      <item row="16" column="0" colspan="3">
-       <widget class="QPushButton" name="pushButton">
-        <property name="text">
-         <string>创建</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>发送数据</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>类型</string>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="0">
-       <widget class="QLabel" name="lblListenIP">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>监听IP</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QRadioButton" name="radioButton">
-        <property name="text">
-         <string>默认发现方式</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="1" colspan="2">
-       <widget class="QSpinBox" name="sbPort">
-        <property name="maximum">
-         <number>65535</number>
-        </property>
-        <property name="value">
-         <number>16166</number>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1" colspan="2">
-       <widget class="QSpinBox" name="sbFrequency">
-        <property name="maximum">
-         <number>10000</number>
-        </property>
-        <property name="singleStep">
-         <number>100</number>
-        </property>
-        <property name="value">
-         <number>500</number>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1" colspan="2">
        <widget class="QComboBox" name="cmbTransKind">
         <item>
          <property name="text">
@@ -630,19 +535,6 @@
         </item>
        </widget>
       </item>
-      <item row="3" column="1" colspan="2">
-       <widget class="QSpinBox" name="sbNum">
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>999</number>
-        </property>
-        <property name="value">
-         <number>1</number>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="lblTopic">
         <property name="sizePolicy">
@@ -656,7 +548,7 @@
         </property>
        </widget>
       </item>
-      <item row="7" column="0">
+      <item row="9" column="0">
        <widget class="QLabel" name="lblTransKind">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -669,8 +561,8 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_5">
+      <item row="11" column="0">
+       <widget class="QLabel" name="lblIP">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -678,12 +570,131 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>发送频率(ms)</string>
+         <string>连接IP</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_3">
+      <item row="18" column="0" colspan="3">
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>创建</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="1" colspan="2">
+       <widget class="QLineEdit" name="leIP">
+        <property name="text">
+         <string>127.0.0.1</string>
+        </property>
+        <property name="maxLength">
+         <number>15</number>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="0">
+       <widget class="QLabel" name="lblListenIP">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>监听IP</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1" colspan="2">
+       <widget class="QPushButton" name="pbQos">
+        <property name="text">
+         <string>设置</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>发送数据</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QLineEdit" name="lineEdit_2">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QRadioButton" name="radioButton">
+        <property name="text">
+         <string>默认发现方式</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1" colspan="2">
+       <widget class="QSpinBox" name="sbFrequency">
+        <property name="maximum">
+         <number>10000</number>
+        </property>
+        <property name="singleStep">
+         <number>100</number>
+        </property>
+        <property name="value">
+         <number>500</number>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1" colspan="2">
+       <widget class="QSpinBox" name="sbNum">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>999</number>
+        </property>
+        <property name="value">
+         <number>1</number>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="lblNum">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>创建数量</string>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="0">
+       <widget class="QLabel" name="lblTimeout">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>网络逾时(ms)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="lblQos">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -695,12 +706,38 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="1" colspan="2">
-       <widget class="QPushButton" name="pushButton_7">
+      <item row="7" column="2">
+       <widget class="QPushButton" name="pushButton_4">
         <property name="text">
-         <string>设置</string>
+         <string>...</string>
         </property>
        </widget>
+      </item>
+      <item row="2" column="1" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLineEdit" name="leTopic"/>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cmbTopic">
+          <item>
+           <property name="text">
+            <string>SENT_DATA_TOPIC</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>RECEIVED_DATA_TOPIC</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>HISTORY_LATENCY_TOPIC</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>

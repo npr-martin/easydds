@@ -27,7 +27,6 @@
 
 #include <fastdds/dds/core/status/SubscriptionMatchedStatus.hpp>
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
-#include <fastdds/dds/subscriber/DataReader.hpp>
 #include <fastdds/dds/subscriber/qos/DataReaderQos.hpp>
 #include <fastdds/dds/subscriber/qos/SubscriberQos.hpp>
 #include <fastdds/dds/subscriber/SampleInfo.hpp>
@@ -60,14 +59,14 @@ easyddsMonitorSub::easyddsMonitorSub(
     std::string participant_name = "monitor_domain_" + std::to_string(domain_id);
     pqos.name(participant_name);
 
-    pqos.properties().properties().emplace_back(
-        "fastdds.application.id",
-        "0",
-        "true");
-    pqos.properties().properties().emplace_back(
-        "fastdds.application.metadata",
-        "",
-        "true");
+    // pqos.properties().properties().emplace_back(
+    //     "fastdds.application.id",
+    //     "0",
+    //     "true");
+    // pqos.properties().properties().emplace_back(
+    //     "fastdds.application.metadata",
+    //     "",
+    //     "true");
 
     factory_ = DomainParticipantFactory::get_shared_instance();
     participant_ = factory_->create_participant(domain_id, pqos, nullptr, StatusMask::none());
@@ -89,10 +88,8 @@ easyddsMonitorSub::easyddsMonitorSub(
         type_ = TypeSupport(new statistics::ReceivedDataPubSubType());
     }
 
-
     // Register the type
     participant_->register_type(type_, type_.get_type_name());
-    // type_.register_type(participant_);
 
     // Create the subscriber
     subscriber_ = participant_->create_subscriber(SUBSCRIBER_QOS_DEFAULT, nullptr, StatusMask::none());
@@ -165,50 +162,28 @@ void easyddsMonitorSub::on_data_available(
 {
     if ("SENT_DATA_TOPIC" == m_topicName)
     {
-        statistics::SentData sample_;
-        SampleInfo info;
-
-        while ((!is_stopped()) && (RETCODE_OK == reader->take_next_sample(&sample_, &info)))
-        {
-            if ((info.instance_state == ALIVE_INSTANCE_STATE) && info.valid_data)
-            {
-                auto result = deserialize_sample_identity(sample_.sample_id());
-                std::cout << "SentData sample_identity = " << result.first + "|" + std::to_string(result.second)
-                << ", msg = " << sample_.sent_msg() << std::endl;
-            }
-        }
+        dealSample<statistics::SentData>(reader, [=](statistics::SentData sample_){
+            auto result = deserialize_sample_identity(sample_.sample_id());
+            std::cout << "SentData sample_identity = " << result.first + "|" + std::to_string(result.second)
+                      << ", msg = " << sample_.sent_msg() << std::endl;
+        });
     }
     else if ("HISTORY_LATENCY_TOPIC" == m_topicName)
     {
-        statistics::WriterReaderData sample_;
-        SampleInfo info;
-
-        while ((!is_stopped()) && (RETCODE_OK == reader->take_next_sample(&sample_, &info)))
-        {
-            if ((info.instance_state == ALIVE_INSTANCE_STATE) && info.valid_data)
-            {
-                auto readerID = deserialize_guid(sample_.reader_guid());
-                auto writerID = deserialize_guid(sample_.writer_guid());
-                std::cout << "LATENCY writerID = " << writerID
-                << ", readerID = " << readerID << ", latency = " << sample_.data() << std::endl;
-            }
-        }
+        dealSample<statistics::WriterReaderData>(reader, [=](statistics::WriterReaderData sample_){
+            auto readerID = deserialize_guid(sample_.reader_guid());
+            auto writerID = deserialize_guid(sample_.writer_guid());
+            std::cout << "LATENCY writerID = " << writerID
+            << ", readerID = " << readerID << ", latency = " << sample_.data() << std::endl; });
     }
     else
     {
-        statistics::ReceivedData sample_;
-        SampleInfo info;
-
-        while ((!is_stopped()) && (RETCODE_OK == reader->take_next_sample(&sample_, &info)))
-        {
-            if ((info.instance_state == ALIVE_INSTANCE_STATE) && info.valid_data)
-            {
-                auto result = deserialize_sample_identity(sample_.sample_id());
-                auto readerID = deserialize_guid(sample_.reader_guid());
-                std::cout << "ReceivedData sample_identity = " << result.first + "|" + std::to_string(result.second)
-                << ", readerID = " << readerID << std::endl;
-            }
-        }
+        dealSample<statistics::ReceivedData>(reader, [=](statistics::ReceivedData sample_){
+            auto result = deserialize_sample_identity(sample_.sample_id());
+            auto readerID = deserialize_guid(sample_.reader_guid());
+            std::cout << "ReceivedData sample_identity = " << result.first + "|" + std::to_string(result.second)
+            << ", readerID = " << readerID << std::endl;
+        });
     }
 }
 

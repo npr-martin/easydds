@@ -34,8 +34,8 @@ namespace EASYDDS
     static const qos_profile_s qos_profile_default =
         {
             KEEP_LAST_HISTORY_QOS,
-            20,
             10,
+            0,
             RELIABLE_RELIABILITY_QOS,
             VOLATILE_DURABILITY_QOS,
             {TIME_T_INFINITE_SECONDS, TIME_T_INFINITE_NANOSECONDS},
@@ -61,9 +61,11 @@ namespace EASYDDS
         SAMPLE_DATAS_TOPIC = 1 << 12,
         PDP_PACKETS_TOPIC = 1 << 13,
         EDP_PACKETS_TOPIC = 1 << 14,
-        PHYSICAL_DATA_TOPIC = 1 << 15
+        PHYSICAL_DATA_TOPIC = 1 << 15,
+        SENT_DATA_TOPIC = 1 << 16,
+        RECEIVED_DATA_TOPIC = 1 << 17
     };
-    static const monitorItems monitorItems_default = static_cast<monitorItems>(65535);
+    static const monitorItems monitorItems_default = static_cast<monitorItems>(262143);
     static std::string transTopic(monitorItems item)
     {
         switch (item)
@@ -98,6 +100,9 @@ namespace EASYDDS
         case GAP_COUNT_TOPIC:
             return "GAP_COUNT_TOPIC";
             break;
+        case DATA_COUNT_TOPIC:
+            return "DATA_COUNT_TOPIC";
+            break;
         case RESENT_DATAS_TOPIC:
             return "RESENT_DATAS_TOPIC";
             break;
@@ -112,6 +117,12 @@ namespace EASYDDS
             break;
         case PHYSICAL_DATA_TOPIC:
             return "PHYSICAL_DATA_TOPIC";
+            break;
+        case SENT_DATA_TOPIC:
+            return "SENT_DATA_TOPIC";
+            break;
+        case RECEIVED_DATA_TOPIC:
+            return "RECEIVED_DATA_TOPIC";
             break;
         default:
             break;
