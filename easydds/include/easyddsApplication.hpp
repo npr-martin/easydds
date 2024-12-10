@@ -40,9 +40,9 @@ public:
     //! Trigger the end of execution
     virtual void stop() = 0;
 
-    virtual bool send(const std::string &msg) { return true; }
+    virtual bool send(const std::string &) { return true; }
 
-    virtual void onMessageReceived(const std::function<void(std::string)> &func) {}
+    virtual void onMessageReceived(const std::function<void(std::string)> &) {}
     
     virtual bool getIsStopped() = 0;
 

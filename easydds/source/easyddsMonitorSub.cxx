@@ -189,11 +189,11 @@ void easyddsMonitorSub::on_data_available(
 
 void easyddsMonitorSub::run()
 {
-    // std::unique_lock<std::mutex> lck(terminate_cv_mtx_);
-    // terminate_cv_.wait(lck, [this]
-    //         {
-    //             return is_stopped();
-    //         });
+    std::unique_lock<std::mutex> lck(terminate_cv_mtx_);
+    terminate_cv_.wait(lck, [this]
+            {
+                return is_stopped();
+            });
 }
 
 bool easyddsMonitorSub::getIsStopped()
@@ -209,5 +209,5 @@ bool easyddsMonitorSub::is_stopped()
 void easyddsMonitorSub::stop()
 {
     stop_.store(true);
-    // terminate_cv_.notify_all();
+    terminate_cv_.notify_all();
 }
