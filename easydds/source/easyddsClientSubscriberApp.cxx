@@ -129,8 +129,11 @@ void easyddsClientSubscriberApp::on_data_available(
     {
         if ((info.instance_state == ALIVE_INSTANCE_STATE) && info.valid_data)
         {
-            std::string printInfo = "Send [topic: " + m_topicName + "] Sample: " + std::to_string(m_sampleCount++) + "  \n";
-            receivedMsg(printInfo);
+            if (receivedMsg)
+            {
+                std::string printInfo = "Send [topic: " + m_topicName + "] Sample: " + std::to_string(m_sampleCount++) + "  \n";
+                receivedMsg(printInfo);
+            }
             std::cout << "sample received." << std::endl;
         }
         else

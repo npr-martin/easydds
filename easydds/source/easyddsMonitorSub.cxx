@@ -123,7 +123,7 @@ easyddsMonitorSub::easyddsMonitorSub(
         throw std::runtime_error("Employee DataReader initialization failed");
     }
 
-    std::cout << "create monitor finished" << std::endl;
+    // std::cout << "create monitor finished" << std::endl;
 }
 
 easyddsMonitorSub::~easyddsMonitorSub()
@@ -144,11 +144,11 @@ void easyddsMonitorSub::on_subscription_matched(
 {
     if (info.current_count_change == 1)
     {
-        std::cout << "Employee Subscriber matched." << std::endl;
+        // std::cout << "Monitor matched." << std::endl;
     }
     else if (info.current_count_change == -1)
     {
-        std::cout << "Employee Subscriber unmatched." << std::endl;
+        // std::cout << "Monitor unmatched." << std::endl;
     }
     else
     {
@@ -164,8 +164,16 @@ void easyddsMonitorSub::on_data_available(
     {
         dealSample<statistics::SentData>(reader, [=](statistics::SentData sample_){
             auto result = deserialize_sample_identity(sample_.sample_id());
-            std::cout << "SentData sample_identity = " << result.first + "|" + std::to_string(result.second)
-                      << ", msg = " << sample_.sent_msg() << std::endl;
+            std::string strString = result.first + "|" + std::to_string(result.second);
+            if(funcWriter_)
+            {
+                funcWriter_(strString, sample_.sent_msg());
+            }
+            else
+            {
+                std::cout << "SentData sample_identity = " << result.first + "|" + std::to_string(result.second)
+                          << ", msg = " << sample_.sent_msg() << std::endl;
+            }
         });
     }
     else if ("HISTORY_LATENCY_TOPIC" == m_topicName)
@@ -180,9 +188,17 @@ void easyddsMonitorSub::on_data_available(
     {
         dealSample<statistics::ReceivedData>(reader, [=](statistics::ReceivedData sample_){
             auto result = deserialize_sample_identity(sample_.sample_id());
+            std::string strString = result.first + "|" + std::to_string(result.second);
             auto readerID = deserialize_guid(sample_.reader_guid());
-            std::cout << "ReceivedData sample_identity = " << result.first + "|" + std::to_string(result.second)
-            << ", readerID = " << readerID << std::endl;
+            if (funcReader_)
+            {
+                funcReader_(strString, readerID);
+            }
+            else
+            {
+                std::cout << "ReceivedData sample_identity = " << result.first + "|" + std::to_string(result.second)
+                          << ", readerID = " << readerID << std::endl;
+            }
         });
     }
 }
@@ -199,6 +215,16 @@ void easyddsMonitorSub::run()
 bool easyddsMonitorSub::getIsStopped()
 {
     return is_stopped();
+}
+
+void easyddsMonitorSub::registerWriterOp(const std::function<void(std::string, std::string)> &func)
+{
+    funcWriter_ = func;
+}
+
+void easyddsMonitorSub::registerReaderOp(const std::function<void(std::string, std::string)> &func)
+{
+    funcReader_ = func;
 }
 
 bool easyddsMonitorSub::is_stopped()

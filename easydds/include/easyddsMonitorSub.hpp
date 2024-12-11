@@ -33,8 +33,10 @@
 #include "easydds.hpp"
 #include "easyddsApplication.hpp"
 
+using namespace eprosima::fastdds::dds;
+
 class easyddsMonitorSub : public easyddsApplication,
-        public eprosima::fastdds::dds::DataReaderListener
+        public DataReaderListener
 {
 public:
 
@@ -44,12 +46,12 @@ public:
 
     //! Subscription callback
     void on_data_available(
-            eprosima::fastdds::dds::DataReader* reader) override;
+            DataReader* reader) override;
 
     //! Subscriber matched method
     void on_subscription_matched(
-            eprosima::fastdds::dds::DataReader* reader,
-            const eprosima::fastdds::dds::SubscriptionMatchedStatus& info) override;
+            DataReader* reader,
+            const SubscriptionMatchedStatus& info) override;
 
     //! Run subscriber
     void run() override;
@@ -58,6 +60,9 @@ public:
     void stop() override;
 
     bool getIsStopped() override;
+
+    void registerWriterOp(const std::function<void(std::string, std::string)>& func);
+    void registerReaderOp(const std::function<void(std::string, std::string)>& func);
 
 private:
 
@@ -69,32 +74,35 @@ private:
 
     std::string m_topicName;
 
-    std::shared_ptr<eprosima::fastdds::dds::DomainParticipantFactory> factory_;
-    eprosima::fastdds::dds::DomainParticipant* participant_;
-    eprosima::fastdds::dds::Subscriber* subscriber_;
-    eprosima::fastdds::dds::Topic* topic_;
-    eprosima::fastdds::dds::DataReader* reader_;
-    eprosima::fastdds::dds::TypeSupport type_;
+    std::shared_ptr<DomainParticipantFactory> factory_;
+    DomainParticipant* participant_;
+    Subscriber* subscriber_;
+    Topic* topic_;
+    DataReader* reader_;
+    TypeSupport type_;
     uint16_t samples_received_;
     std::atomic<bool> stop_;
     mutable std::mutex terminate_cv_mtx_;
     std::condition_variable terminate_cv_;
+
+    std::function<void(std::string, std::string)> funcWriter_;
+    std::function<void(std::string, std::string)> funcReader_;
 };
 
 template <typename T>
 void easyddsMonitorSub::dealSample(DataReader* reader, std::function<void(T)> func)
 {
     T sample_;
-    eprosima::fastdds::dds::SampleInfo info;
+    SampleInfo info;
 
     while ((!is_stopped()) && (RETCODE_OK == reader->take_next_sample(&sample_, &info)))
     {
-        if ((info.instance_state == eprosima::fastdds::dds::ALIVE_INSTANCE_STATE)
+        if ((info.instance_state == ALIVE_INSTANCE_STATE)
              && info.valid_data)
         {
             func(sample_);
-            std::cout << "instanceHandle = " << info.instance_handle << std::endl;
-            std::cout << "pubInsHandle = " << info.publication_handle << std::endl;
+            // std::cout << "instanceHandle = " << info.instance_handle << std::endl;
+            // std::cout << "pubInsHandle = " << info.publication_handle << std::endl;
         }
     }
 }

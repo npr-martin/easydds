@@ -20,6 +20,7 @@
 #include <csignal>
 #include <stdexcept>
 #include <thread>
+#include <fstream>
 
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
 #include <fastdds/dds/log/Log.hpp>
@@ -35,22 +36,53 @@ void signal_handler(
 }
 
 int main(
-        int ,
-        char** )
+        int argc,
+        char** argv)
 {
-    std::shared_ptr<easyddsMonitorSub> app = 
-    easyddsApplication::createMoniterSubscriber(0, "HISTORY_LATENCY_TOPIC");
-    
+    // to make build finish
     std::string unUsed = transTopic(EASYDDS::monitorItems_default);
 
-    // std::thread thread(&easyddsApplication::run, app);
+    std::string fileName = "/home/mhy/monitor.txt";
+    if(argc > 1)
+    {
+        fileName = argv[1];
+    }
+    std::ofstream ofs;
+    ofs.open(fileName, std::ios::out);
 
-    std::cout << "Monitor HISTORY_LATENCY_TOPIC is running. Please press Ctrl+C to stop the monitor at any time." << std::endl;
+    if(!ofs.is_open())
+    {
+        std::cout << "open monitor file error. Please check the filePath: " << fileName << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::shared_ptr<easyddsMonitorSub> sentApp = 
+    easyddsApplication::createMoniterSubscriber(0, "SENT_DATA_TOPIC");
+    sentApp->registerWriterOp([&](std::string sampleIdentity, std::string msg){
+        // std::cout << "sampleIdentity = " << sampleIdentity << ", msg = " << msg << "." << std::endl;
+        ofs << "sampleIdentity = " << sampleIdentity << ", msg = " << msg << std::endl;
+    });
+
+    std::shared_ptr<easyddsMonitorSub> recvApp = 
+    easyddsApplication::createMoniterSubscriber(0, "RECEIVED_DATA_TOPIC");
+    recvApp->registerReaderOp([&](std::string sampleIdentity, std::string readerID){
+        // std::cout << "sampleIdentity = " << sampleIdentity << ", readerID = " << readerID << "." << std::endl;
+        ofs << "sampleIdentity = " << sampleIdentity << ", readerID = " << readerID << std::endl;
+    });
+
+    std::thread thread(&easyddsApplication::run, recvApp);
+
+    std::cout << "Monitor SENT_DATA_TOPIC&RECEIVED_DATA_TOPIC is running. "
+                 "Please press Ctrl+C to stop the monitor at any time."
+              << std::endl;
+    std::cout << "Monitor Information will be saved in " << fileName << std::endl;
 
     stop_app_handler = [&](int signum)
                 {
                     std::cout << signum << " received. Stop execution." << std::endl;
-                    app->stop();
+                    sentApp->stop();
+                    recvApp->stop();
+                    ofs.close();
                 };
 
         signal(SIGINT, signal_handler);
@@ -60,8 +92,8 @@ int main(
         signal(SIGHUP, signal_handler);
     #endif // _WIN32
 
-    app->run();
-    // thread.join();
+    thread.join();
+    sentApp->run();
     
     return EXIT_SUCCESS;
 }

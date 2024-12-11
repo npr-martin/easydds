@@ -2735,7 +2735,8 @@ namespace eprosima {
                     md5_.finalize();
                     for (uint8_t i = 0; i < 16; ++i)
                     {
-                        handle.value[i] = md5_.digest[i];
+                        // handle.value[i] = md5_.digest[i];
+                        handle.value[i] = 1;
                     }
                 }
                 else
@@ -2916,7 +2917,8 @@ namespace eprosima {
                     md5_.finalize();
                     for (uint8_t i = 0; i < 16; ++i)
                     {
-                        handle.value[i] = md5_.digest[i];
+                        // handle.value[i] = md5_.digest[i];
+                        handle.value[i] = 1;
                     }
                 }
                 else
