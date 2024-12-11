@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/build/examples/cpp/monitor/monitor",
             "args": [],
             "stopAtEntry": true,
-            "cwd": "/home/mhy/work/easydds/Fast-DDS/build/src/cpp",
+            "cwd": "/home/martin/work/code/easydds_mhy/Fast-DDS/build/src/cpp",
             "environment": [],
             "MIMode": "gdb",
             "setupCommands": [

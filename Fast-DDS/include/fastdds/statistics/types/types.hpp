@@ -2968,7 +2968,7 @@ public:
             SentData&& x) noexcept
     {
         m_sample_id = std::move(x.m_sample_id);
-        m_sent_msg = x.m_sent_msg;
+        m_sent_msg = std::move(x.m_sent_msg);
     }
 
     /*!
@@ -2995,7 +2995,7 @@ public:
     {
 
         m_sample_id = std::move(x.m_sample_id);
-        m_sent_msg = x.m_sent_msg;
+        m_sent_msg = std::move(x.m_sent_msg);
         return *this;
     }
 
@@ -3060,20 +3060,30 @@ public:
 
 
     /*!
-     * @brief This function sets a value in member sent_msg
-     * @param _sent_msg New value for member sent_msg
+     * @brief This function copies the value in member sent_msg
+     * @param _sent_msg New value to be copied in member sent_msg
      */
     eProsima_user_DllExport void sent_msg(
-            std::string _sent_msg)
+            const std::string& _sent_msg)
     {
         m_sent_msg = _sent_msg;
     }
 
     /*!
-     * @brief This function returns the value of member sent_msg
-     * @return Value of member sent_msg
+     * @brief This function moves the value in member sent_msg
+     * @param _sent_msg New value to be moved in member sent_msg
      */
-    eProsima_user_DllExport std::string sent_msg() const
+    eProsima_user_DllExport void sent_msg(
+            std::string&& _sent_msg)
+    {
+        m_sent_msg = std::move(_sent_msg);
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member sent_msg
+     * @return Constant reference to member sent_msg
+     */
+    eProsima_user_DllExport const std::string& sent_msg() const
     {
         return m_sent_msg;
     }
@@ -3138,7 +3148,7 @@ public:
             ReceivedData&& x) noexcept
     {
         m_sample_id = std::move(x.m_sample_id);
-        m_reader_guid = x.m_reader_guid;
+        m_reader_guid = std::move(x.m_reader_guid);
     }
 
     /*!
@@ -3165,7 +3175,7 @@ public:
     {
 
         m_sample_id = std::move(x.m_sample_id);
-        m_reader_guid = x.m_reader_guid;
+        m_reader_guid = std::move(x.m_reader_guid);
         return *this;
     }
 
@@ -3230,20 +3240,30 @@ public:
 
 
     /*!
-     * @brief This function sets a value in member reader_guid
-     * @param _reader_guid New value for member reader_guid
+     * @brief This function copies the value in member reader_guid
+     * @param _reader_guid New value to be copied in member reader_guid
      */
     eProsima_user_DllExport void reader_guid(
-            detail::GUID_s _reader_guid)
+            const detail::GUID_s& _reader_guid)
     {
         m_reader_guid = _reader_guid;
     }
 
     /*!
-     * @brief This function returns the value of member reader_guid
-     * @return Value of member reader_guid
+     * @brief This function moves the value in member reader_guid
+     * @param _reader_guid New value to be moved in member reader_guid
      */
-    eProsima_user_DllExport detail::GUID_s reader_guid() const
+    eProsima_user_DllExport void reader_guid(
+            detail::GUID_s&& _reader_guid)
+    {
+        m_reader_guid = std::move(_reader_guid);
+    }
+
+    /*!
+     * @brief This function returns a constant reference to member reader_guid
+     * @return Constant reference to member reader_guid
+     */
+    eProsima_user_DllExport const detail::GUID_s& reader_guid() const
     {
         return m_reader_guid;
     }
@@ -3257,13 +3277,14 @@ public:
         return m_reader_guid;
     }
 
+
+
 private:
 
     detail::SampleIdentity_s m_sample_id;
     detail::GUID_s m_reader_guid;
 
 };
-
 namespace EventKind {
 
 const uint32_t HISTORY2HISTORY_LATENCY = 0x1;
@@ -3324,45 +3345,46 @@ public:
 
         switch (x.selected_member_)
         {
-        case 0x00000001:
-            writer_reader_data_() = x.m_writer_reader_data;
-            break;
+                        case 0x00000001:
+                            writer_reader_data_() = x.m_writer_reader_data;
+                            break;
 
-        case 0x00000002:
-            locator2locator_data_() = x.m_locator2locator_data;
-            break;
+                        case 0x00000002:
+                            locator2locator_data_() = x.m_locator2locator_data;
+                            break;
 
-        case 0x00000003:
-            entity_data_() = x.m_entity_data;
-            break;
+                        case 0x00000003:
+                            entity_data_() = x.m_entity_data;
+                            break;
 
-        case 0x00000004:
-            entity2locator_traffic_() = x.m_entity2locator_traffic;
-            break;
+                        case 0x00000004:
+                            entity2locator_traffic_() = x.m_entity2locator_traffic;
+                            break;
 
-        case 0x00000005:
-            entity_count_() = x.m_entity_count;
-            break;
+                        case 0x00000005:
+                            entity_count_() = x.m_entity_count;
+                            break;
 
-        case 0x00000006:
-            discovery_time_() = x.m_discovery_time;
-            break;
+                        case 0x00000006:
+                            discovery_time_() = x.m_discovery_time;
+                            break;
 
-        case 0x00000007:
-            sample_identity_count_() = x.m_sample_identity_count;
-            break;
+                        case 0x00000007:
+                            sample_identity_count_() = x.m_sample_identity_count;
+                            break;
 
-        case 0x00000008:
-            physical_data_() = x.m_physical_data;
-            break;
+                        case 0x00000008:
+                            physical_data_() = x.m_physical_data;
+                            break;
 
-        case 0x00000009:
-            sent_data_() = x.m_sent_data;
-            break;
+                        case 0x00000009:
+                            sent_data_() = x.m_sent_data;
+                            break;
 
-        case 0x0000000A:
-            received_data_() = x.m_received_data;
-            break;
+                        case 0x0000000a:
+                            received_data_() = x.m_received_data;
+                            break;
+
         }
     }
 
@@ -3377,45 +3399,46 @@ public:
 
         switch (x.selected_member_)
         {
-        case 0x00000001:
-            writer_reader_data_() = std::move(x.m_writer_reader_data);
-            break;
+                        case 0x00000001:
+                            writer_reader_data_() = std::move(x.m_writer_reader_data);
+                            break;
 
-        case 0x00000002:
-            locator2locator_data_() = std::move(x.m_locator2locator_data);
-            break;
+                        case 0x00000002:
+                            locator2locator_data_() = std::move(x.m_locator2locator_data);
+                            break;
 
-        case 0x00000003:
-            entity_data_() = std::move(x.m_entity_data);
-            break;
+                        case 0x00000003:
+                            entity_data_() = std::move(x.m_entity_data);
+                            break;
 
-        case 0x00000004:
-            entity2locator_traffic_() = std::move(x.m_entity2locator_traffic);
-            break;
+                        case 0x00000004:
+                            entity2locator_traffic_() = std::move(x.m_entity2locator_traffic);
+                            break;
 
-        case 0x00000005:
-            entity_count_() = std::move(x.m_entity_count);
-            break;
+                        case 0x00000005:
+                            entity_count_() = std::move(x.m_entity_count);
+                            break;
 
-        case 0x00000006:
-            discovery_time_() = std::move(x.m_discovery_time);
-            break;
+                        case 0x00000006:
+                            discovery_time_() = std::move(x.m_discovery_time);
+                            break;
 
-        case 0x00000007:
-            sample_identity_count_() = std::move(x.m_sample_identity_count);
-            break;
+                        case 0x00000007:
+                            sample_identity_count_() = std::move(x.m_sample_identity_count);
+                            break;
 
-        case 0x00000008:
-            physical_data_() = std::move(x.m_physical_data);
-            break;
+                        case 0x00000008:
+                            physical_data_() = std::move(x.m_physical_data);
+                            break;
 
-        case 0x00000009:
-            sent_data_() = std::move(x.m_sent_data);
-            break;
+                        case 0x00000009:
+                            sent_data_() = std::move(x.m_sent_data);
+                            break;
 
-        case 0x0000000A:
-            received_data_() = std::move(x.m_received_data);
-            break;
+                        case 0x0000000a:
+                            received_data_() = std::move(x.m_received_data);
+                            break;
+
         }
     }
 
@@ -3430,45 +3453,46 @@ public:
 
         switch (x.selected_member_)
         {
-        case 0x00000001:
-            writer_reader_data_() = x.m_writer_reader_data;
-            break;
+                        case 0x00000001:
+                            writer_reader_data_() = x.m_writer_reader_data;
+                            break;
 
-        case 0x00000002:
-            locator2locator_data_() = x.m_locator2locator_data;
-            break;
+                        case 0x00000002:
+                            locator2locator_data_() = x.m_locator2locator_data;
+                            break;
 
-        case 0x00000003:
-            entity_data_() = x.m_entity_data;
-            break;
+                        case 0x00000003:
+                            entity_data_() = x.m_entity_data;
+                            break;
 
-        case 0x00000004:
-            entity2locator_traffic_() = x.m_entity2locator_traffic;
-            break;
+                        case 0x00000004:
+                            entity2locator_traffic_() = x.m_entity2locator_traffic;
+                            break;
 
-        case 0x00000005:
-            entity_count_() = x.m_entity_count;
-            break;
+                        case 0x00000005:
+                            entity_count_() = x.m_entity_count;
+                            break;
 
-        case 0x00000006:
-            discovery_time_() = x.m_discovery_time;
-            break;
+                        case 0x00000006:
+                            discovery_time_() = x.m_discovery_time;
+                            break;
 
-        case 0x00000007:
-            sample_identity_count_() = x.m_sample_identity_count;
-            break;
+                        case 0x00000007:
+                            sample_identity_count_() = x.m_sample_identity_count;
+                            break;
 
-        case 0x00000008:
-            physical_data_() = x.m_physical_data;
-            break;
+                        case 0x00000008:
+                            physical_data_() = x.m_physical_data;
+                            break;
 
-        case 0x00000009:
-            sent_data_() = x.m_sent_data;
-            break;
+                        case 0x00000009:
+                            sent_data_() = x.m_sent_data;
+                            break;
 
-        case 0x0000000A:
-            received_data_() = x.m_received_data;
-            break;
+                        case 0x0000000a:
+                            received_data_() = x.m_received_data;
+                            break;
+
         }
 
         return *this;
@@ -3485,45 +3509,46 @@ public:
 
         switch (x.selected_member_)
         {
-        case 0x00000001:
-            writer_reader_data_() = std::move(x.m_writer_reader_data);
-            break;
+                        case 0x00000001:
+                            writer_reader_data_() = std::move(x.m_writer_reader_data);
+                            break;
 
-        case 0x00000002:
-            locator2locator_data_() = std::move(x.m_locator2locator_data);
-            break;
+                        case 0x00000002:
+                            locator2locator_data_() = std::move(x.m_locator2locator_data);
+                            break;
 
-        case 0x00000003:
-            entity_data_() = std::move(x.m_entity_data);
-            break;
+                        case 0x00000003:
+                            entity_data_() = std::move(x.m_entity_data);
+                            break;
 
-        case 0x00000004:
-            entity2locator_traffic_() = std::move(x.m_entity2locator_traffic);
-            break;
+                        case 0x00000004:
+                            entity2locator_traffic_() = std::move(x.m_entity2locator_traffic);
+                            break;
 
-        case 0x00000005:
-            entity_count_() = std::move(x.m_entity_count);
-            break;
+                        case 0x00000005:
+                            entity_count_() = std::move(x.m_entity_count);
+                            break;
 
-        case 0x00000006:
-            discovery_time_() = std::move(x.m_discovery_time);
-            break;
+                        case 0x00000006:
+                            discovery_time_() = std::move(x.m_discovery_time);
+                            break;
 
-        case 0x00000007:
-            sample_identity_count_() = std::move(x.m_sample_identity_count);
-            break;
+                        case 0x00000007:
+                            sample_identity_count_() = std::move(x.m_sample_identity_count);
+                            break;
 
-        case 0x00000008:
-            physical_data_() = std::move(x.m_physical_data);
-            break;
+                        case 0x00000008:
+                            physical_data_() = std::move(x.m_physical_data);
+                            break;
 
-        case 0x00000009:
-            sent_data_() = std::move(x.m_sent_data);
-            break;
+                        case 0x00000009:
+                            sent_data_() = std::move(x.m_sent_data);
+                            break;
 
-        case 0x0000000A:
-            received_data_() = std::move(x.m_received_data);
-            break;
+                        case 0x0000000a:
+                            received_data_() = std::move(x.m_received_data);
+                            break;
+
         }
 
         return *this;
@@ -3546,45 +3571,46 @@ public:
                 {
                     switch (selected_member_)
                     {
-                    case 0x00000001:
-                        ret_value = (x.m_writer_reader_data == m_writer_reader_data);
-                        break;
+                                                    case 0x00000001:
+                                                        ret_value = (x.m_writer_reader_data == m_writer_reader_data);
+                                                        break;
 
-                    case 0x00000002:
-                        ret_value = (x.m_locator2locator_data == m_locator2locator_data);
-                        break;
+                                                    case 0x00000002:
+                                                        ret_value = (x.m_locator2locator_data == m_locator2locator_data);
+                                                        break;
 
-                    case 0x00000003:
-                        ret_value = (x.m_entity_data == m_entity_data);
-                        break;
+                                                    case 0x00000003:
+                                                        ret_value = (x.m_entity_data == m_entity_data);
+                                                        break;
 
-                    case 0x00000004:
-                        ret_value = (x.m_entity2locator_traffic == m_entity2locator_traffic);
-                        break;
+                                                    case 0x00000004:
+                                                        ret_value = (x.m_entity2locator_traffic == m_entity2locator_traffic);
+                                                        break;
 
-                    case 0x00000005:
-                        ret_value = (x.m_entity_count == m_entity_count);
-                        break;
+                                                    case 0x00000005:
+                                                        ret_value = (x.m_entity_count == m_entity_count);
+                                                        break;
 
-                    case 0x00000006:
-                        ret_value = (x.m_discovery_time == m_discovery_time);
-                        break;
+                                                    case 0x00000006:
+                                                        ret_value = (x.m_discovery_time == m_discovery_time);
+                                                        break;
 
-                    case 0x00000007:
-                        ret_value = (x.m_sample_identity_count == m_sample_identity_count);
-                        break;
+                                                    case 0x00000007:
+                                                        ret_value = (x.m_sample_identity_count == m_sample_identity_count);
+                                                        break;
 
-                    case 0x00000008:
-                        ret_value = (x.m_physical_data == m_physical_data);
-                        break;
+                                                    case 0x00000008:
+                                                        ret_value = (x.m_physical_data == m_physical_data);
+                                                        break;
 
-                    case 0x00000009:
-                        ret_value = (x.m_sent_data == m_sent_data);
-                        break;
+                                                    case 0x00000009:
+                                                        ret_value = (x.m_sent_data == m_sent_data);
+                                                        break;
 
-                    case 0x0000000A:
-                        ret_value = (x.m_received_data == m_received_data);
-                        break;
+                                                    case 0x0000000a:
+                                                        ret_value = (x.m_received_data == m_received_data);
+                                                        break;
+
                     }
                 }
             }
@@ -3692,7 +3718,7 @@ public:
                             break;
 
                         case EventKind::RECEIVED_DATA:
-                            if (0x0000000A == selected_member_)
+                            if (0x0000000a == selected_member_)
                             {
                                 valid_discriminator = true;
                             }
@@ -4140,6 +4166,7 @@ public:
         return m_physical_data;
     }
 
+
     /*!
      * @brief This function copies the value in member sent_data
      * @param _sent_data New value to be copied in member sent_data
@@ -4192,6 +4219,7 @@ public:
         return m_sent_data;
     }
 
+
     /*!
      * @brief This function copies the value in member received_data
      * @param _received_data New value to be copied in member received_data
@@ -4221,7 +4249,7 @@ public:
      */
     eProsima_user_DllExport const ReceivedData& received_data() const
     {
-        if (0x0000000A != selected_member_)
+        if (0x0000000a != selected_member_)
         {
             throw eprosima::fastcdr::exception::BadParamException("This member has not been selected");
         }
@@ -4236,13 +4264,14 @@ public:
      */
     eProsima_user_DllExport ReceivedData& received_data()
     {
-        if (0x0000000A != selected_member_)
+        if (0x0000000a != selected_member_)
         {
             throw eprosima::fastcdr::exception::BadParamException("This member has not been selected");
         }
 
         return m_received_data;
     }
+
 
     void _default()
     {
@@ -4448,14 +4477,14 @@ private:
 
             ReceivedData& received_data_()
             {
-                if (0x0000000A != selected_member_)
+                if (0x0000000a != selected_member_)
                 {
                     if (member_destructor_)
                     {
                         member_destructor_();
                     }
 
-                    selected_member_ = 0x0000000A;
+                    selected_member_ = 0x0000000a;
                     member_destructor_ = [&]()
                     {
                         m_received_data.~ReceivedData();
@@ -4466,6 +4495,7 @@ private:
 
                 return m_received_data;
             }
+
 
     uint32_t m__d {2147483647};
 

@@ -81,3 +81,4 @@ Thumbs.db
 *.exe
 
 Easy-DDS-Test/build-EDTest-Desktop_Qt_5_12_9_GCC_64bit-Release/EDTest
+Fast-DDS/.vscode/launch.json
