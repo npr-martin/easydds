@@ -147,12 +147,11 @@ bool easyddsClientPublisherApp::send(const std::string &msg)
 {
     bool ret = false;
 
-    if (!is_stopped())
+    if (!is_stopped() && matched_> 0)
     {
         Employee sample_(msg);
-        // const clock_t begin_time = clock();
+
         ret = (RETCODE_OK == writer_->write(&sample_));
-        // float mseconds = float(clock() - begin_time);
     }
     return ret;
 }

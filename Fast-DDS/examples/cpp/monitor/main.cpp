@@ -42,7 +42,7 @@ int main(
     // to make build finish
     std::string unUsed = transTopic(EASYDDS::monitorItems_default);
 
-    std::string fileName = "/home/mhy/monitor.txt";
+    std::string fileName = "./monitor.txt";
     if(argc > 1)
     {
         fileName = argv[1];
@@ -60,14 +60,18 @@ int main(
     easyddsApplication::createMoniterSubscriber(0, "SENT_DATA_TOPIC");
     sentApp->registerWriterOp([&](std::string sampleIdentity, std::string msg){
         // std::cout << "sampleIdentity = " << sampleIdentity << ", msg = " << msg << "." << std::endl;
-        ofs << "sampleIdentity = " << sampleIdentity << ", msg = " << msg << std::endl;
+        std::string sentInfo;
+        sentInfo = "sampleIdentity = " + sampleIdentity + ", msg = " + msg + "\n";
+        ofs << sentInfo;
     });
 
     std::shared_ptr<easyddsMonitorSub> recvApp = 
     easyddsApplication::createMoniterSubscriber(0, "RECEIVED_DATA_TOPIC");
     recvApp->registerReaderOp([&](std::string sampleIdentity, std::string readerID){
         // std::cout << "sampleIdentity = " << sampleIdentity << ", readerID = " << readerID << "." << std::endl;
-        ofs << "sampleIdentity = " << sampleIdentity << ", readerID = " << readerID << std::endl;
+        std::string recvInfo;
+        recvInfo = "sampleIdentity = " + sampleIdentity + ", readerID = " + readerID + "\n";
+        ofs << recvInfo;
     });
 
     std::thread thread(&easyddsApplication::run, recvApp);

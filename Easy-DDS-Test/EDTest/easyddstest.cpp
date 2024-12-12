@@ -603,10 +603,17 @@ void EasyDDSTest::sendText(const std::shared_ptr<easyddsClientPublisherApp> &app
         int sampleCount = 0;
         while(!app->getIsStopped())
         {
-            app->send(source);
-            std::string printInfo = "Send [topic: " + topicName.toStdString() + "] Sample: "
-                    + std::to_string(sampleCount++) + "  \n";
-            std::cout << printInfo;
+            if(app->send(source))
+            {
+                std::string printInfo = "Send [topic: " + topicName.toStdString() + "] Sample: "
+                        + std::to_string(sampleCount++) + "  \n";
+                std::cout << printInfo;
+            }
+            else
+            {
+
+            }
+
             QApplication::processEvents(QEventLoop::AllEvents, frequency);
             std::this_thread::sleep_for(std::chrono::milliseconds(frequency));
         }
