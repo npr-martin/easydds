@@ -607,7 +607,7 @@ void EasyDDSTest::processMappedData(uchar *ptr, qint64 bytesToMap)
     QString pic = QString::fromUtf8(reinterpret_cast<char*>(ptr), bytesToMap);
     m_source.append(pic);
 }
-
+ource.toStdString())
 void EasyDDSTest::sendText(const std::shared_ptr<easyddsClientPublisherApp> &app, QString topicName,
                            int frequency, const QString& source)
 {

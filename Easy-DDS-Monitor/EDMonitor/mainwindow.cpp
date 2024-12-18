@@ -14,9 +14,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->twSample->setColumnCount(2);
-    ui->twSample->setHorizontalHeaderLabels({"序列号", "？"});
-    ui->twSample->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->twSample->setColumnCount(4);
+    ui->twSample->setHorizontalHeaderLabels({"写入者", "序列号", "消息内容", "读取者"});
+    ui->twSample->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->twSample->verticalHeader()->setVisible(false);
 }
 
@@ -109,6 +109,7 @@ bool MainWindow::praseLine(const QString &line)
                 int seqNum = si.first;
                 QString strWriter = si.second;
                 m_mapWriter2NumMsg[strWriter].append(MapInfo(seqNum, strMessage));
+                m_mapNumWriter2Msg[MapInfo(seqNum, strWriter)] = strMessage;
             }
             else
             {
@@ -138,7 +139,8 @@ void MainWindow::updateUI()
             = [=](QStringList list, QString text, QListWidget* lw){
         for(int i = 0; i < list.size(); ++i)
         {
-            QListWidgetItem* item = new QListWidgetItem(text + QString::number(i));
+            QListWidgetItem* item = new QListWidgetItem(QString("%1%2 [%3]").arg(text).arg(i)
+                                                        .arg(list[i]));
             item->setToolTip(list[i]);
             item->setStatusTip(list[i]);
             lw->addItem(item);
@@ -186,65 +188,70 @@ void MainWindow::updateSampleTable()
     QStringList selectedWriters = getSelectedWriters();
     QStringList selectedReaders = getSelectedReaders();
 
-    QVector<MapInfo> infos;
-    QVector<MapInfo> unRecvInfos;
-    QVector<QStringList> readerInfos;
+    // WriterText, SeqNum, Msg, ReaderText
+    using TableInfo = std::tuple<QString, int, QString, QString>;
 
-    bool showDetails = false;
-    bool onlyReader = false;
+    QVector<TableInfo> infos;
+    QVector<TableInfo> unRecvInfos;
 
+    //仅选择写入者
     if(selectedReaders.isEmpty())
     {
-        ui->twSample->setColumnCount(3);
-        ui->twSample->setHorizontalHeaderLabels({"序列号", "信息内容", "读取者列表"});
-        showDetails = true;
         for(auto key : m_mapWriter2NumMsg.keys())
         {
             if(selectedWriters.contains(key))
             {
                 auto numMsgs = m_mapWriter2NumMsg.value(key);
-                infos.append(numMsgs);
+                // info: SeqNum&Msg
                 for(auto info : numMsgs)
                 {
-                    readerInfos.append(m_mapNumWriter2Reader.value(MapInfo(info.first, key)).toList());
+                    QStringList readerInfoList = m_mapNumWriter2Reader.value(MapInfo(info.first, key)).toList();
+                    QString readerText = transReader(readerInfoList);
+                    infos.append(std::make_tuple(transWriter(key), info.first, info.second, readerText));
                 }
             }
         }
     }
+    //仅选择读取者
     else if(selectedWriters.isEmpty())
     {
-        onlyReader = true;
-        ui->twSample->setColumnCount(2);
-        ui->twSample->setHorizontalHeaderLabels({"序列号", "写入者编号"});
         for(auto key : m_mapReader2Num.keys())
         {
             if(selectedReaders.contains(key))
             {
-                infos.append(m_mapReader2Num.value(key));
+                // vector(SeqNum&WriterID)
+                auto swList = m_mapReader2Num.value(key);
+                for(auto seqAndWriter : swList)
+                {
+                    infos.append(std::make_tuple(transWriter(seqAndWriter.second), seqAndWriter.first,
+                                                 m_mapNumWriter2Msg.value(seqAndWriter), transReader(key)));
+                }
             }
         }
     }
     else
     {
-        ui->twSample->setColumnCount(2);
-        ui->twSample->setHorizontalHeaderLabels({"序列号", "信息内容"});
         for(auto writerID : m_mapWriter2NumMsg.keys())
         {
             if(selectedWriters.contains(writerID))
             {
                 QVector<MapInfo> vecWriterMsgs = m_mapWriter2NumMsg.value(writerID);
+                // SeqNum&Message
                 for(MapInfo writerMsg : vecWriterMsgs)
                 {
+                    // ReaderList
                     auto vecRecvs = m_mapNumWriter2Reader.value(MapInfo(writerMsg.first, writerID));
+                    TableInfo tableInfo = std::make_tuple(transWriter(writerID), writerMsg.first,
+                                                          writerMsg.second, transReader(vecRecvs.toList()));
                     // 如果当前所选信息的接受者内包含所选项
                     if(anyInVecs(vecRecvs, selectedReaders))
                     {
-                        infos.append(writerMsg);
+                        infos.append(tableInfo);
                     }
                     // 检查Writer与Reader是否匹配
                     else if(anyInSet(m_mapWriter2Reader.value(writerID), selectedReaders))
                     {
-                        unRecvInfos.append(writerMsg);
+                        unRecvInfos.append(tableInfo);
                     }
                 }
             }
@@ -257,22 +264,28 @@ void MainWindow::updateSampleTable()
     // 已接收的消息
     for(; row < infos.size(); ++row)
     {
-        ui->twSample->setItem(row, 0, new QTableWidgetItem(QString::number(infos[row].first)));
-        ui->twSample->setItem(row, 1, new QTableWidgetItem(onlyReader ? transWriter(infos[row].second) : infos[row].second));
-        if(showDetails)
-        {
-            ui->twSample->setItem(row, 2, new QTableWidgetItem(transReader(readerInfos[row])));
-        }
+        int index = 0;
+
+        ui->twSample->setItem(row, index++, new QTableWidgetItem(std::get<0>(infos[row])));
+        ui->twSample->setItem(row, index++, new QTableWidgetItem(QString::number(std::get<1>(infos[row]))));
+        ui->twSample->setItem(row, index++, new QTableWidgetItem(std::get<2>(infos[row])));
+        ui->twSample->setItem(row, index++, new QTableWidgetItem(std::get<3>(infos[row])));
     }
     // 未接收的消息
     for(int i = 0; i < unRecvInfos.size(); ++i)
     {
-        auto itemSeq = new QTableWidgetItem(QString::number(unRecvInfos[i].first));
-        auto itemMsg = new QTableWidgetItem(unRecvInfos[i].second);
+        auto itemWriter = new QTableWidgetItem(std::get<0>(unRecvInfos[i]));
+        auto itemSeq    = new QTableWidgetItem(QString::number(std::get<1>(unRecvInfos[i])));
+        auto itemMsg    = new QTableWidgetItem(std::get<2>(unRecvInfos[i]));
+        auto itemReader = new QTableWidgetItem(std::get<3>(unRecvInfos[i]));
+        itemWriter->setTextColor(Qt::gray);
         itemSeq->setTextColor(Qt::gray);
         itemMsg->setTextColor(Qt::gray);
-        ui->twSample->setItem(row + i, 0, itemSeq);
-        ui->twSample->setItem(row + i, 1, itemMsg);
+        itemReader->setTextColor(Qt::gray);
+        ui->twSample->setItem(row + i, 0, itemWriter);
+        ui->twSample->setItem(row + i, 1, itemSeq);
+        ui->twSample->setItem(row + i, 2, itemMsg);
+        ui->twSample->setItem(row + i, 3, itemReader);
     }
 }
 
@@ -314,13 +327,18 @@ QString MainWindow::transReader(const QStringList &list)
     return strReaderList.join(", ");
 }
 
+QString MainWindow::transReader(const QString &readerID)
+{
+    return transReader(QStringList{readerID});
+}
+
 QString MainWindow::transWriter(const QString &writerID)
 {
     QStringList writerList = m_mapWriter2NumMsg.keys();
     int index = writerList.indexOf(writerID);
     if(index != -1)
     {
-        return "reader" + QString::number(index);
+        return "writer" + QString::number(index);
     }
     else
     {

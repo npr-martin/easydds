@@ -32,7 +32,8 @@ public:
 
 signals:
     void setCoutText(const QString& text);
-    void sendTextSignal(const std::shared_ptr<easyddsClientPublisherApp> &app , QString topicName, int frequency, const QString& source);
+    void sendTextSignal(const std::shared_ptr<easyddsClientPublisherApp> &app , QString topicName,
+                        int frequency, const QString& source);
 private slots:
     void on_pushButton_clicked();
 

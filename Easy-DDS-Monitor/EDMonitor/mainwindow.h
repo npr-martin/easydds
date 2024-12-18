@@ -46,16 +46,18 @@ private:
     bool anyInSet(const QSet<QString>& setBase, const QStringList& vecCheck);
 
     QString transReader(const QStringList& list);
+    QString transReader(const QString& readerID);
     QString transWriter(const QString& writerID);
 
 private:
     Ui::MainWindow *ui;
 
-    QMap<QString, QVector<MapInfo> > m_mapWriter2NumMsg; ///< WriterID->SequenceNum&Message
-    QMap<QString, QVector<MapInfo> > m_mapReader2Num; ///< ReaderID->SequenceNum&WriterID
+    QMap<QString, QVector<MapInfo> > m_mapWriter2NumMsg;    ///< WriterID->SequenceNum&Message
+    QMap<QString, QVector<MapInfo> > m_mapReader2Num;       ///< ReaderID->SequenceNum&WriterID
 
     QMap<MapInfo, QVector<QString> > m_mapNumWriter2Reader; ///< SequenceNum&WriterID->ReaderID
-    QMap<QString, QSet<QString> > m_mapWriter2Reader; ///< WriterID->ReaderID
+    QMap<MapInfo, QString> m_mapNumWriter2Msg;              ///< SequenceNum&WriterID->Message
+    QMap<QString, QSet<QString> > m_mapWriter2Reader;       ///< WriterID->ReaderID
 
     QMap<QString, int> m_mapFileIndex;
 
