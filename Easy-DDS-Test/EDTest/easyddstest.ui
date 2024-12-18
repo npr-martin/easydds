@@ -14,7 +14,7 @@
    <string>EasyDDSTest</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_3" columnstretch="2,0,0">
+   <layout class="QGridLayout" name="gridLayout_3" columnstretch="2,1,1">
     <item row="0" column="2">
      <layout class="QVBoxLayout" name="verticalLayout_6" stretch="1,10">
       <property name="spacing">

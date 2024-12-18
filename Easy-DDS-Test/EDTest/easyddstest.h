@@ -32,7 +32,7 @@ public:
 
 signals:
     void setCoutText(const QString& text);
-    void sendTextSignal(const std::shared_ptr<easyddsClientPublisherApp> &app , QString topicName, int frequency, std::string source);
+    void sendTextSignal(const std::shared_ptr<easyddsClientPublisherApp> &app , QString topicName, int frequency, const QString& source);
 private slots:
     void on_pushButton_clicked();
 
@@ -57,14 +57,14 @@ private slots:
 private:
     void initInvisible();
 
-    void addInfoTab(const QString& topicName, int frequency = 500, std::string source = "");
+    void addInfoTab(const QString& topicName, int frequency = 500, const QString& source = "");
 
     void createApp(int domain_id, const QString& topicName,
-                   int frequency = 500, std::string source = "",
+                   int frequency = 500, const QString& source = "",
                    int curRow = 0, bool addRow = true);
 
     void createPubliserApp(int domain_id, const QString& topicName,
-                           int frequency = 500, std::string source = "",
+                           int frequency = 500, const QString& source = "",
                            int curRow = 0,
                            bool addRow = true);
     void createSubscriberApp(int domain_id, const QString& topicName,
@@ -96,8 +96,11 @@ private:
     void addText(const QString& text);
 
     void setWidgetsVisible(const QVector<QWidget*> widgets, bool visible = true);
+
+    void processMappedData(uchar* ptr, qint64 bytesToMap);
+
 public slots:
-    void sendText(const std::shared_ptr<easyddsClientPublisherApp> &app, QString topicName, int frequency = 500, std::string source = "");
+    void sendText(const std::shared_ptr<easyddsClientPublisherApp> &app, QString topicName, int frequency = 500, const QString& source = "");
 
     static void printRecvMsg(std::string message);
 private:
@@ -110,7 +113,7 @@ private:
     QVector< std::shared_ptr<easyddsMonitorSub> > m_monitorInfos;
     std::shared_ptr<qtStreamBuf> buffer;
 
-    std::string m_source;
+    QString m_source;
 
     std::string m_monitorTopic;
     std::string m_kindName;

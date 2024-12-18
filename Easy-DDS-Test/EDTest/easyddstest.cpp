@@ -8,6 +8,8 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QEventLoop>
+#include <QStandardPaths>
+
 #include <thread>
 #include <iostream>
 #include "qosdialog.h"
@@ -44,9 +46,12 @@ EasyDDSTest::EasyDDSTest(QWidget *parent)
     connect(this, &EasyDDSTest::sendTextSignal, this, & EasyDDSTest::sendText, Qt::QueuedConnection);
 
     // First remove previous executions file
+#if 0
     pid_t pid = getpid();
 
-    std::string logName = "/home/mhy/append_" + std::to_string(pid) + ".log";
+    QString homePath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+
+    std::string logName = homePath.toStdString() + "/append_" + std::to_string(pid) + ".log";
 
     std::remove(logName.c_str());
 
@@ -54,6 +59,7 @@ EasyDDSTest::EasyDDSTest(QWidget *parent)
     Log::RegisterConsumer(std::unique_ptr<LogConsumer>(new FileConsumer(logName)));
     Log::ReportFunctions(true);
     Log::SetVerbosity(Log::Info);
+#endif
 }
 
 EasyDDSTest::~EasyDDSTest()
@@ -91,7 +97,7 @@ void EasyDDSTest::on_pushButton_clicked()
     }
 }
 
-void EasyDDSTest::addInfoTab(const QString &topicName, int frequency, std::string source)
+void EasyDDSTest::addInfoTab(const QString &topicName, int frequency, const QString& source)
 {
     int rowNum = ui->tableWidget->rowCount();
 
@@ -137,7 +143,7 @@ void EasyDDSTest::addInfoTab(const QString &topicName, int frequency, std::strin
     ui->tableWidget->setItem(rowNum, 3, new QTableWidgetItem());
 }
 
-void EasyDDSTest::createApp(int domain_id, const QString &topicName, int frequency, std::string source, int curRow, bool addRow)
+void EasyDDSTest::createApp(int domain_id, const QString &topicName, int frequency, const QString& source, int curRow, bool addRow)
 {
     if("publisher" == m_kindName)
     {
@@ -160,7 +166,7 @@ void EasyDDSTest::createApp(int domain_id, const QString &topicName, int frequen
 }
 
 void EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int frequency,
-                                    std::string source, int curRow, bool addRow)
+                                    const QString& source, int curRow, bool addRow)
 {
     std::shared_ptr<easyddsClientPublisherApp> app = nullptr;
     if(!topicName.isEmpty())
@@ -596,26 +602,36 @@ void EasyDDSTest::setWidgetsVisible(const QVector<QWidget *> widgets, bool visib
     }
 }
 
+void EasyDDSTest::processMappedData(uchar *ptr, qint64 bytesToMap)
+{
+    QString pic = QString::fromUtf8(reinterpret_cast<char*>(ptr), bytesToMap);
+    m_source.append(pic);
+}
+
 void EasyDDSTest::sendText(const std::shared_ptr<easyddsClientPublisherApp> &app, QString topicName,
-                           int frequency, std::string source)
+                           int frequency, const QString& source)
 {
     std::thread t([=]() {
         int sampleCount = 0;
         while(!app->getIsStopped())
         {
-            if(app->send(source))
+            try
             {
-                std::string printInfo = "Send [topic: " + topicName.toStdString() + "] Sample: "
-                        + std::to_string(sampleCount++) + "  \n";
-                std::cout << printInfo;
+                if(app->send(source.toStdString()))
+                {
+                    std::string printInfo = "Send [topic: " + topicName.toStdString() + "] Sample: "
+                            + std::to_string(sampleCount++) + "  \n";
+                    std::cout << printInfo;
+                }
+
+                QApplication::processEvents(QEventLoop::AllEvents, frequency);
+                std::this_thread::sleep_for(std::chrono::milliseconds(frequency));
             }
-            else
+            catch (std::exception e)
             {
-
+                std::cout << "Send Data Error: " << e.what();
+                break;
             }
-
-            QApplication::processEvents(QEventLoop::AllEvents, frequency);
-            std::this_thread::sleep_for(std::chrono::milliseconds(frequency));
         }
     });
     t.detach();
@@ -639,17 +655,27 @@ void EasyDDSTest::on_pushButton_3_clicked()
 
 void EasyDDSTest::on_pushButton_4_clicked()
 {
-    QString file = QFileDialog::getOpenFileName(this, "Source", "", "*.txt");
+    QString homePath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+
+    QString file = QFileDialog::getOpenFileName(this, "Source", homePath, "*.txt");
     if(!file.isEmpty())
     {
         ui->lineEdit_2->setText(file);
 
         QFile f(file);
-        if(f.open(QFile::ReadOnly))
+        if(f.open(QFile::ReadWrite))
         {
-            m_source = QString(f.readAll()).toStdString();
-            // std::cout << "source is " << m_source << std::endl;
-            ui->label_6->setText(QString("发送数据(size=%1)").arg(m_source.size()));
+            try
+            {
+                m_source = f.readAll();
+                ui->label_6->setText(QString("发送数据(size=%1)").arg(m_source.size()));
+            }
+            catch (std::exception e)
+            {
+                std::cout << "Read File " << file.toStdString() << " error: " << e.what();
+            }
+
+            f.close();
         }
         else
         {
