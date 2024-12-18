@@ -6,6 +6,8 @@
 /install
 /Easy-DDS-Test/build-EDTest-Desktop_Qt_5_12_9_GCC_64bit-Debug
 /Easy-DDS-Test/build-EDTest-Desktop_Qt_5_12_9_GCC_64bit-Release
+/Easy-DDS-Monitor/build
+/Easy-DDS-Test/build
 
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
