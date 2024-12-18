@@ -82,6 +82,13 @@ void EasyDDSTest::on_pushButton_clicked()
     int num = ui->sbNum->value();
     m_kindName = ui->comboBox->currentText().toStdString();
 
+    if(m_kindName != "publisher")
+    {
+        QStringList labels({"编号", "主题", "状态"});
+        ui->tableWidget->setColumnCount(labels.size());
+        ui->tableWidget->setHorizontalHeaderLabels(labels);
+    }
+
     if(num == 1)
     {
         QString leTopicName = ui->leTopic->text();
@@ -406,25 +413,27 @@ int EasyDDSTest::getWidgetRow(QWidget* widget, int column)
 void EasyDDSTest::multiOp(const QString &op)
 {
     auto items = ui->tableWidget->selectedItems();
-    //    qDebug() << "items size = " << items.size();
+
     QSet<int> selectedRows;
     for(auto item : items)
     {
         selectedRows.insert(item->row());
     }
-    //    qDebug() << selectedRows;
+
     for(int row : selectedRows)
     {
-        QPushButton* btn = qobject_cast<QPushButton*>(ui->tableWidget->cellWidget(row, 1));
+        QPushButton* btn = qobject_cast<QPushButton*>(ui->tableWidget->cellWidget(row, 2));
         if(btn && btn->text() == op)
         {
             btn->clicked();
         }
         else
         {
-            qDebug() << "do not find btn.";
+            qDebug() << "Do not find btn.";
         }
     }
+
+    ui->tableWidget->clearSelection();
 }
 
 EASYDDS::monitorItems EasyDDSTest::insertMonitorQos()
