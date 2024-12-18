@@ -26,8 +26,6 @@ add_subdirectory(cpp/rtps)
 add_subdirectory(cpp/static_edp_discovery)
 add_subdirectory(cpp/topic_instances)
 add_subdirectory(cpp/xtypes)
-add_subdirectory(cpp/monitor)
-
 if (SECURITY)
     add_subdirectory(cpp/security)
 endif()

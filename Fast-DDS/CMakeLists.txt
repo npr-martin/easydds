@@ -428,7 +428,7 @@ add_subdirectory(test)
 ###############################################################################
 # Examples
 ###############################################################################
-option(COMPILE_EXAMPLES "Build example" ON)
+option(COMPILE_EXAMPLES "Build example" OFF)
 
 if(EPROSIMA_BUILD)
     set(COMPILE_EXAMPLES ON)
@@ -601,7 +601,7 @@ if(INSTALL_EXAMPLES)
       )
 endif()
 
-option(INSTALL_TOOLS "Install tools" OFF)
+option(INSTALL_TOOLS "Install tools" ON)
 
 if(INSTALL_TOOLS)
   # Install tools
