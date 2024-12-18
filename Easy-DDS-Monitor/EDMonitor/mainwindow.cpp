@@ -351,7 +351,7 @@ QTableWidgetItem *MainWindow::createItem(const QString &text, bool isGray)
     {
         item->setTextColor(Qt::gray);
     }
-    item->setTextAlignment(Qt::AlignCenter);
+    item->setTextAlignment(Qt::AlignLeft);
     return item;
 }
 
