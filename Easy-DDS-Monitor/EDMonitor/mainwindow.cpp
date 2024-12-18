@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
 //    ui->twSample->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->twSample->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->twSample->horizontalHeader()->setStretchLastSection(true);
+    ui->twSample->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     ui->twSample->verticalHeader()->setVisible(false);
 }
 
@@ -352,6 +353,7 @@ QTableWidgetItem *MainWindow::createItem(const QString &text, bool isGray)
         item->setTextColor(Qt::gray);
     }
     item->setTextAlignment(Qt::AlignLeft);
+    item->setToolTip(text);
     return item;
 }
 
