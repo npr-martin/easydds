@@ -227,6 +227,17 @@ void easyddsMonitorSub::registerReaderOp(const std::function<void(std::string, s
     funcReader_ = func;
 }
 
+std::string easyddsMonitorSub::getGUID()
+{
+    if(reader_)
+    {
+        std::stringstream ss;
+        ss << reader_->guid();
+        return ss.str();
+    }
+    return std::string();
+}
+
 bool easyddsMonitorSub::is_stopped()
 {
     return stop_.load();

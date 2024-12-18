@@ -132,3 +132,14 @@ bool easyddsServerApp::getIsStopped()
 {
      return is_stopped();
 }
+
+std::string easyddsServerApp::getGUID()
+{
+    if(participant_)
+    {
+        std::stringstream ss;
+        ss << participant_->guid();
+        return ss.str();
+    }
+    return std::string();
+}

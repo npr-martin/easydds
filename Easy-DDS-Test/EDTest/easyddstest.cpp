@@ -34,9 +34,11 @@ EasyDDSTest::EasyDDSTest(QWidget *parent)
     buffer = std::make_shared<qtStreamBuf>(this);
     new (&std::cout) std::ostream(buffer.get());
 
-    QStringList labels({"主题", "状态", "频率", "源大小"});
+    QStringList labels({"编号", "主题", "状态", "频率", "源大小"});
     ui->tableWidget->setColumnCount(labels.size());
     ui->tableWidget->setHorizontalHeaderLabels(labels);
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
 
     ui->tableWidget->verticalHeader()->setVisible(false);
 
@@ -97,19 +99,28 @@ void EasyDDSTest::on_pushButton_clicked()
     }
 }
 
-void EasyDDSTest::addInfoTab(const QString &topicName, int frequency, const QString& source)
+void EasyDDSTest::addInfoTab(const QString &topicName, int frequency, const QString& source, const QString& guid)
 {
     int rowNum = ui->tableWidget->rowCount();
 
+    auto splitResult = splitGUID(guid);
+    ui->lblList->setText(QString("%1 列表 [进程标识：%2]").arg(m_kindName.c_str()).arg(splitResult.first));
+
+    QLabel* lblGUID = new QLabel(splitResult.second, ui->tableWidget);
     QLabel* lblTopic = new QLabel(topicName, ui->tableWidget);
     QLabel* lblFrequency = new QLabel(QString::number(frequency), ui->tableWidget);
     QLabel* lblSize = new QLabel(QString::number(source.size()), ui->tableWidget);
+
+    lblGUID->setAlignment(Qt::AlignCenter);
+    lblTopic->setAlignment(Qt::AlignCenter);
+    lblFrequency->setAlignment(Qt::AlignCenter);
+    lblSize->setAlignment(Qt::AlignCenter);
 
     QPushButton* btn = new QPushButton("stop", ui->tableWidget);
 
     connect(btn, &QPushButton::clicked, ui->tableWidget, [=]{
         QString btnText = btn->text();
-        int curRow = getWidgetRow(lblTopic, 0);
+        int curRow = getWidgetRow(lblGUID, 0);
         if(-1 == curRow)
         {
             qDebug() << "get wrong Row for current info.";
@@ -127,47 +138,54 @@ void EasyDDSTest::addInfoTab(const QString &topicName, int frequency, const QStr
             else
             {
                 btn->setText("stop");
-                createApp(0, topicName, ui->sbFrequency->value(), m_source, curRow, false);
+                QString newGUID = createApp(0, topicName, ui->sbFrequency->value(), m_source, curRow, false);
+
+                lblGUID->setText(splitGUID(newGUID).second);
             }
         }
     });
 
     ui->tableWidget->setRowCount(rowNum + 1);
-    ui->tableWidget->setCellWidget(rowNum, 0, lblTopic);
-    ui->tableWidget->setCellWidget(rowNum, 1, btn);
-    ui->tableWidget->setCellWidget(rowNum, 2, lblFrequency);
-    ui->tableWidget->setCellWidget(rowNum, 3, lblSize);
+    ui->tableWidget->setCellWidget(rowNum, 0, lblGUID);
+    ui->tableWidget->setCellWidget(rowNum, 1, lblTopic);
+    ui->tableWidget->setCellWidget(rowNum, 2, btn);
+    ui->tableWidget->setCellWidget(rowNum, 3, lblFrequency);
+    ui->tableWidget->setCellWidget(rowNum, 4, lblSize);
     ui->tableWidget->setItem(rowNum, 0, new QTableWidgetItem());
     ui->tableWidget->setItem(rowNum, 1, new QTableWidgetItem());
     ui->tableWidget->setItem(rowNum, 2, new QTableWidgetItem());
     ui->tableWidget->setItem(rowNum, 3, new QTableWidgetItem());
+    ui->tableWidget->setItem(rowNum, 4, new QTableWidgetItem());
 }
 
-void EasyDDSTest::createApp(int domain_id, const QString &topicName, int frequency, const QString& source, int curRow, bool addRow)
+QString EasyDDSTest::createApp(int domain_id, const QString &topicName, int frequency, const QString& source, int curRow, bool addRow)
 {
     if("publisher" == m_kindName)
     {
-        createPubliserApp(domain_id, topicName, frequency, source, curRow, addRow);
+        return createPubliserApp(domain_id, topicName, frequency, source, curRow, addRow);
     }
     else if("subscriber" == m_kindName)
     {
-        createSubscriberApp(domain_id, topicName, curRow, addRow);
+        return createSubscriberApp(domain_id, topicName, curRow, addRow);
     }
     else if("server" == m_kindName)
     {
-        createServer(domain_id, curRow, addRow);
+        return createServer(domain_id, curRow, addRow);
     }
     else
     {
-        createMonitor(domain_id, topicName, curRow, addRow);
+        return createMonitor(domain_id, topicName, curRow, addRow);
     }
 
-    EPROSIMA_LOG_ERROR("type",m_kindName);
+//    EPROSIMA_LOG_ERROR("type",m_kindName);
+    return QString();
 }
 
-void EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int frequency,
+QString EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int frequency,
                                     const QString& source, int curRow, bool addRow)
 {
+    QString guid;
+
     std::shared_ptr<easyddsClientPublisherApp> app = nullptr;
     if(!topicName.isEmpty())
     {
@@ -181,9 +199,11 @@ void EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int
                   << "'s publisher running. "
                      "Please press stop Button to stop the publisher at any time." << std::endl;
 
+        guid = QString::fromStdString(app->getGUID());
+
         if(addRow)
         {
-            addInfoTab(topicName, frequency, source);
+            addInfoTab(topicName, frequency, source, guid);
             m_pubInfos.append(app);
         }
         else
@@ -207,10 +227,13 @@ void EasyDDSTest::createPubliserApp(int domain_id, const QString &topicName, int
     }
 
     //    sendText(app, frequency, source);
+
+    return guid;
 }
 
-void EasyDDSTest::createSubscriberApp(int domain_id, const QString &topicName, int curRow, bool addRow)
+QString EasyDDSTest::createSubscriberApp(int domain_id, const QString &topicName, int curRow, bool addRow)
 {
+    QString guid;
 
     std::shared_ptr<easyddsClientSubscriberApp> app = nullptr;
     if(!topicName.isEmpty())
@@ -224,9 +247,11 @@ void EasyDDSTest::createSubscriberApp(int domain_id, const QString &topicName, i
         std::cout << topicName.toStdString() << "'s subscriber running. "
                                                 "Please press stop Button to stop the subscriber at any time." << std::endl;
 
+        guid = QString::fromStdString(app->getGUID());
+
         if(addRow)
         {
-            addInfoTab(topicName);
+            addInfoTab(topicName, 500, "", guid);
             m_subInfos.append(app);
         }
         else
@@ -249,10 +274,14 @@ void EasyDDSTest::createSubscriberApp(int domain_id, const QString &topicName, i
     }
 
     app->onMessageReceived(printRecvMsg);
+
+    return guid;
 }
 
-void EasyDDSTest::createMonitor(int domain_id, const QString &topicName, int curRow, bool addRow)
+QString EasyDDSTest::createMonitor(int domain_id, const QString &topicName, int curRow, bool addRow)
 {
+    QString guid;
+
     std::shared_ptr<easyddsMonitorSub> app = nullptr;
 
     app = easyddsApplication::createMoniterSubscriber(domain_id, topicName.toStdString());
@@ -263,9 +292,11 @@ void EasyDDSTest::createMonitor(int domain_id, const QString &topicName, int cur
     std::cout << "Monitor " << topicName.toStdString()
               << " is running. Please press stop Button to stop the monitor at any time." << std::endl;
 
+    guid = QString::fromStdString(app->getGUID());
+
     if(addRow)
     {
-        addInfoTab(topicName);
+        addInfoTab(topicName, 500, "", guid);
         m_monitorInfos.append(app);
     }
     else
@@ -281,10 +312,14 @@ void EasyDDSTest::createMonitor(int domain_id, const QString &topicName, int cur
     }
 
     ui->comboBox->setEnabled(false);
+
+    return guid;
 }
 
-void EasyDDSTest::createServer(int domain_id, int curRow, bool addRow)
+QString EasyDDSTest::createServer(int domain_id, int curRow, bool addRow)
 {
+    QString guid;
+
     std::shared_ptr<easyddsServerApp> app = nullptr;
 
     app = easyddsApplication::createServer(domain_id, getEasyServerConfig());
@@ -294,9 +329,11 @@ void EasyDDSTest::createServer(int domain_id, int curRow, bool addRow)
 
     std::cout << "Server is running. Please press stop Button to stop the server at any time." << std::endl;
 
+    guid = QString::fromStdString(app->getGUID());
+
     if(addRow)
     {
-        addInfoTab("server");
+        addInfoTab("server", 500, "", guid);
         m_serverInfos.append(app);
     }
     else
@@ -312,6 +349,8 @@ void EasyDDSTest::createServer(int domain_id, int curRow, bool addRow)
     }
 
     ui->comboBox->setEnabled(false);
+
+    return guid;
 }
 
 void EasyDDSTest::stopApp(int curRow)
@@ -602,12 +641,31 @@ void EasyDDSTest::setWidgetsVisible(const QVector<QWidget *> widgets, bool visib
     }
 }
 
-void EasyDDSTest::processMappedData(uchar *ptr, qint64 bytesToMap)
+QPair<QString, QString> EasyDDSTest::splitGUID(QString guid)
 {
-    QString pic = QString::fromUtf8(reinterpret_cast<char*>(ptr), bytesToMap);
-    m_source.append(pic);
+    QStringList entityList = guid.split("|");
+    if(entityList.size() == 2)
+    {
+        QStringList guidList = entityList.first().split(".");
+        if(guidList.size() == 12)
+        {
+            QStringList hostAndProcess = guidList.mid(0, 8);
+            QStringList uniID = guidList.mid(8);
+            return QPair<QString, QString>(hostAndProcess.join("."), uniID.join("."));
+        }
+        else
+        {
+            qDebug() << "GUID ID error. GUID = " << guid;
+        }
+    }
+    else
+    {
+        qDebug() << "GUID Entity error. GUID = " << guid;
+    }
+
+    return QPair<QString, QString>();
 }
-ource.toStdString())
+
 void EasyDDSTest::sendText(const std::shared_ptr<easyddsClientPublisherApp> &app, QString topicName,
                            int frequency, const QString& source)
 {

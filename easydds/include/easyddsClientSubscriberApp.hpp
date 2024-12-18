@@ -42,6 +42,8 @@ public:
 
     void onMessageReceived(const std::function<void(std::string)> &func) override;
 
+    std::string getGUID() override;
+
 private:
     std::function<void(std::string)> receivedMsg;
     //! Return the current state of execution

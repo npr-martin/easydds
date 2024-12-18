@@ -156,6 +156,17 @@ bool easyddsClientPublisherApp::send(const std::string &msg)
     return ret;
 }
 
+std::string easyddsClientPublisherApp::getGUID()
+{
+    if(writer_)
+    {
+        std::stringstream ss;
+        ss << writer_->guid();
+        return ss.str();
+    }
+    return std::string();
+}
+
 bool easyddsClientPublisherApp::is_stopped()
 {
     return stop_.load();

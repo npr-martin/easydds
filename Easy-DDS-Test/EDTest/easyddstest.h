@@ -58,23 +58,24 @@ private slots:
 private:
     void initInvisible();
 
-    void addInfoTab(const QString& topicName, int frequency = 500, const QString& source = "");
+    void addInfoTab(const QString& topicName, int frequency = 500,
+                    const QString& source = "", const QString& guid = QString());
 
-    void createApp(int domain_id, const QString& topicName,
-                   int frequency = 500, const QString& source = "",
-                   int curRow = 0, bool addRow = true);
+    QString createApp(int domain_id, const QString& topicName,
+                      int frequency = 500, const QString& source = "",
+                      int curRow = 0, bool addRow = true);
 
-    void createPubliserApp(int domain_id, const QString& topicName,
-                           int frequency = 500, const QString& source = "",
-                           int curRow = 0,
-                           bool addRow = true);
-    void createSubscriberApp(int domain_id, const QString& topicName,
-                             int curRow = 0,
-                             bool addRow = true);
-    void createMonitor(int domain_id, const QString& topicName,
-                       int curRow = 0, bool addRow = true);
+    QString createPubliserApp(int domain_id, const QString& topicName,
+                              int frequency = 500, const QString& source = "",
+                              int curRow = 0,
+                              bool addRow = true);
+    QString createSubscriberApp(int domain_id, const QString& topicName,
+                                int curRow = 0,
+                                bool addRow = true);
+    QString createMonitor(int domain_id, const QString& topicName,
+                          int curRow = 0, bool addRow = true);
 
-    void createServer(int domain_id, int curRow = 0, bool addRow = true);
+    QString createServer(int domain_id, int curRow = 0, bool addRow = true);
 
     void stopApp(int curRow);
 
@@ -98,7 +99,7 @@ private:
 
     void setWidgetsVisible(const QVector<QWidget*> widgets, bool visible = true);
 
-    void processMappedData(uchar* ptr, qint64 bytesToMap);
+    QPair<QString, QString> splitGUID(QString guid);
 
 public slots:
     void sendText(const std::shared_ptr<easyddsClientPublisherApp> &app, QString topicName, int frequency = 500, const QString& source = "");

@@ -87,6 +87,8 @@ easyddsClientSubscriberApp::easyddsClientSubscriberApp(
     {
         throw std::runtime_error("DataWriter initialization failed");
     }
+
+    reader_->guid();
 }
 
 easyddsClientSubscriberApp::~easyddsClientSubscriberApp()
@@ -169,4 +171,15 @@ bool easyddsClientSubscriberApp::getIsStopped()
 void easyddsClientSubscriberApp::onMessageReceived(const std::function<void(std::string)> &func)
 {
     receivedMsg = func;
+}
+
+std::string easyddsClientSubscriberApp::getGUID()
+{
+    if(reader_)
+    {
+        std::stringstream ss;
+        ss << reader_->guid();
+        return ss.str();
+    }
+    return std::string();
 }

@@ -38,6 +38,8 @@ public:
 
         bool send(const std::string &msg) override;
 
+        std::string getGUID() override;
+
 private:
         //! Return the current state of execution
         bool is_stopped();

@@ -12,6 +12,7 @@ namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 using MapInfo = QPair<int, QString>;
+class QTableWidgetItem;
 
 class MainWindow : public QMainWindow
 {
@@ -48,6 +49,9 @@ private:
     QString transReader(const QStringList& list);
     QString transReader(const QString& readerID);
     QString transWriter(const QString& writerID);
+
+    QTableWidgetItem* createItem(int num, bool isGray = false);
+    QTableWidgetItem* createItem(const QString& text, bool isGray = false);
 
 private:
     Ui::MainWindow *ui;

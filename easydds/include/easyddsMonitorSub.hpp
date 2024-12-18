@@ -64,6 +64,8 @@ public:
     void registerWriterOp(const std::function<void(std::string, std::string)>& func);
     void registerReaderOp(const std::function<void(std::string, std::string)>& func);
 
+    std::string getGUID() override;
+
 private:
 
     //! Return the current state of execution

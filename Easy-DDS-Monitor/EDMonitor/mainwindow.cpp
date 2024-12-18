@@ -16,7 +16,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->twSample->setColumnCount(4);
     ui->twSample->setHorizontalHeaderLabels({"写入者", "序列号", "消息内容", "读取者"});
-    ui->twSample->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+//    ui->twSample->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->twSample->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->twSample->horizontalHeader()->setStretchLastSection(true);
     ui->twSample->verticalHeader()->setVisible(false);
 }
 
@@ -258,34 +260,23 @@ void MainWindow::updateSampleTable()
         }
     }
 
-
     ui->twSample->setRowCount(infos.size() + unRecvInfos.size());
     int row = 0;
     // 已接收的消息
     for(; row < infos.size(); ++row)
     {
-        int index = 0;
-
-        ui->twSample->setItem(row, index++, new QTableWidgetItem(std::get<0>(infos[row])));
-        ui->twSample->setItem(row, index++, new QTableWidgetItem(QString::number(std::get<1>(infos[row]))));
-        ui->twSample->setItem(row, index++, new QTableWidgetItem(std::get<2>(infos[row])));
-        ui->twSample->setItem(row, index++, new QTableWidgetItem(std::get<3>(infos[row])));
+        ui->twSample->setItem(row, 0, createItem(std::get<0>(infos[row])));
+        ui->twSample->setItem(row, 1, createItem(std::get<1>(infos[row])));
+        ui->twSample->setItem(row, 2, createItem(std::get<2>(infos[row])));
+        ui->twSample->setItem(row, 3, createItem(std::get<3>(infos[row])));
     }
     // 未接收的消息
     for(int i = 0; i < unRecvInfos.size(); ++i)
     {
-        auto itemWriter = new QTableWidgetItem(std::get<0>(unRecvInfos[i]));
-        auto itemSeq    = new QTableWidgetItem(QString::number(std::get<1>(unRecvInfos[i])));
-        auto itemMsg    = new QTableWidgetItem(std::get<2>(unRecvInfos[i]));
-        auto itemReader = new QTableWidgetItem(std::get<3>(unRecvInfos[i]));
-        itemWriter->setTextColor(Qt::gray);
-        itemSeq->setTextColor(Qt::gray);
-        itemMsg->setTextColor(Qt::gray);
-        itemReader->setTextColor(Qt::gray);
-        ui->twSample->setItem(row + i, 0, itemWriter);
-        ui->twSample->setItem(row + i, 1, itemSeq);
-        ui->twSample->setItem(row + i, 2, itemMsg);
-        ui->twSample->setItem(row + i, 3, itemReader);
+        ui->twSample->setItem(row + i, 0, createItem(std::get<0>(unRecvInfos[i]), true));
+        ui->twSample->setItem(row + i, 1, createItem(std::get<1>(unRecvInfos[i]), true));
+        ui->twSample->setItem(row + i, 2, createItem(std::get<2>(unRecvInfos[i]), true));
+        ui->twSample->setItem(row + i, 3, createItem(std::get<3>(unRecvInfos[i]), true));
     }
 }
 
@@ -346,6 +337,22 @@ QString MainWindow::transWriter(const QString &writerID)
     }
 
     return writerID;
+}
+
+QTableWidgetItem *MainWindow::createItem(int num, bool isGray)
+{
+    return createItem(QString::number(num), isGray);
+}
+
+QTableWidgetItem *MainWindow::createItem(const QString &text, bool isGray)
+{
+    QTableWidgetItem* item = new QTableWidgetItem(text);
+    if(isGray)
+    {
+        item->setTextColor(Qt::gray);
+    }
+    item->setTextAlignment(Qt::AlignCenter);
+    return item;
 }
 
 void MainWindow::on_lwWriter_itemSelectionChanged()

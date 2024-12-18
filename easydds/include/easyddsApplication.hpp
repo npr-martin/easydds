@@ -46,6 +46,8 @@ public:
     
     virtual bool getIsStopped() = 0;
 
+    virtual std::string getGUID() = 0;
+
     static std::shared_ptr<easyddsClientPublisherApp> createClientPublisher(
         const std::string &topic_name,
         const int &domain_id = 0,

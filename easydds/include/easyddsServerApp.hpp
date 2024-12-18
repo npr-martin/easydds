@@ -36,6 +36,8 @@ public:
 
     bool getIsStopped() override;
 
+    std::string getGUID() override;
+
 private:
     //! Return the current state of execution
     bool is_stopped();
