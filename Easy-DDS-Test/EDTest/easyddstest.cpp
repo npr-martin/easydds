@@ -829,11 +829,11 @@ void EasyDDSTest::on_comboBox_currentTextChanged(const QString &arg1)
     setWidgetsVisible({ui->lblTopic, ui->leTopic, ui->lblNum, ui->sbNum},
                       !isServer);
 
-    bool isMonitor = arg1.contains("monitor");
-    setWidgetsVisible({ui->cmbTopic}, isMonitor);
-    setWidgetsVisible({ui->leTopic, ui->lblQos, ui->pbQos,
-                      ui->lblTransKind, ui->cmbTransKind,
-                      ui->lblNum, ui->sbNum}, !isMonitor);
+//    bool isMonitor = arg1.contains("monitor");
+//    setWidgetsVisible({ui->cmbTopic}, isMonitor);
+//    setWidgetsVisible({ui->leTopic, ui->lblQos, ui->pbQos,
+//                      ui->lblTransKind, ui->cmbTransKind,
+//                      ui->lblNum, ui->sbNum}, !isMonitor);
 
     if(ui->radioButton_2->isChecked())
     {

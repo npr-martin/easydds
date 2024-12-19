@@ -16,7 +16,8 @@ std::condition_variable cv;
 bool finished = false;
 
 // 写文件的函数
-void write_to_file(const std::string& filename) {
+void write_to_file(const std::string& filename) 
+{
     std::ofstream file(filename, std::ios::out | std::ios::app);
     while (true) 
     {
@@ -31,6 +32,7 @@ void write_to_file(const std::string& filename) {
         // 写入缓冲区内容到文件
         file.write(buffer.data(), buffer.size());
         buffer.clear(); // 清空缓冲区
+        file.flush();
         lock.unlock(); // 解锁互斥锁
     }
     file.close();
@@ -97,6 +99,7 @@ int main(
         sentApp->stop();
         recvApp->stop();
         finished = true;
+        cv.notify_all();
         // ofs.close();
     };
 
@@ -106,11 +109,8 @@ int main(
     signal(SIGQUIT, signal_handler);
     signal(SIGHUP, signal_handler);
 #endif // _WIN32
-
-    cv.notify_all();
     
     writer.join();
-
     thread.join();
     sentApp->run();
 
