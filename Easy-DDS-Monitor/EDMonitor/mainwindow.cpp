@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->twSample->horizontalHeader()->setStretchLastSection(true);
     ui->twSample->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     ui->twSample->verticalHeader()->setVisible(false);
+    ui->twSample->setWordWrap(false);
 }
 
 MainWindow::~MainWindow()

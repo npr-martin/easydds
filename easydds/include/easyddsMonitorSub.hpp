@@ -61,8 +61,8 @@ public:
 
     bool getIsStopped() override;
 
-    void registerWriterOp(const std::function<void(std::string, std::string)>& func);
-    void registerReaderOp(const std::function<void(std::string, std::string)>& func);
+    void registerWriterOp(const std::function<void(const std::string&, const std::string&)>& func);
+    void registerReaderOp(const std::function<void(const std::string&, const std::string&)>& func);
 
     std::string getGUID() override;
 
@@ -87,8 +87,8 @@ private:
     mutable std::mutex terminate_cv_mtx_;
     std::condition_variable terminate_cv_;
 
-    std::function<void(std::string, std::string)> funcWriter_;
-    std::function<void(std::string, std::string)> funcReader_;
+    std::function<void(const std::string&, const std::string&)> funcWriter_;
+    std::function<void(const std::string&, const std::string&)> funcReader_;
 };
 
 template <typename T>

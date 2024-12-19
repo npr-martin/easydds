@@ -217,12 +217,12 @@ bool easyddsMonitorSub::getIsStopped()
     return is_stopped();
 }
 
-void easyddsMonitorSub::registerWriterOp(const std::function<void(std::string, std::string)> &func)
+void easyddsMonitorSub::registerWriterOp(const std::function<void(const std::string&, const std::string&)> &func)
 {
     funcWriter_ = func;
 }
 
-void easyddsMonitorSub::registerReaderOp(const std::function<void(std::string, std::string)> &func)
+void easyddsMonitorSub::registerReaderOp(const std::function<void(const std::string&, const std::string&)> &func)
 {
     funcReader_ = func;
 }
