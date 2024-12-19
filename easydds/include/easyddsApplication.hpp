@@ -62,10 +62,10 @@ public:
         const int &domain_id = 0,
         const EASYDDS::easyddsServerConfig &config = EASYDDS::easyddsServerConfig());
 
-    static std::shared_ptr<easyddsMonitorSub> createMoniterSubscriber(
+    static std::shared_ptr<easyddsMonitorSub> createMoniterSubscriber(  
+        const std::string &topic_name,
         const int &domain_id = 0,
-        const std::string &topic_name = std::string()
-    );
+        const EASYDDS::easyddsClientConfig &config = EASYDDS::easyddsClientConfig());
 
 protected:
     DomainParticipantQos getClientDomainParticipantQos(const bool &monitorEnabled,

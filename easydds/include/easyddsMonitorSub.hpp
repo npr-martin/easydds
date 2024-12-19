@@ -39,8 +39,9 @@ class easyddsMonitorSub : public easyddsApplication,
         public DataReaderListener
 {
 public:
-
-    easyddsMonitorSub(const int& domain_id, const std::string& topic_name);
+    easyddsMonitorSub(const std::string &topic_name,
+                      const int &domain_id = 0,
+                      const EASYDDS::easyddsClientConfig &config = EASYDDS::easyddsClientConfig());
 
     virtual ~easyddsMonitorSub();
 

@@ -31,9 +31,11 @@ std::shared_ptr<easyddsServerApp> easyddsApplication::
 }
 
 std::shared_ptr<easyddsMonitorSub> easyddsApplication::createMoniterSubscriber(
-    const int &domain_id, const std::string &topic_name)
+    const std::string &topic_name,
+    const int &domain_id,
+    const EASYDDS::easyddsClientConfig &config)
 {
-    return std::make_shared<easyddsMonitorSub>(domain_id, topic_name);
+    return std::make_shared<easyddsMonitorSub>(topic_name, domain_id, config);
 }
 
 DomainParticipantQos easyddsApplication::getClientDomainParticipantQos(const bool &monitorEnabled,

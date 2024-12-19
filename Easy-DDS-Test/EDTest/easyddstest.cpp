@@ -291,7 +291,7 @@ QString EasyDDSTest::createMonitor(int domain_id, const QString &topicName, int 
 
     std::shared_ptr<easyddsMonitorSub> app = nullptr;
 
-    app = easyddsApplication::createMoniterSubscriber(domain_id, topicName.toStdString());
+    app = easyddsApplication::createMoniterSubscriber(topicName.toStdString(), domain_id);
 
     std::thread thread(&easyddsApplication::run, app);
     thread.detach();

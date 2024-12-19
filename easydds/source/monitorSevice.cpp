@@ -66,8 +66,11 @@ int main(
     // 启动消费者线程，每隔1秒写入文件
     std::thread writer(write_to_file, fileName);
 
+    easyddsClientConfig ecc = easyddsClientConfig();
+    ecc.clientConfig.transport_kind = TransportKind::TCPv4;
+
     std::shared_ptr<easyddsMonitorSub> sentApp = 
-    easyddsApplication::createMoniterSubscriber(0, "SENT_DATA_TOPIC");
+    easyddsApplication::createMoniterSubscriber("SENT_DATA_TOPIC", 0, ecc);
     sentApp->registerWriterOp([&](const std::string& sampleIdentity, const std::string& msg){
         std::lock_guard<std::mutex> lock(mtx);
         std::string sentInfo = "sampleIdentity = " + sampleIdentity + ", msg = " + msg + "\n";
@@ -77,7 +80,7 @@ int main(
     });
 
     std::shared_ptr<easyddsMonitorSub> recvApp = 
-    easyddsApplication::createMoniterSubscriber(0, "RECEIVED_DATA_TOPIC");
+    easyddsApplication::createMoniterSubscriber("RECEIVED_DATA_TOPIC", 0, ecc);
     recvApp->registerReaderOp([&](const std::string& sampleIdentity, const std::string& readerID){
         std::lock_guard<std::mutex> lock(mtx);
         std::string recvInfo = "sampleIdentity = " + sampleIdentity + ", readerID = " + readerID + "\n";

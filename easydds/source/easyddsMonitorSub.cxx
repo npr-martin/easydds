@@ -40,8 +40,9 @@
 using namespace eprosima::fastdds::dds;
 
 easyddsMonitorSub::easyddsMonitorSub(
-        const int& domain_id
-        , const std::string& topic_name)
+    const std::string &topic_name,
+    const int &domain_id,
+    const EASYDDS::easyddsClientConfig &config)
     : m_topicName(topic_name)
     , factory_(nullptr)
     , participant_(nullptr)
@@ -53,20 +54,18 @@ easyddsMonitorSub::easyddsMonitorSub(
     , stop_(false)
 {
     // Create the participant
-    DomainParticipantQos pqos = PARTICIPANT_QOS_DEFAULT;
-    // pqos.name("easydds_monitor_participant");
-    /* Previous string conversion is needed for string_255 */
+    DomainParticipantQos pqos;
+    if(config.useDiscoveryServer)
+    {
+        pqos = getClientDomainParticipantQos(config.open_monitor, config.items, config.clientConfig);
+    }
+    else
+    {
+        pqos = getSubDomainParticipantQos(config.open_monitor, config.items, config.clientConfig, config.qosProfile.samples);
+    }
+
     std::string participant_name = "monitor_domain_" + std::to_string(domain_id);
     pqos.name(participant_name);
-
-    // pqos.properties().properties().emplace_back(
-    //     "fastdds.application.id",
-    //     "0",
-    //     "true");
-    // pqos.properties().properties().emplace_back(
-    //     "fastdds.application.metadata",
-    //     "",
-    //     "true");
 
     factory_ = DomainParticipantFactory::get_shared_instance();
     participant_ = factory_->create_participant(domain_id, pqos, nullptr, StatusMask::none());
