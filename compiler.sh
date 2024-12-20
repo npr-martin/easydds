@@ -37,4 +37,4 @@ cd Easy-DDS-Test/build
 qmake ../EDTest  
 make $1
 cp ./EDTest ../../install/bin
-
+cp ../EDTest/easydds.sh ../../install/bin

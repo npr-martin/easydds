@@ -25,7 +25,7 @@ class EasyDDSTest : public QMainWindow
     Q_OBJECT
 
 public:
-    EasyDDSTest(QWidget *parent = nullptr);
+    EasyDDSTest(const QString& type = "publisher", QWidget *parent = nullptr);
     ~EasyDDSTest();
 
     void Append(const QString &text);

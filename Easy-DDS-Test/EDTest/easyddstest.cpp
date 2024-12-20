@@ -19,7 +19,7 @@
 
 #include <unistd.h>
 
-EasyDDSTest::EasyDDSTest(QWidget *parent)
+EasyDDSTest::EasyDDSTest(const QString& type, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::EasyDDSTest)
 {
@@ -62,6 +62,16 @@ EasyDDSTest::EasyDDSTest(QWidget *parent)
     Log::ReportFunctions(true);
     Log::SetVerbosity(Log::Info);
 #endif
+
+    if(type == "subscriber")
+    {
+        ui->comboBox->setCurrentText(type);
+    }
+    else if(type.startsWith("ds_"))
+    {
+        ui->radioButton_2->click();
+        ui->comboBox->setCurrentText(type.mid(3));
+    }
 }
 
 EasyDDSTest::~EasyDDSTest()
