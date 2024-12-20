@@ -22,6 +22,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->twSample->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     ui->twSample->verticalHeader()->setVisible(false);
     ui->twSample->setWordWrap(false);
+
+    m_lblStatus = new QLabel(this);
+    ui->statusBar->addWidget(m_lblStatus);
 }
 
 MainWindow::~MainWindow()
@@ -36,9 +39,11 @@ void MainWindow::on_actionOpenLog_triggered()
     QString fileName = QFileDialog::getOpenFileName(this, "打开监控日志", homePath, "监控日志文件 (*.txt)");
     if(!fileName.isEmpty())
     {
+        clearCache();
         if(praseLog(fileName))
         {
             updateUI();
+            m_lblStatus->setText("当前监控日志：" + fileName);
         }
     }
 }
@@ -48,10 +53,8 @@ bool MainWindow::praseLog(const QString &fileName)
     QFile f(fileName);
     if(f.open(QIODevice::Text | QIODevice::ReadOnly))
     {
-        int fileLine = m_mapFileIndex.value(fileName, 0);
-
         // 跳过之前已读取的监控内容行数
-        for(int i = 0; i < fileLine; ++i)
+        for(int i = 0; i < m_fileLine; ++i)
         {
             f.readLine();
         }
@@ -59,11 +62,9 @@ bool MainWindow::praseLog(const QString &fileName)
         while(!f.atEnd())
         {
             QString line = f.readLine();
-            ++fileLine;
+            ++m_fileLine;
             praseLine(line);
         }
-
-        m_mapFileIndex[fileName] = fileLine;
 
         f.close();
         return true;
@@ -139,6 +140,9 @@ MapInfo MainWindow::praseSample(const QString &text)
 
 void MainWindow::updateUI()
 {
+    ui->lwWriter->clear();
+    ui->lwReader->clear();
+
     std::function<void(QStringList, QString, QListWidget*)> updateListData
             = [=](QStringList list, QString text, QListWidget* lw){
         for(int i = 0; i < list.size(); ++i)
@@ -366,4 +370,15 @@ void MainWindow::on_lwWriter_itemSelectionChanged()
 void MainWindow::on_lwReader_itemSelectionChanged()
 {
     updateSampleTable();
+}
+
+void MainWindow::clearCache()
+{
+    m_mapWriter2NumMsg.clear();
+    m_mapReader2Num.clear();
+    m_mapNumWriter2Reader.clear();
+    m_mapNumWriter2Msg.clear();
+    m_mapWriter2Reader.clear();
+
+    m_fileLine = 0;
 }

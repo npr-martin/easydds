@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QPair>
 #include <QSet>
+#include <QLabel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -30,6 +31,8 @@ private slots:
     void on_lwReader_itemSelectionChanged();
 
 private:
+    void clearCache();
+
     bool praseLog(const QString& fileName);
     bool praseLine(const QString& line);
     MapInfo praseSample(const QString& text);
@@ -63,8 +66,8 @@ private:
     QMap<MapInfo, QString> m_mapNumWriter2Msg;              ///< SequenceNum&WriterID->Message
     QMap<QString, QSet<QString> > m_mapWriter2Reader;       ///< WriterID->ReaderID
 
-    QMap<QString, int> m_mapFileIndex;
-
     int m_fileLine = 0;
+
+    QLabel* m_lblStatus = nullptr;
 };
 #endif // MAINWINDOW_H
