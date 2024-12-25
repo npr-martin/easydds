@@ -442,6 +442,7 @@ void DomainParticipantImpl::enable_statistics_builtin_datawriters(
             efd::utils::set_qos_from_attributes(datawriter_qos, attr);
         }
 
+        datawriter_qos.history().kind = eprosima::fastdds::dds::HistoryQosPolicyKind::KEEP_ALL_HISTORY_QOS;
         ReturnCode_t ret = enable_statistics_datawriter(topic, datawriter_qos);
         // case efd::RETCODE_ERROR is checked and logged in enable_statistics_datawriter.
         // case efd::RETCODE_INCONSISTENT_POLICY could happen if profile defined in XML is inconsistent.

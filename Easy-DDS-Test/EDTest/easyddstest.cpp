@@ -9,6 +9,7 @@
 #include <QTextStream>
 #include <QEventLoop>
 #include <QStandardPaths>
+#include <QMenu>
 
 #include <thread>
 #include <iostream>
@@ -155,7 +156,7 @@ void EasyDDSTest::addInfoTab(const QString &topicName, int frequency, const QStr
             else
             {
                 btn->setText("stop");
-                QString newGUID = createApp(0, topicName, ui->sbFrequency->value(), m_source, curRow, false);
+                QString newGUID = createApp(0, topicName, frequency, source, curRow, false);
 
                 lblGUID->setText(splitGUID(newGUID).second);
             }
@@ -874,4 +875,12 @@ void EasyDDSTest::on_pbQos_clicked()
     {
         m_qosProfile = dialog.getQoSProfile();
     }
+}
+
+void EasyDDSTest::on_textEdit_customContextMenuRequested(const QPoint &pos)
+{
+    QMenu menu(ui->textEdit);
+    menu.addAction("清空", ui->textEdit, [=]{ui->textEdit->clear();});
+
+    menu.exec(ui->textEdit->mapToGlobal(pos));
 }

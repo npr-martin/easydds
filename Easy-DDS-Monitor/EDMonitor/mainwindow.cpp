@@ -55,7 +55,11 @@ bool MainWindow::praseLog(const QString &fileName)
         while(!f.atEnd())
         {
             QString line = f.readLine();
-            praseLine(line);
+            if(!m_lineHistory.contains(line))
+            {
+                praseLine(line);
+                m_lineHistory.append(line);
+            }
         }
 
         f.close();
@@ -363,6 +367,8 @@ void MainWindow::on_lwReader_itemSelectionChanged()
 
 void MainWindow::clearCache()
 {
+    m_lineHistory.clear();
+
     m_mapWriter2NumMsg.clear();
     m_mapReader2Num.clear();
     m_mapNumWriter2Reader.clear();

@@ -61,6 +61,8 @@ private:
 private:
     Ui::MainWindow *ui;
 
+    QStringList m_lineHistory;
+
     QMap<QString, QVector<MapInfo> > m_mapWriter2NumMsg;    ///< WriterID->SequenceNum&Message
     QMap<QString, QVector<MapInfo> > m_mapReader2Num;       ///< ReaderID->SequenceNum&WriterID
 

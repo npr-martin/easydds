@@ -147,7 +147,7 @@ bool easyddsClientPublisherApp::send(const std::string &msg)
 {
     bool ret = false;
 
-    if (!is_stopped() && matched_> 0)
+    if (!is_stopped()) // && matched_> 0)
     {
         Employee sample_(msg);
 

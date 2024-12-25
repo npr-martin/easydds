@@ -55,6 +55,8 @@ private slots:
 
     void on_pbQos_clicked();
 
+    void on_textEdit_customContextMenuRequested(const QPoint &pos);
+
 private:
     void initInvisible();
 

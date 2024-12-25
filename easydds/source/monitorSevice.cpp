@@ -32,7 +32,8 @@ std::map<std::string, IniSection> parseIniFile(const std::string& filename)
     while (std::getline(file, line)) 
     {
         // 忽略空行和注释
-        if (line.empty() || line[0] == ';' || line[0] == '#') {
+        if (line.empty() || line[0] == ';' || line[0] == '#') 
+        {
             continue;
         }
 
@@ -193,9 +194,7 @@ void signal_handler(
     stop_app_handler(signum);
 }
 
-int main(
-        int argc,
-        char** argv)
+int main(int argc, char** argv)
 {
     std::string fileName = (argc > 1) ? argv[1] : "./monitor.txt";
 
@@ -206,6 +205,7 @@ int main(
     checkAndCreateIni(iniName);
 
     easyddsClientConfig ecc = getConfigFromIni(iniName);
+    ecc.qosProfile.history = HistoryQosPolicyKind::KEEP_ALL_HISTORY_QOS;
 
     std::shared_ptr<easyddsMonitorSub> sentApp = 
     easyddsApplication::createMoniterSubscriber("SENT_DATA_TOPIC", 0, ecc);
@@ -230,6 +230,7 @@ int main(
         buffer.insert(buffer.end(), recvInfo.begin(), recvInfo.end());
         cv.notify_one();
         // ofs << recvInfo;
+        std::cout << recvInfo;
     });
 
     std::thread thread(&easyddsApplication::run, recvApp);
