@@ -125,16 +125,17 @@ easyddsClientConfig getConfigFromIni(const std::string& fileName)
     std::string useDiscoveryServer = getIniValue(iniData, "config", "useDiscoveryServer", "false");
     ecc.useDiscoveryServer = (useDiscoveryServer == "true");
 
-    if(ecc.useDiscoveryServer)
-    {
-        // IPAddress
-        std::string ipAddress = getIniValue(iniData, "discoveryConfig", "ipaddress", "127.0.0.1");
-        ecc.clientConfig.connection_address = ipAddress;
+    // IPAddress
+    std::string ipAddress = getIniValue(iniData, "config", "ipaddress", "127.0.0.1");
+    ecc.clientConfig.connection_address = ipAddress;
 
-        // Port
-        std::string port = getIniValue(iniData, "discoveryConfig", "port", "16166");
-        ecc.clientConfig.connection_port = std::stoi(port);
-    }
+    // Port
+    std::string port = getIniValue(iniData, "config", "port", "16166");
+    ecc.clientConfig.connection_port = std::stoi(port);
+
+    // MonitorPort
+    std::string monitorPort = getIniValue(iniData, "config", "monitorport", "5200");
+    ecc.clientConfig.monitor_port = std::stoi(monitorPort);
 
     return ecc;
 }
@@ -150,8 +151,8 @@ void checkAndCreateIni(const std::string& fileName)
         if (file_write)
         {
             file_write << "[config]\n# default/udpv4/udpv6/tcpv4/tcpv6/shm/datasharing/largedata\n"
-                          "transportKind = default\n# true/false\nuseDiscoveryServer = false\n\n"
-                          "[discoveryConfig]\nipaddress = 127.0.0.1\nport = 16166";
+                          "transportKind = default\n# true/false\nuseDiscoveryServer = false\n"
+                          "ipaddress = 127.0.0.1\nport = 16166\nmonitorport = 5200";
         }
     }
 }
@@ -215,6 +216,11 @@ int main(
         cv.notify_one();
         // ofs << sentInfo;
     });
+
+    if (ecc.clientConfig.transport_kind == TransportKind::TCPv4)
+    {
+        ecc.clientConfig.connection_port = ecc.clientConfig.monitor_port;
+    }
 
     std::shared_ptr<easyddsMonitorSub> recvApp = 
     easyddsApplication::createMoniterSubscriber("RECEIVED_DATA_TOPIC", 0, ecc);

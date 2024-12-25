@@ -61,7 +61,8 @@ easyddsMonitorSub::easyddsMonitorSub(
     }
     else
     {
-        pqos = getSubDomainParticipantQos(config.open_monitor, config.items, config.clientConfig, config.qosProfile.samples);
+        pqos = getSubDomainParticipantQos(config.open_monitor, config.items,
+                                          config.clientConfig, config.qosProfile.samples, true);
     }
 
     std::string participant_name = "monitor_domain_" + std::to_string(domain_id);

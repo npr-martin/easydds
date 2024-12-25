@@ -49,6 +49,8 @@ private:
     bool anyInVecs(const QVector<QString>& vecBase, const QStringList& vecCheck);
     bool anyInSet(const QSet<QString>& setBase, const QStringList& vecCheck);
 
+    QString getIndexStr(const QStringList& list, const QString& id, const QString& preStr);
+
     QString transReader(const QStringList& list);
     QString transReader(const QString& readerID);
     QString transWriter(const QString& writerID);
@@ -65,8 +67,6 @@ private:
     QMap<MapInfo, QVector<QString> > m_mapNumWriter2Reader; ///< SequenceNum&WriterID->ReaderID
     QMap<MapInfo, QString> m_mapNumWriter2Msg;              ///< SequenceNum&WriterID->Message
     QMap<QString, QSet<QString> > m_mapWriter2Reader;       ///< WriterID->ReaderID
-
-    int m_fileLine = 0;
 
     QLabel* m_lblStatus = nullptr;
 };

@@ -306,11 +306,11 @@ DomainParticipantQos easyddsApplication::getPubDomainParticipantQos(const bool &
             Locator_t tcp_v4_locator_;
             tcp_v4_locator_.kind = LOCATOR_KIND_TCPv4;
             IPLocator::setIPv4(tcp_v4_locator_, tcp_ip_address);
-            IPLocator::setPhysicalPort(tcp_v4_locator_, 5100);
+            IPLocator::setPhysicalPort(tcp_v4_locator_, config.connection_port);
             pqos.wire_protocol().builtin.metatrafficUnicastLocatorList.push_back(tcp_v4_locator_);
             pqos.wire_protocol().default_unicast_locator_list.push_back(tcp_v4_locator_);
             tcp_v4_transport_->set_WAN_address(tcp_ip_address);
-            tcp_v4_transport_->add_listener_port(5100);
+            tcp_v4_transport_->add_listener_port(config.connection_port);
             pqos.transport().user_transports.push_back(tcp_v4_transport_);
             break;
         }
@@ -359,7 +359,8 @@ DomainParticipantQos easyddsApplication::getPubDomainParticipantQos(const bool &
 DomainParticipantQos easyddsApplication::getSubDomainParticipantQos(const bool &monitorEnabled,
                                                                     const EASYDDS::monitorItems &items,
                                                                     const EASYDDS::client_config &config,
-                                                                    const uint32_t &samples)
+                                                                    const uint32_t &samples,
+                                                                    bool forMonitor)
 {
     DomainParticipantQos pqos = PARTICIPANT_QOS_DEFAULT;
 
@@ -395,19 +396,51 @@ DomainParticipantQos easyddsApplication::getSubDomainParticipantQos(const bool &
         }
         case EASYDDS::TransportKind::TCPv4:
         {
-            Locator tcp_v4_initial_peers_locator_;
-            tcp_v4_initial_peers_locator_.kind = LOCATOR_KIND_TCPv4;
-            tcp_v4_initial_peers_locator_.port = 5100;
-            std::string tcp_ip_address = "127.0.0.1";
-            if (!config.connection_address.empty())
+            if(forMonitor)
             {
-                tcp_ip_address = config.connection_address;
+                Locator tcp_v4_initial_peers_locator_;
+                tcp_v4_initial_peers_locator_.kind = LOCATOR_KIND_TCPv4;
+                tcp_v4_initial_peers_locator_.port = config.connection_port;
+                std::string tcp_ip_address = "127.0.0.1";
+                if (!config.connection_address.empty())
+                {
+                    tcp_ip_address = config.connection_address;
+                }
+                IPLocator::setIPv4(tcp_v4_initial_peers_locator_, tcp_ip_address);
+                pqos.wire_protocol().builtin.initialPeersList.push_back(tcp_v4_initial_peers_locator_);
+                pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
+                pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
+                pqos.transport().user_transports.push_back(std::make_shared<TCPv4TransportDescriptor>());
             }
-            IPLocator::setIPv4(tcp_v4_initial_peers_locator_, tcp_ip_address);
-            pqos.wire_protocol().builtin.initialPeersList.push_back(tcp_v4_initial_peers_locator_);
-            pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
-            pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
-            pqos.transport().user_transports.push_back(std::make_shared<TCPv4TransportDescriptor>());
+            else
+            {
+                std::shared_ptr<TCPv4TransportDescriptor> tcp_v4_transport_ = std::make_shared<TCPv4TransportDescriptor>();
+                pqos.wire_protocol().builtin.discovery_config.leaseDuration = eprosima::fastdds::dds::c_TimeInfinite;
+                pqos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = eprosima::fastdds::dds::Duration_t(5, 0);
+                tcp_v4_transport_->sendBufferSize = 0;
+                tcp_v4_transport_->receiveBufferSize = 0;
+                std::string tcp_ip_address = "127.0.0.1";
+                if (!config.connection_address.empty())
+                {
+                    tcp_ip_address = config.connection_address;
+                }
+                // Set unicast locators
+                Locator_t tcp_v4_locator_;
+                tcp_v4_locator_.kind = LOCATOR_KIND_TCPv4;
+                IPLocator::setIPv4(tcp_v4_locator_, tcp_ip_address);
+                IPLocator::setPhysicalPort(tcp_v4_locator_, config.monitor_port);
+                pqos.wire_protocol().builtin.metatrafficUnicastLocatorList.push_back(tcp_v4_locator_);
+                pqos.wire_protocol().default_unicast_locator_list.push_back(tcp_v4_locator_);
+                tcp_v4_transport_->set_WAN_address(tcp_ip_address);
+                tcp_v4_transport_->add_listener_port(config.monitor_port);
+                pqos.transport().user_transports.push_back(tcp_v4_transport_);
+                Locator tcp_v4_initial_peers_locator_;
+                tcp_v4_initial_peers_locator_.kind = LOCATOR_KIND_TCPv4;
+                tcp_v4_initial_peers_locator_.port = config.connection_port;
+                IPLocator::setIPv4(tcp_v4_initial_peers_locator_, tcp_ip_address);
+                pqos.wire_protocol().builtin.initialPeersList.push_back(tcp_v4_initial_peers_locator_);
+            }
+
             break;
         }
         case EASYDDS::TransportKind::TCPv6:

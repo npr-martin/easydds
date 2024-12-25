@@ -84,7 +84,8 @@ protected:
     DomainParticipantQos getSubDomainParticipantQos(const bool &monitorEnabled,
                                                     const EASYDDS::monitorItems &items,
                                                     const EASYDDS::client_config &config,
-                                                    const uint32_t &samples);
+                                                    const uint32_t &samples,
+                                                    bool forMonitor = false);
 
     void setMonitorContent(DomainParticipantQos &pqos, const bool &monitorEnabled, const EASYDDS::monitorItems &items);
    

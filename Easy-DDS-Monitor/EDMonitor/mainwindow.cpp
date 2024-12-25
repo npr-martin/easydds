@@ -16,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->twSample->setColumnCount(4);
     ui->twSample->setHorizontalHeaderLabels({"写入者", "序列号", "消息内容", "读取者"});
-//    ui->twSample->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->twSample->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->twSample->horizontalHeader()->setStretchLastSection(true);
     ui->twSample->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
@@ -53,16 +52,9 @@ bool MainWindow::praseLog(const QString &fileName)
     QFile f(fileName);
     if(f.open(QIODevice::Text | QIODevice::ReadOnly))
     {
-        // 跳过之前已读取的监控内容行数
-        for(int i = 0; i < m_fileLine; ++i)
-        {
-            f.readLine();
-        }
-
         while(!f.atEnd())
         {
             QString line = f.readLine();
-            ++m_fileLine;
             praseLine(line);
         }
 
@@ -87,8 +79,7 @@ bool MainWindow::praseLine(const QString &line)
             QStringList splitList = strCutBegin.split(strReaderMid);
             if(splitList.size() == 2)
             {
-                QString strSample = splitList[0];
-                QString strReader = splitList[1];
+                QString strSample = splitList[0], strReader = splitList[1];
                 removeN(strReader);
                 // seqNum,WriterID
                 MapInfo si = praseSample(strSample);
@@ -107,8 +98,7 @@ bool MainWindow::praseLine(const QString &line)
             QStringList splitList = strCutBegin.split(strWriterMid);
             if(splitList.size() == 2)
             {
-                QString strSample = splitList[0];
-                QString strMessage = splitList[1];
+                QString strSample = splitList[0], strMessage = splitList[1];
                 removeN(strMessage);
                 MapInfo si = praseSample(strSample);
                 int seqNum = si.first;
@@ -147,8 +137,8 @@ void MainWindow::updateUI()
             = [=](QStringList list, QString text, QListWidget* lw){
         for(int i = 0; i < list.size(); ++i)
         {
-            QListWidgetItem* item = new QListWidgetItem(QString("%1%2 [%3]").arg(text).arg(i)
-                                                        .arg(list[i]));
+            QListWidgetItem* item = new QListWidgetItem(QString("%1%2 [%3]").arg(text)
+                                                        .arg(i).arg(list[i]));
             item->setToolTip(list[i]);
             item->setStatusTip(list[i]);
             lw->addItem(item);
@@ -302,20 +292,30 @@ bool MainWindow::anyInSet(const QSet<QString> &setBase, const QStringList &vecCh
     return (iter != setBase.end());
 }
 
+QString MainWindow::getIndexStr(const QStringList &list, const QString &id, const QString &preStr)
+{
+    int index = list.indexOf(id);
+    if(index != -1)
+    {
+        return preStr + QString::number(index);
+    }
+    else
+    {
+        qDebug() << "Wrong index for " << preStr << "ID: " << id;
+    }
+
+    return id;
+}
+
 QString MainWindow::transReader(const QStringList &list)
 {
     QStringList strReaderList;
-    QStringList readerList = m_mapReader2Num.keys();
     for(auto readerID : list)
     {
-        int index = readerList.indexOf(readerID);
-        if(index != -1)
+        QString strReader = transReader(readerID);
+        if(!strReader.isEmpty())
         {
-            strReaderList.append("reader" + QString::number(index));
-        }
-        else
-        {
-            qDebug() << "Wrong index for readerID: " << readerID;
+            strReaderList.append(strReader);
         }
     }
 
@@ -326,23 +326,12 @@ QString MainWindow::transReader(const QStringList &list)
 
 QString MainWindow::transReader(const QString &readerID)
 {
-    return transReader(QStringList{readerID});
+    return getIndexStr(m_mapReader2Num.keys(), readerID, "reader");
 }
 
 QString MainWindow::transWriter(const QString &writerID)
 {
-    QStringList writerList = m_mapWriter2NumMsg.keys();
-    int index = writerList.indexOf(writerID);
-    if(index != -1)
-    {
-        return "writer" + QString::number(index);
-    }
-    else
-    {
-        qDebug() << "Wrong index for writerID: " << writerID;
-    }
-
-    return writerID;
+    return getIndexStr(m_mapWriter2NumMsg.keys(), writerID, "writer");
 }
 
 QTableWidgetItem *MainWindow::createItem(int num, bool isGray)
@@ -379,6 +368,4 @@ void MainWindow::clearCache()
     m_mapNumWriter2Reader.clear();
     m_mapNumWriter2Msg.clear();
     m_mapWriter2Reader.clear();
-
-    m_fileLine = 0;
 }

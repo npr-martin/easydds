@@ -144,6 +144,7 @@ namespace EASYDDS
     struct client_config
     {
         uint16_t connection_port{16166};
+        uint16_t monitor_port{5200};
         std::string connection_address{"127.0.0.1"};
         TransportKind transport_kind{TransportKind::UDPv4};
     };
