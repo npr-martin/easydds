@@ -26,6 +26,7 @@ class easyddsPublisherApp;
 class easyddsSubscriberApp;
 class easyddsClientPublisherApp;
 class easyddsClientSubscriberApp;
+class easyddsClientPubSubApp;
 class easyddsServerApp;
 class easyddsMonitorSub;
 class easyddsApplication
@@ -55,6 +56,11 @@ public:
 
     static std::shared_ptr<easyddsClientSubscriberApp> createClientSubscriber(  
         const std::string &topic_name,
+        const int &domain_id = 0,
+        const EASYDDS::easyddsClientConfig &config = EASYDDS::easyddsClientConfig());
+
+    static std::shared_ptr<easyddsClientPubSubApp> createClientPubSub(  
+        const std::string &pub_topic_name, const std::string &sub_topic_name,
         const int &domain_id = 0,
         const EASYDDS::easyddsClientConfig &config = EASYDDS::easyddsClientConfig());
 

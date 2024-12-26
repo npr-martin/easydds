@@ -2,6 +2,7 @@
 
 #include "easyddsClientPublisherApp.hpp"
 #include "easyddsClientSubscriberApp.hpp"
+#include "easyddsClientPubSubApp.hpp"
 #include "easyddsServerApp.hpp"
 #include "easyddsMonitorSub.hpp"
 
@@ -21,6 +22,14 @@ std::shared_ptr<easyddsClientSubscriberApp> easyddsApplication::
                            const EASYDDS::easyddsClientConfig &config)
 {
     return std::make_shared<easyddsClientSubscriberApp>(topic_name, domain_id, config);
+}
+
+std::shared_ptr<easyddsClientPubSubApp> easyddsApplication::
+    createClientPubSub(const std::string &pub_topic_name, const std::string &sub_topic_name,
+                       const int &domain_id,
+                       const EASYDDS::easyddsClientConfig &config)
+{
+    return std::make_shared<easyddsClientPubSubApp>(pub_topic_name, sub_topic_name, domain_id, config);
 }
 
 std::shared_ptr<easyddsServerApp> easyddsApplication::

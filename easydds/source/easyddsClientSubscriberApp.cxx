@@ -87,8 +87,6 @@ easyddsClientSubscriberApp::easyddsClientSubscriberApp(
     {
         throw std::runtime_error("DataWriter initialization failed");
     }
-
-    reader_->guid();
 }
 
 easyddsClientSubscriberApp::~easyddsClientSubscriberApp()

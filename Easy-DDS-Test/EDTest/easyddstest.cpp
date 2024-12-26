@@ -13,6 +13,8 @@
 
 #include <thread>
 #include <iostream>
+#include <time.h>
+#include <chrono>
 #include "qosdialog.h"
 
 #include "fastdds/dds/log/Log.hpp"
@@ -44,9 +46,11 @@ EasyDDSTest::EasyDDSTest(const QString& type, QWidget *parent)
     ui->tableWidget->verticalHeader()->setVisible(false);
 
     qRegisterMetaType<std::shared_ptr<easyddsClientPublisherApp>>("std::shared_ptr<easyddsClientPublisherApp>");
+    qRegisterMetaType<std::shared_ptr<easyddsClientPubSubApp>>("std::shared_ptr<easyddsClientPubSubApp>");
     qRegisterMetaType<std::string>("std::string");
     connect(this, &EasyDDSTest::setCoutText, this, &EasyDDSTest::addText);
     connect(this, &EasyDDSTest::sendTextSignal, this, & EasyDDSTest::sendText, Qt::QueuedConnection);
+    connect(this, &EasyDDSTest::sendTimeSignal, this, & EasyDDSTest::sendTime, Qt::QueuedConnection);
 
     // First remove previous executions file
 #if 0
@@ -91,9 +95,9 @@ void EasyDDSTest::Append(const QString &text)
 void EasyDDSTest::on_pushButton_clicked()
 {
     int num = ui->sbNum->value();
-    m_kindName = ui->comboBox->currentText().toStdString();
+    m_kindName = ui->comboBox->currentText();
 
-    if(m_kindName != "publisher")
+    if(!m_kindName.startsWith("pub"))
     {
         QStringList labels({"编号", "主题", "状态"});
         ui->tableWidget->setColumnCount(labels.size());
@@ -103,9 +107,19 @@ void EasyDDSTest::on_pushButton_clicked()
     if(num == 1)
     {
         QString leTopicName = ui->leTopic->text();
-        QString cmbTopicName = ui->cmbTopic->currentText();
-        createApp(0, m_kindName == "monitor" ? cmbTopicName : leTopicName,
-                  ui->sbFrequency->value(), m_source);
+        if(m_kindName.startsWith("pubsub"))
+        {
+            QString leTopicName2 = ui->leTopic2->text();
+            createApp(0, leTopicName + "|" + leTopicName2,
+                      ui->sbFrequency->value(), m_source);
+        }
+        else
+        {
+            QString cmbTopicName = ui->cmbTopic->currentText();
+            createApp(0, m_kindName == "monitor" ? cmbTopicName : leTopicName,
+                      ui->sbFrequency->value(), m_source);
+        }
+
     }
     else
     {
@@ -122,7 +136,7 @@ void EasyDDSTest::addInfoTab(const QString &topicName, int frequency, const QStr
     int rowNum = ui->tableWidget->rowCount();
 
     auto splitResult = splitGUID(guid);
-    ui->lblList->setText(QString("%1 列表 [进程标识：%2]").arg(m_kindName.c_str()).arg(splitResult.first));
+    ui->lblList->setText(QString("%1 列表 [进程标识：%2]").arg(m_kindName).arg(splitResult.first));
 
     QLabel* lblGUID = new QLabel(splitResult.second, ui->tableWidget);
     QLabel* lblTopic = new QLabel(topicName, ui->tableWidget);
@@ -186,6 +200,14 @@ QString EasyDDSTest::createApp(int domain_id, const QString &topicName, int freq
     {
         return createSubscriberApp(domain_id, topicName, curRow, addRow);
     }
+    else if("pubsub_first" == m_kindName)
+    {
+        return createPubSubApp(domain_id, topicName, frequency, source, curRow, addRow);
+    }
+    else if("pubsub_second" == m_kindName)
+    {
+        return createPubSubApp2(domain_id, topicName, curRow, addRow);
+    }
     else if("server" == m_kindName)
     {
         return createServer(domain_id, curRow, addRow);
@@ -195,7 +217,6 @@ QString EasyDDSTest::createApp(int domain_id, const QString &topicName, int freq
         return createMonitor(domain_id, topicName, curRow, addRow);
     }
 
-//    EPROSIMA_LOG_ERROR("type",m_kindName);
     return QString();
 }
 
@@ -334,6 +355,132 @@ QString EasyDDSTest::createMonitor(int domain_id, const QString &topicName, int 
     return guid;
 }
 
+QString EasyDDSTest::createPubSubApp(int domain_id, const QString &topicName, int frequency,
+                                     const QString &source, int curRow, bool addRow)
+{
+    QString guid;
+
+    std::shared_ptr<easyddsClientPubSubApp> app = nullptr;
+    if(!topicName.isEmpty())
+    {
+        QStringList topicList = topicName.split("|");
+        QString sendTopic = topicList[0];
+        QString recvTopic = topicList[1];
+
+        app = easyddsApplication::createClientPubSub(sendTopic.toStdString(),
+                                                     recvTopic.toStdString(),
+                                                     domain_id, getEasyConfig());
+
+        std::thread thread(&easyddsApplication::run, app);
+        thread.detach();
+
+        std::cout << topicName.toStdString()
+                  << "'s pubsub running. "
+                     "Please press stop Button to stop the pubsub at any time." << std::endl;
+
+        guid = QString::fromStdString(app->getGUID());
+
+        if(addRow)
+        {
+            addInfoTab(topicName, frequency, source, guid);
+            m_pubsubInfos.append(app);
+        }
+        else
+        {
+            if(curRow < m_pubsubInfos.size())
+            {
+                m_pubsubInfos[curRow] = app;
+            }
+            else
+            {
+                qDebug() << "Wrong curRow for info buffer.(curRow = " << curRow << ", bufferSize = " << m_pubsubInfos.size();
+            }
+        }
+
+        ui->comboBox->setEnabled(false);
+        emit sendTimeSignal(app, sendTopic, frequency, source);
+    }
+    else
+    {
+        QMessageBox::warning(this, "Topic Error", "Publisher Topic can't be empty.");
+    }
+
+    //    sendText(app, frequency, source);
+    app->onMessageReceived([=](const std::string& recvMsg){
+        auto microseconds = getCurMicroSecond();
+        auto sendMicro = std::atol(recvMsg.substr(0,16).c_str());
+
+//        std::cout << "send time = " << sendMicro << ", current time = " << microseconds << std::endl;
+        std::cout << "source size = " << recvMsg.size() - 16 << ", latency = "
+                  << (microseconds - sendMicro) / 2 << " us." << std::endl;
+    });
+
+    return guid;
+}
+
+QString EasyDDSTest::createPubSubApp2(int domain_id, const QString &topicName, int curRow, bool addRow)
+{
+    QString guid;
+
+    std::shared_ptr<easyddsClientPubSubApp> app = nullptr;
+    if(!topicName.isEmpty())
+    {
+        QStringList topicList = topicName.split("|");
+        QString sendTopic = topicList[0];
+        QString recvTopic = topicList[1];
+
+        app = easyddsApplication::createClientPubSub(sendTopic.toStdString(),
+                                                     recvTopic.toStdString(),
+                                                     domain_id, getEasyConfig());
+
+        std::thread thread(&easyddsApplication::run, app);
+        thread.detach();
+
+        std::cout << topicName.toStdString() << "'s pubsub running. "
+                                                "Please press stop Button to stop the pubsub at any time." << std::endl;
+
+        guid = QString::fromStdString(app->getGUID());
+
+        if(addRow)
+        {
+            addInfoTab(topicName, 500, "", guid);
+            m_pubsubInfos.append(app);
+        }
+        else
+        {
+            if(curRow < m_subInfos.size())
+            {
+                m_pubsubInfos[curRow] = app;
+            }
+            else
+            {
+                qDebug() << "Wrong curRow for info buffer.(curRow = " << curRow << ", bufferSize = " << m_subInfos.size();
+            }
+        }
+
+        ui->comboBox->setEnabled(false);
+    }
+    else
+    {
+        QMessageBox::warning(this, "Topic Error", "Publisher Topic can't be empty.");
+    }
+
+    app->onMessageReceived([=](const std::string& recvMsg){
+//        auto now = std::chrono::system_clock::now();
+//        auto duration = now.time_since_epoch();
+//        auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+
+//        auto sendMicro = std::atol(recvMsg.c_str());
+
+//        std::cout << "send time = " << sendMicro << ", current time = " << microseconds << std::endl;
+//        std::cout << "latency = " << (microseconds - sendMicro) / 2 << " us." << std::endl;
+
+        app->send(recvMsg);
+    });
+
+    return guid;
+}
+
 QString EasyDDSTest::createServer(int domain_id, int curRow, bool addRow)
 {
     QString guid;
@@ -387,6 +534,14 @@ void EasyDDSTest::stopApp(int curRow)
         {
             m_subInfos[curRow]->stop();
             m_subInfos[curRow] = nullptr;
+        }
+    }
+    else if(m_kindName.startsWith("pubsub"))
+    {
+        if(curRow < m_pubsubInfos.size())
+        {
+            m_pubsubInfos[curRow]->stop();
+            m_pubsubInfos[curRow] = nullptr;
         }
     }
     else if("server" == m_kindName)
@@ -686,6 +841,17 @@ QPair<QString, QString> EasyDDSTest::splitGUID(QString guid)
     return QPair<QString, QString>();
 }
 
+long EasyDDSTest::getCurMicroSecond()
+{
+    auto now = std::chrono::system_clock::now();
+//                time_t time = std::chrono::system_clock::to_time_t(now);
+
+    auto duration = now.time_since_epoch();
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+
+    return microseconds;
+}
+
 void EasyDDSTest::sendText(const std::shared_ptr<easyddsClientPublisherApp> &app, QString topicName,
                            int frequency, const QString& source)
 {
@@ -714,6 +880,35 @@ void EasyDDSTest::sendText(const std::shared_ptr<easyddsClientPublisherApp> &app
     });
     t.detach();
 
+}
+
+void EasyDDSTest::sendTime(const std::shared_ptr<easyddsClientPubSubApp> &app, QString topicName, int frequency, const QString& source)
+{
+    std::thread t([=]{
+        while(!app->getIsStopped())
+        {
+            try
+            {
+                std::string strTime = std::to_string(getCurMicroSecond());
+
+                if(app->send(strTime + source.toStdString()))
+                {
+//                    std::string printInfo = "Send [topic: " + topicName.toStdString() + "] Time: "
+//                            + strTime + "  \n";
+//                    std::cout << printInfo;
+                }
+
+                QApplication::processEvents(QEventLoop::AllEvents, frequency);
+                std::this_thread::sleep_for(std::chrono::milliseconds(frequency));
+            }
+            catch (std::exception e)
+            {
+                std::cout << "Send Data Error: " << e.what();
+                break;
+            }
+        }
+    });
+    t.detach();
 }
 
 void EasyDDSTest::printRecvMsg(std::string message)
@@ -832,13 +1027,17 @@ void EasyDDSTest::on_radioButton_2_toggled(bool checked)
 
 void EasyDDSTest::on_comboBox_currentTextChanged(const QString &arg1)
 {
-    bool vis = arg1.contains("publisher") ? true : false;
+    bool vis = (arg1.startsWith("pub") && arg1 != "pubsub_second") ? true : false;
     setWidgetsVisible({ui->sbFrequency, ui->lineEdit_2, ui->pushButton_4,
                        ui->label_5, ui->label_6}, vis);
 
     bool isServer = arg1.contains("server");
     setWidgetsVisible({ui->lblTopic, ui->leTopic, ui->lblNum, ui->sbNum},
                       !isServer);
+
+    bool isPubSub = arg1.startsWith("pubsub");
+    setWidgetsVisible({ui->leTopic2}, isPubSub);
+    setWidgetsVisible({ui->lblNum, ui->sbNum}, !isPubSub);
 
 //    bool isMonitor = arg1.contains("monitor");
 //    setWidgetsVisible({ui->cmbTopic}, isMonitor);
@@ -863,7 +1062,7 @@ void EasyDDSTest::initInvisible()
                 ui->lblListenIP, ui->sbListenPort,
                 ui->lblListenPort, ui->leListenIP,
                 ui->lblTimeout, ui->sbTimeout,
-                                ui->cmbTopic};
+                ui->cmbTopic, ui->leTopic2};
 
     setWidgetsVisible(invisibles, false);
 }

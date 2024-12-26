@@ -409,6 +409,16 @@
           <string>subscriber</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>pubsub_first</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>pubsub_second</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="0" column="2">
@@ -719,6 +729,9 @@
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
          <widget class="QLineEdit" name="leTopic"/>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="leTopic2"/>
         </item>
         <item>
          <widget class="QComboBox" name="cmbTopic">

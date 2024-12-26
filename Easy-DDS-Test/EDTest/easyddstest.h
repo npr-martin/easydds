@@ -13,6 +13,7 @@
 #include "qtstreambuf.h"
 #include "easyddsClientPublisherApp.hpp"
 #include "easyddsClientSubscriberApp.hpp"
+#include "easyddsClientPubSubApp.hpp"
 #include "easyddsServerApp.hpp"
 #include "easyddsMonitorSub.hpp"
 
@@ -34,6 +35,8 @@ signals:
     void setCoutText(const QString& text);
     void sendTextSignal(const std::shared_ptr<easyddsClientPublisherApp> &app , QString topicName,
                         int frequency, const QString& source);
+    void sendTimeSignal(const std::shared_ptr<easyddsClientPubSubApp> &app,
+                        QString topicName, int frequency = 500, const QString& source = "");
 private slots:
     void on_pushButton_clicked();
 
@@ -77,6 +80,14 @@ private:
     QString createMonitor(int domain_id, const QString& topicName,
                           int curRow = 0, bool addRow = true);
 
+    QString createPubSubApp(int domain_id, const QString& topicName,
+                            int frequency = 500, const QString& source = "",
+                            int curRow = 0,
+                            bool addRow = true);
+    QString createPubSubApp2(int domain_id, const QString& topicName,
+                             int curRow = 0,
+                             bool addRow = true);
+
     QString createServer(int domain_id, int curRow = 0, bool addRow = true);
 
     void stopApp(int curRow);
@@ -103,8 +114,11 @@ private:
 
     QPair<QString, QString> splitGUID(QString guid);
 
+    long getCurMicroSecond();
+
 public slots:
     void sendText(const std::shared_ptr<easyddsClientPublisherApp> &app, QString topicName, int frequency = 500, const QString& source = "");
+    void sendTime(const std::shared_ptr<easyddsClientPubSubApp> &app, QString topicName, int frequency = 500, const QString& source = "");
 
     static void printRecvMsg(std::string message);
 private:
@@ -113,6 +127,7 @@ private:
     int m_index = 0;
     QVector< std::shared_ptr<easyddsClientPublisherApp> > m_pubInfos;
     QVector< std::shared_ptr<easyddsClientSubscriberApp> > m_subInfos;
+    QVector< std::shared_ptr<easyddsClientPubSubApp> > m_pubsubInfos;
     QVector< std::shared_ptr<easyddsServerApp> > m_serverInfos;
     QVector< std::shared_ptr<easyddsMonitorSub> > m_monitorInfos;
     std::shared_ptr<qtStreamBuf> buffer;
@@ -120,7 +135,7 @@ private:
     QString m_source;
 
     std::string m_monitorTopic;
-    std::string m_kindName;
+    QString m_kindName;
 
     qos_profile_s m_qosProfile = qos_profile_default;
 
